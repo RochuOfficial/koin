@@ -32,24 +32,26 @@ export function AddExpenseModal({ open, onClose }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="mx-auto max-w-[400px] rounded-2xl">
+      <DialogContent className="mx-auto max-w-[400px]">
         <DialogHeader>
           <DialogTitle>Add Expense</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Amount ($)</label>
-            <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0" className="rounded-xl h-12 text-xl font-bold" autoFocus />
+            <label className="mb-1.5 block text-label-medium text-on-surface-variant">Amount ($)</label>
+            <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0" className="text-xl font-bold" autoFocus />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Category</label>
+            <label className="mb-1.5 block text-label-medium text-on-surface-variant">Category</label>
             <div className="grid grid-cols-4 gap-2">
               {EXPENSE_CATEGORIES.map(c => (
                 <button
                   key={c.id}
                   onClick={() => setCategory(c.id)}
-                  className={`flex flex-col items-center gap-1 rounded-xl border-2 p-2 text-xs transition-all ${
-                    category === c.id ? 'border-primary bg-primary/5' : 'border-border'
+                  className={`flex flex-col items-center gap-1 rounded-2xl p-2 text-label-small transition-all ${
+                    category === c.id
+                      ? 'bg-primary-container text-on-primary-container ring-2 ring-primary'
+                      : 'bg-surface-container-low text-on-surface-variant'
                   }`}
                 >
                   <span className="text-lg">{c.icon}</span>
@@ -58,8 +60,8 @@ export function AddExpenseModal({ open, onClose }: Props) {
               ))}
             </div>
           </div>
-          <Input value={note} onChange={e => setNote(e.target.value)} placeholder="Note (optional)" className="rounded-xl" />
-          <Button onClick={handleSave} disabled={!amount || !category} className="w-full rounded-xl h-12 font-semibold">
+          <Input value={note} onChange={e => setNote(e.target.value)} placeholder="Note (optional)" />
+          <Button onClick={handleSave} disabled={!amount || !category} className="w-full">
             Save Expense
           </Button>
         </div>

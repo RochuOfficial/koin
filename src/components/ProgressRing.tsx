@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 interface ProgressRingProps {
-  progress: number; // 0-100
+  progress: number;
   size?: number;
   strokeWidth?: number;
   children?: React.ReactNode;
@@ -20,7 +20,7 @@ export function ProgressRing({ progress, size = 180, strokeWidth = 12, children 
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="hsl(var(--progress-subtle))"
+          stroke="hsl(var(--surface-container))"
           strokeWidth={strokeWidth}
         />
         <motion.circle
@@ -28,7 +28,7 @@ export function ProgressRing({ progress, size = 180, strokeWidth = 12, children 
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="hsl(var(--progress))"
+          stroke="hsl(var(--primary))"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
