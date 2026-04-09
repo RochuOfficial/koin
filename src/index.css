@@ -6,22 +6,48 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    /* M3 Primary */
+    --primary: 224 80% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-container: 214 95% 93%;
+    --on-primary-container: 222 47% 20%;
 
+    /* M3 Secondary */
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-container: 214 80% 92%;
+    --on-secondary-container: 217 50% 25%;
+
+    /* M3 Tertiary (accent/progress green) */
+    --tertiary: 160 84% 39%;
+    --tertiary-foreground: 0 0% 100%;
+    --tertiary-container: 152 60% 90%;
+    --on-tertiary-container: 160 60% 18%;
+
+    /* M3 Surfaces */
+    --background: 220 30% 98%;
+    --foreground: 222 47% 11%;
+    --surface: 220 30% 98%;
+    --surface-dim: 220 20% 94%;
+    --surface-container-lowest: 0 0% 100%;
+    --surface-container-low: 220 25% 96%;
+    --surface-container: 220 20% 94%;
+    --surface-container-high: 220 18% 91%;
+    --surface-container-highest: 220 15% 88%;
+    --on-surface: 222 47% 11%;
+    --on-surface-variant: 215 16% 47%;
+
+    /* M3 Outline */
+    --outline: 215 15% 75%;
+    --outline-variant: 215 15% 85%;
+
+    /* Semantic - kept for compatibility */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 224 80% 48%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 217 91% 60%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 215 20% 65%;
+    --muted: 220 20% 94%;
     --muted-foreground: 215 16% 47%;
 
     --accent: 160 84% 39%;
@@ -32,19 +58,20 @@
 
     --warning: 32 95% 44%;
     --warning-foreground: 0 0% 100%;
+    --warning-container: 38 90% 92%;
 
     --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
     --progress: 160 84% 39%;
     --progress-light: 160 73% 52%;
-    --progress-subtle: 152 82% 81%;
+    --progress-subtle: 152 30% 90%;
 
-    --border: 213 27% 84%;
-    --input: 213 27% 84%;
+    --border: 215 15% 85%;
+    --input: 215 15% 85%;
     --ring: 224 80% 48%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -71,5 +98,51 @@
 @layer utilities {
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* M3 Typography Scale */
+  .text-display-small {
+    @apply text-[2rem] leading-[2.5rem] font-bold tracking-tight;
+  }
+  .text-headline-medium {
+    @apply text-[1.75rem] leading-[2.25rem] font-bold tracking-tight;
+  }
+  .text-headline-small {
+    @apply text-[1.5rem] leading-[2rem] font-bold;
+  }
+  .text-title-large {
+    @apply text-[1.375rem] leading-[1.75rem] font-semibold;
+  }
+  .text-title-medium {
+    @apply text-base leading-6 font-semibold tracking-[0.01em];
+  }
+  .text-title-small {
+    @apply text-sm leading-5 font-semibold tracking-[0.01em];
+  }
+  .text-body-large {
+    @apply text-base leading-6 font-normal;
+  }
+  .text-body-medium {
+    @apply text-sm leading-5 font-normal;
+  }
+  .text-body-small {
+    @apply text-xs leading-4 font-normal;
+  }
+  .text-label-large {
+    @apply text-sm leading-5 font-semibold tracking-[0.01em];
+  }
+  .text-label-medium {
+    @apply text-xs leading-4 font-medium tracking-[0.02em];
+  }
+  .text-label-small {
+    @apply text-[0.6875rem] leading-4 font-medium tracking-[0.02em];
+  }
+
+  /* M3 State layers */
+  .state-layer-hover {
+    @apply hover:bg-on-surface/[0.08];
+  }
+  .state-layer-press {
+    @apply active:bg-on-surface/[0.12];
   }
 }
