@@ -81,14 +81,14 @@ export default function AICoach() {
   return (
     <div className="flex h-[calc(100vh-80px)] flex-col">
       {/* Header */}
-      <div className="border-b border-border bg-card px-5 py-4">
+      <div className="bg-surface-container-low px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-container">
             <span className="text-lg">🤖</span>
           </div>
           <div>
-            <h1 className="text-base font-semibold">AI Coach</h1>
-            <p className="text-xs text-accent">Online • Ready to help</p>
+            <h1 className="text-title-medium text-on-surface">AI Coach</h1>
+            <p className="text-label-small text-tertiary">Online • Ready to help</p>
           </div>
         </div>
       </div>
@@ -97,10 +97,10 @@ export default function AICoach() {
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
         {messages.map(m => (
           <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+            <div className={`max-w-[85%] rounded-3xl px-4 py-3 text-body-medium leading-relaxed ${
               m.role === 'user'
-                ? 'bg-primary text-primary-foreground rounded-br-md'
-                : 'bg-card border border-border rounded-bl-md'
+                ? 'bg-primary-container text-on-primary-container rounded-br-lg'
+                : 'bg-surface-container-low text-on-surface rounded-bl-lg'
             }`}>
               {m.content.split('\n').map((line, i) => (
                 <p key={i} className={i > 0 ? 'mt-1' : ''}>
@@ -124,7 +124,7 @@ export default function AICoach() {
             <button
               key={s}
               onClick={() => send(s)}
-              className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-primary/40 transition-colors"
+              className="rounded-full border border-outline bg-transparent px-4 py-2 text-label-large text-on-surface-variant hover:bg-surface-container transition-colors"
             >
               {s}
             </button>
@@ -133,15 +133,15 @@ export default function AICoach() {
       )}
 
       {/* Input */}
-      <div className="border-t border-border bg-card p-3">
+      <div className="bg-surface-container-low p-3">
         <form onSubmit={e => { e.preventDefault(); if (input.trim()) send(input.trim()); }} className="flex gap-2">
           <Input
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Ask your coach..."
-            className="rounded-xl flex-1"
+            className="flex-1"
           />
-          <Button type="submit" size="icon" disabled={!input.trim()} className="rounded-xl h-10 w-10 shrink-0">
+          <Button type="submit" size="icon" disabled={!input.trim()} className="shrink-0">
             <Send size={16} />
           </Button>
         </form>

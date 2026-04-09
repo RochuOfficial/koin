@@ -27,49 +27,57 @@ export default function Missions() {
 
   return (
     <div className="px-5 py-6 animate-fade-in">
-      <h1 className="mb-1 text-2xl font-bold">Missions</h1>
-      <p className="mb-5 text-sm text-muted-foreground">Complete missions to earn XP and build habits</p>
+      <h1 className="mb-1 text-headline-small text-on-surface">Missions</h1>
+      <p className="mb-5 text-body-medium text-on-surface-variant">Complete missions to earn XP and build habits</p>
 
       {/* Level bar */}
-      <div className="mb-5 rounded-xl border border-border bg-card p-4">
+      <div className="mb-5 rounded-2xl bg-surface-container-low p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Zap size={16} className="text-primary" />
-            <span className="text-sm font-semibold">Saver Lv.{profile.level}</span>
+            <span className="text-title-small text-on-surface">Saver Lv.{profile.level}</span>
           </div>
-          <span className="text-xs text-muted-foreground">{profile.xp % 100}/100 XP</span>
+          <span className="text-label-medium text-on-surface-variant">{profile.xp % 100}/100 XP</span>
         </div>
-        <div className="h-2 w-full rounded-full bg-border">
-          <div className="h-2 rounded-full bg-primary transition-all" style={{ width: `${profile.xp % 100}%` }} />
+        <div className="h-1 w-full rounded-full bg-surface-container">
+          <div className="h-1 rounded-full bg-primary transition-all" style={{ width: `${profile.xp % 100}%` }} />
         </div>
-        <p className="mt-2 text-[11px] text-muted-foreground">{completedCount}/{missions.length} missions completed</p>
+        <p className="mt-2 text-label-small text-on-surface-variant">{completedCount}/{missions.length} missions completed</p>
       </div>
 
-      {/* Tabs */}
-      <div className="mb-5 flex gap-2">
+      {/* M3 Segmented Button */}
+      <div className="mb-5 flex rounded-full bg-surface-container-low p-1">
         <button
           onClick={() => setTab('missions')}
-          className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all ${tab === 'missions' ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground'}`}
+          className={`flex-1 rounded-full py-2.5 text-label-large transition-all ${
+            tab === 'missions'
+              ? 'bg-primary text-primary-foreground'
+              : 'text-on-surface-variant'
+          }`}
         >
           Missions
         </button>
         <button
           onClick={() => setTab('achievements')}
-          className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all ${tab === 'achievements' ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground'}`}
+          className={`flex-1 rounded-full py-2.5 text-label-large transition-all flex items-center justify-center gap-1 ${
+            tab === 'achievements'
+              ? 'bg-primary text-primary-foreground'
+              : 'text-on-surface-variant'
+          }`}
         >
-          <Trophy size={14} className="inline mr-1" /> Badges
+          <Trophy size={14} /> Badges
         </button>
       </div>
 
       {tab === 'missions' ? (
         <div>
-          <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Daily Missions</h3>
+          <h3 className="mb-3 text-label-large text-on-surface-variant">Daily Missions</h3>
           <div className="mb-5 space-y-2">
             {dailyMissions.map(m => (
               <MissionCard key={m.id} mission={m} onComplete={() => completeMission(m)} />
             ))}
           </div>
-          <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Weekly Missions</h3>
+          <h3 className="mb-3 text-label-large text-on-surface-variant">Weekly Missions</h3>
           <div className="space-y-2">
             {weeklyMissions.map(m => (
               <MissionCard key={m.id} mission={m} onComplete={() => completeMission(m)} />
@@ -83,11 +91,15 @@ export default function Missions() {
               key={a.id}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className={`flex flex-col items-center gap-1.5 rounded-xl p-3 text-center ${a.unlocked ? 'bg-accent/10 border border-accent/30' : 'bg-card border border-border opacity-50'}`}
+              className={`flex flex-col items-center gap-1.5 rounded-2xl p-3 text-center ${
+                a.unlocked
+                  ? 'bg-tertiary-container'
+                  : 'bg-surface-container-low opacity-50'
+              }`}
             >
               <span className="text-2xl">{a.icon}</span>
-              <span className="text-[11px] font-semibold leading-tight">{a.title}</span>
-              <span className="text-[9px] text-muted-foreground leading-tight">{a.description}</span>
+              <span className="text-label-small text-on-surface leading-tight">{a.title}</span>
+              <span className="text-[9px] text-on-surface-variant leading-tight">{a.description}</span>
             </motion.div>
           ))}
         </div>
@@ -98,21 +110,25 @@ export default function Missions() {
 
 function MissionCard({ mission, onComplete }: { mission: Mission; onComplete: () => void }) {
   return (
-    <div className={`flex items-center gap-3 rounded-xl border p-3 transition-all ${mission.completed ? 'border-accent/30 bg-accent/5' : 'border-border bg-card'}`}>
+    <div className={`flex items-center gap-3 rounded-2xl p-4 min-h-[56px] transition-all ${
+      mission.completed ? 'bg-tertiary-container' : 'bg-surface-container-low'
+    }`}>
       <button
         onClick={onComplete}
         disabled={mission.completed}
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
-          mission.completed ? 'border-accent bg-accent text-accent-foreground' : 'border-border hover:border-primary'
+          mission.completed
+            ? 'border-tertiary bg-tertiary text-tertiary-foreground'
+            : 'border-outline hover:border-primary'
         }`}
       >
         {mission.completed && <Check size={14} />}
       </button>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium ${mission.completed ? 'line-through text-muted-foreground' : ''}`}>{mission.title}</p>
-        <p className="text-[11px] text-muted-foreground">{mission.description}</p>
+        <p className={`text-body-medium ${mission.completed ? 'line-through text-on-surface-variant' : 'text-on-surface'}`}>{mission.title}</p>
+        <p className="text-label-small text-on-surface-variant">{mission.description}</p>
       </div>
-      <span className="text-xs font-bold text-primary">+{mission.reward} XP</span>
+      <span className="text-label-large text-primary">+{mission.reward} XP</span>
     </div>
   );
 }
