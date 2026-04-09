@@ -98,7 +98,7 @@ export default function Onboarding() {
     // Step 0: Welcome
     <motion.div key="welcome" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex flex-col items-center justify-center px-6 text-center min-h-[70vh]">
       <div className="mb-6 text-6xl">💰</div>
-      <h1 className="mb-3 text-3xl font-bold text-foreground">Welcome to SaveQuest</h1>
+      <h1 className="mb-3 text-3xl font-bold text-foreground">Welcome to Koin</h1>
       <p className="mb-2 text-lg text-muted-foreground">Your journey to financial freedom starts with one goal.</p>
       <p className="mb-8 text-sm text-muted-foreground">Let's set up your first savings goal in 60 seconds.</p>
       <Button onClick={() => setStep(1)} size="lg" className="w-full max-w-xs gap-2 text-base font-semibold rounded-xl h-14">

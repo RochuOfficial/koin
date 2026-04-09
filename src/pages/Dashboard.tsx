@@ -52,7 +52,7 @@ export default function Dashboard() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground">{greeting()}</p>
-          <h1 className="text-2xl font-bold">SaveQuest</h1>
+          <h1 className="text-2xl font-bold">Koin</h1>
         </div>
         <div className="flex items-center gap-1.5 rounded-full bg-warning/10 px-3 py-1.5">
           <Flame size={16} className="text-warning" />
