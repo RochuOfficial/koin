@@ -37,6 +37,7 @@ export default function Onboarding() {
   const [targetAmount, setTargetAmount] = useState('');
   const [deadline, setDeadline] = useState('');
   const [income, setIncome] = useState('');
+  const [userName, setUserName] = useState('');
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
   const [currentQuiz, setCurrentQuiz] = useState(0);
   const [personalityResult, setPersonalityResult] = useState('');
@@ -82,6 +83,7 @@ export default function Onboarding() {
     };
     store.addGoal(goal);
     store.updateProfile({
+      name: userName,
       monthlyIncome: Number(income),
       onboardingCompleted: true,
     });
@@ -161,13 +163,22 @@ export default function Onboarding() {
       </div>
     </motion.div>,
 
-    // Step 3: Income
+    // Step 3: Name & Income
     <motion.div key="income" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="px-5 py-6">
-      <h2 className="mb-1 text-headline-small text-on-surface">What's your monthly income?</h2>
-      <p className="mb-6 text-body-medium text-on-surface-variant">This helps us plan your savings journey</p>
-      <Input type="number" value={income} onChange={e => setIncome(e.target.value)} placeholder="e.g. 3000" className="text-xl font-bold mb-4" />
+      <h2 className="mb-1 text-headline-small text-on-surface">A little about you</h2>
+      <p className="mb-6 text-body-medium text-on-surface-variant">This helps us personalize your experience</p>
+      <div className="space-y-4">
+        <div>
+          <label className="mb-1.5 block text-label-medium text-on-surface-variant">Your name</label>
+          <Input value={userName} onChange={e => setUserName(e.target.value)} placeholder="e.g. Alex" />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-label-medium text-on-surface-variant">Monthly income ($)</label>
+          <Input type="number" value={income} onChange={e => setIncome(e.target.value)} placeholder="e.g. 3000" className="text-xl font-bold" />
+        </div>
+      </div>
       {projectedMonths && Number(income) > 0 && (
-        <div className="rounded-2xl bg-tertiary-container p-4 text-center">
+        <div className="mt-4 rounded-2xl bg-tertiary-container p-4 text-center">
           <p className="text-body-medium text-on-tertiary-container">Saving 20% monthly, you'll reach your goal in</p>
           <p className="mt-1 text-headline-medium text-on-tertiary-container">{projectedMonths} months</p>
           <p className="mt-1 text-label-small text-on-tertiary-container/70">(${Math.round(Number(income) * 0.2)}/month toward your goal)</p>
@@ -175,7 +186,7 @@ export default function Onboarding() {
       )}
       <div className="mt-6 flex gap-3">
         <Button variant="outline" onClick={() => setStep(2)} size="icon"><ArrowLeft size={16} /></Button>
-        <Button onClick={() => setStep(4)} disabled={!income} className="flex-1">
+        <Button onClick={() => setStep(4)} disabled={!income || !userName.trim()} className="flex-1">
           Continue <ArrowRight size={16} />
         </Button>
       </div>

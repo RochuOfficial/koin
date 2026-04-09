@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { store, EXPENSE_CATEGORIES } from '@/lib/store';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Bell, CreditCard, User, RotateCcw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Bell, CreditCard, User, RotateCcw, Pencil, Check } from 'lucide-react';
 
 export default function Profile() {
   const [profile, setProfile] = useState(store.getProfile());
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(profile.name);
   const goals = store.getGoals();
   const achievements = store.getAchievements();
 
@@ -37,7 +40,38 @@ export default function Profile() {
         <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
           <User size={28} className="text-on-primary-container" />
         </div>
-        <h1 className="text-title-large text-on-primary-container">Saver Lv.{profile.level}</h1>
+        {editingName ? (
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Input
+              value={nameInput}
+              onChange={e => setNameInput(e.target.value)}
+              className="max-w-[180px] h-10 text-center bg-primary/10 border-0"
+              autoFocus
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  store.updateProfile({ name: nameInput.trim() });
+                  setProfile(store.getProfile());
+                  setEditingName(false);
+                }
+              }}
+            />
+            <button
+              onClick={() => {
+                store.updateProfile({ name: nameInput.trim() });
+                setProfile(store.getProfile());
+                setEditingName(false);
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20"
+            >
+              <Check size={16} className="text-on-primary-container" />
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => setEditingName(true)} className="flex items-center justify-center gap-1.5 mb-1 group">
+            <h1 className="text-title-large text-on-primary-container">{profile.name || 'Saver'} · Lv.{profile.level}</h1>
+            <Pencil size={14} className="text-on-primary-container/50 group-hover:text-on-primary-container" />
+          </button>
+        )}
         <p className="text-body-medium text-on-primary-container/70">{profile.personalityType ? `${profile.personalityType.charAt(0).toUpperCase() + profile.personalityType.slice(1)} personality` : 'Financial explorer'}</p>
         <div className="mt-4 grid grid-cols-3 gap-3">
           <div>
