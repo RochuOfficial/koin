@@ -51,7 +51,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-body-medium text-on-surface-variant">{greeting()}</p>
+          <p className="text-body-medium text-on-surface-variant">{greeting()}{profile.name ? `, ${profile.name}` : ''}</p>
           <h1 className="text-headline-medium text-on-surface">Koin</h1>
         </div>
         <div className="flex items-center gap-1.5 rounded-full bg-warning-container px-3.5 py-2">
