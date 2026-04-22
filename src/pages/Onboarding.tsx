@@ -199,7 +199,77 @@ export default function Onboarding() {
       </div>
     </motion.div>,
 
-    // Step 4: Quiz
+    // Step 4: Contact & Region (email, country, currency)
+    <motion.div key="contact" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="px-5 py-6">
+      <h2 className="mb-1 text-headline-small text-on-surface">Where are you based?</h2>
+      <p className="mb-6 text-body-medium text-on-surface-variant">We'll use this to set your currency and reminders</p>
+      <div className="space-y-4">
+        <div>
+          <label className="mb-1.5 block text-label-medium text-on-surface-variant">Email</label>
+          <Input
+            type="email"
+            value={email}
+            onChange={e => {
+              setEmail(e.target.value);
+              if (emailError) setEmailError('');
+            }}
+            onBlur={() => {
+              if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                setEmailError('Please enter a valid email');
+              }
+            }}
+            placeholder="you@example.com"
+            autoComplete="email"
+          />
+          {emailError && <p className="mt-1.5 text-label-small text-destructive">{emailError}</p>}
+        </div>
+        <div>
+          <label className="mb-1.5 block text-label-medium text-on-surface-variant">Country</label>
+          <select
+            value={country}
+            onChange={e => {
+              const code = e.target.value;
+              setCountry(code);
+              const match = COUNTRIES.find(c => c.code === code);
+              if (match) setCurrency(match.currency);
+            }}
+            className="flex h-14 w-full rounded-2xl bg-surface-container-low px-4 py-3 text-body-large text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <option value="" disabled>Select your country</option>
+            {COUNTRIES.map(c => (
+              <option key={c.code} value={c.code}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="mb-1.5 block text-label-medium text-on-surface-variant">Currency</label>
+          <select
+            value={currency}
+            onChange={e => setCurrency(e.target.value)}
+            className="flex h-14 w-full rounded-2xl bg-surface-container-low px-4 py-3 text-body-large text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            {CURRENCIES.map(c => (
+              <option key={c.code} value={c.code}>{c.symbol} — {c.name} ({c.code})</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <div className="mt-6 flex gap-3">
+        <Button variant="outline" onClick={() => setStep(3)} size="icon"><ArrowLeft size={16} /></Button>
+        <Button
+          onClick={() => setStep(5)}
+          disabled={
+            !email.trim() ||
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+            !country ||
+            !currency
+          }
+          className="flex-1"
+        >
+          Continue <ArrowRight size={16} />
+        </Button>
+      </div>
+    </motion.div>,
     <motion.div key="quiz" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="px-5 py-6">
       {!personalityResult ? (
         <>
@@ -249,7 +319,7 @@ export default function Onboarding() {
     <div className="mx-auto min-h-screen max-w-[430px] bg-surface">
       {/* Progress dots */}
       <div className="flex items-center justify-center gap-2 pt-6 pb-2">
-        {[0, 1, 2, 3, 4].map(i => (
+        {[0, 1, 2, 3, 4, 5].map(i => (
           <div
             key={i}
             className={`h-2 rounded-full transition-all ${
