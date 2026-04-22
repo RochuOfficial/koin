@@ -42,6 +42,9 @@ export interface Achievement {
 
 export interface UserProfile {
   name: string;
+  email: string;
+  country: string;
+  currency: string;
   monthlyIncome: number;
   personalityType?: string;
   level: number;
@@ -80,6 +83,9 @@ function set(key: string, value: unknown) {
 
 const DEFAULT_PROFILE: UserProfile = {
   name: '',
+  email: '',
+  country: '',
+  currency: 'USD',
   monthlyIncome: 0,
   level: 1,
   xp: 0,
@@ -196,6 +202,56 @@ export const GOAL_TEMPLATES = [
   { id: 'wedding', name: 'Wedding', icon: '💍', suggestedAmount: 25000 },
   { id: 'trip', name: 'First Trip', icon: '🌍', suggestedAmount: 1000 },
   { id: 'purchase', name: 'Big Purchase', icon: '🎁', suggestedAmount: 500 },
+];
+
+export const COUNTRIES = [
+  { code: 'US', name: 'United States', currency: 'USD' },
+  { code: 'GB', name: 'United Kingdom', currency: 'GBP' },
+  { code: 'CA', name: 'Canada', currency: 'CAD' },
+  { code: 'AU', name: 'Australia', currency: 'AUD' },
+  { code: 'DE', name: 'Germany', currency: 'EUR' },
+  { code: 'FR', name: 'France', currency: 'EUR' },
+  { code: 'ES', name: 'Spain', currency: 'EUR' },
+  { code: 'IT', name: 'Italy', currency: 'EUR' },
+  { code: 'NL', name: 'Netherlands', currency: 'EUR' },
+  { code: 'IE', name: 'Ireland', currency: 'EUR' },
+  { code: 'PT', name: 'Portugal', currency: 'EUR' },
+  { code: 'BR', name: 'Brazil', currency: 'BRL' },
+  { code: 'MX', name: 'Mexico', currency: 'MXN' },
+  { code: 'JP', name: 'Japan', currency: 'JPY' },
+  { code: 'CN', name: 'China', currency: 'CNY' },
+  { code: 'IN', name: 'India', currency: 'INR' },
+  { code: 'SG', name: 'Singapore', currency: 'SGD' },
+  { code: 'CH', name: 'Switzerland', currency: 'CHF' },
+  { code: 'SE', name: 'Sweden', currency: 'SEK' },
+  { code: 'NO', name: 'Norway', currency: 'NOK' },
+  { code: 'DK', name: 'Denmark', currency: 'DKK' },
+  { code: 'PL', name: 'Poland', currency: 'PLN' },
+  { code: 'AE', name: 'United Arab Emirates', currency: 'AED' },
+  { code: 'ZA', name: 'South Africa', currency: 'ZAR' },
+  { code: 'NZ', name: 'New Zealand', currency: 'NZD' },
+];
+
+export const CURRENCIES = [
+  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'GBP', symbol: '£', name: 'British Pound' },
+  { code: 'CAD', symbol: 'CA$', name: 'Canadian Dollar' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+  { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
+  { code: 'MXN', symbol: 'MX$', name: 'Mexican Peso' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
+  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
+  { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
+  { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone' },
+  { code: 'DKK', symbol: 'kr', name: 'Danish Krone' },
+  { code: 'PLN', symbol: 'zł', name: 'Polish Złoty' },
+  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham' },
+  { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
 ];
 
 export const EXPENSE_CATEGORIES = [
