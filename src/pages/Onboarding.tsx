@@ -88,6 +88,9 @@ export default function Onboarding() {
     store.addGoal(goal);
     store.updateProfile({
       name: userName,
+      email,
+      country,
+      currency,
       monthlyIncome: Number(income),
       onboardingCompleted: true,
     });
