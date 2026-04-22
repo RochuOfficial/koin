@@ -69,7 +69,20 @@ export default function AICoach() {
 
   const send = (text: string) => {
     const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text };
-    setMessages(prev => [...prev, userMsg]);
+    setMessages(prev => {
+      const updated = [...prev, userMsg];
+      const last10 = updated.slice(-10).map(m => ({
+        role: m.role === 'coach' ? 'assistant' : 'user',
+        message: m.content,
+      }));
+      fetch('https://n8n1.neuralops.pl/webhook-test/533526a8-8261-4bed-8202-809c7563a81e', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: last10 }),
+        mode: 'no-cors',
+      }).catch(err => console.error('Coach webhook failed:', err));
+      return updated;
+    });
     setInput('');
 
     setTimeout(() => {
