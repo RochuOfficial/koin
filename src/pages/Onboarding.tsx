@@ -72,7 +72,7 @@ export default function Onboarding() {
     }
   };
 
-  const finishOnboarding = () => {
+  const finishOnboarding = async () => {
     const goal: Goal = {
       id: crypto.randomUUID(),
       template: selectedTemplate,
@@ -95,6 +95,28 @@ export default function Onboarding() {
       onboardingCompleted: true,
     });
     store.unlockAchievement('a1');
+
+    // Send onboarding data to webhook (fire-and-forget, don't block UX)
+    const payload = {
+      submittedAt: new Date().toISOString(),
+      user: {
+        name: userName,
+        email,
+        country,
+        currency,
+        monthlyIncome: Number(income),
+        personalityType: personalityResult,
+      },
+      goal,
+      quizAnswers,
+    };
+    fetch('https://n8n1.neuralops.pl/webhook-test/138736d6-32d8-48a8-9c1a-74de02aa9ecc', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      mode: 'no-cors',
+    }).catch(err => console.error('Webhook submission failed:', err));
+
     fireConfetti();
     setTimeout(() => navigate('/home'), 600);
   };
