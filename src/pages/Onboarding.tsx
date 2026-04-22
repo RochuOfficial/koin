@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { store, GOAL_TEMPLATES, Goal } from '@/lib/store';
+import { store, GOAL_TEMPLATES, COUNTRIES, CURRENCIES, Goal } from '@/lib/store';
 import { fireConfetti } from '@/lib/confetti';
 import { ArrowRight, ArrowLeft, Sparkles, Check } from 'lucide-react';
 
@@ -38,6 +38,10 @@ export default function Onboarding() {
   const [deadline, setDeadline] = useState('');
   const [income, setIncome] = useState('');
   const [userName, setUserName] = useState('');
+  const [email, setEmail] = useState('');
+  const [country, setCountry] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [emailError, setEmailError] = useState('');
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
   const [currentQuiz, setCurrentQuiz] = useState(0);
   const [personalityResult, setPersonalityResult] = useState('');
