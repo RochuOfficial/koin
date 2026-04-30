@@ -42,19 +42,19 @@ The core logic currently resides in `src/lib/store.ts`. This needs to be adapted
 React Native uses native primitives (`View`, `Text`, `TouchableOpacity`) instead of HTML elements (`div`, `span`, `button`).
 
 1.  **Base Components**
-    - [ ] **Button**: Create a `Button` component using `TouchableOpacity` or `Pressable`, styled with NativeWind to match the existing variants (default, outline, tonal, ghost).
-    - [ ] **Input**: Create an `Input` component using `TextInput`, ensuring proper styling and placeholder colors.
-    - [ ] **Switch**: Use the native `Switch` component from `react-native`.
-    - [ ] **Modal/Dialog**: Replace `AddExpenseModal` with React Native's `Modal` component or use a library like `@gorhom/bottom-sheet` for a premium native feel.
+    - [x] **Button**: Create a `Button` component using `TouchableOpacity` or `Pressable`, styled with NativeWind to match the existing variants (default, outline, tonal, ghost).
+    - [x] **Input**: Create an `Input` component using `TextInput`, ensuring proper styling and placeholder colors.
+    - [x] **Switch**: Use the native `Switch` component from `react-native`.
+    - [x] **Modal/Dialog**: Replace `AddExpenseModal` with React Native's `Modal` component or use a library like `@gorhom/bottom-sheet` for a premium native feel.
 
 2.  **Progress Ring**
-    - [ ] Port `src/components/ProgressRing.tsx`.
-    - [ ] Use `react-native-svg` (`Svg`, `Circle`) to draw the ring.
-    - [ ] Use `react-native-reanimated` to animate the `strokeDashoffset` when progress changes.
+    - [x] Port `src/components/ProgressRing.tsx`.
+    - [x] Use `react-native-svg` (`Svg`, `Circle`) to draw the ring.
+    - [x] Use `react-native-reanimated` to animate the `strokeDashoffset` when progress changes.
 
 3.  **Layout Shell**
-    - [ ] Replace `AppShell.tsx` and `BottomNav.tsx` with Expo Router's `<Tabs>` layout.
-    - [ ] Configure the Tab Bar to match the existing bottom navigation styling, using `lucide-react-native` icons for the tabs.
+    - [x] Replace `AppShell.tsx` and `BottomNav.tsx` with Expo Router's `<Tabs>` layout.
+    - [x] Configure the Tab Bar to match the existing bottom navigation styling, using `lucide-react-native` icons for the tabs.
 
 ## Phase 4: Screen Migration (Pages)
 
