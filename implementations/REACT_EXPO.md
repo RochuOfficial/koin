@@ -91,8 +91,8 @@ Map the existing web pages to Expo Router file paths (`app/(tabs)/*` and `app/*`
 ## Phase 5: Animations & Polish
 
 1.  **Micro-interactions**
-    - [ ] Add scale animations on button presses using `react-native-reanimated`.
-    - [ ] Animate list items entering the screen using `moti`.
+    - [x] Add scale animations on button presses using `react-native-reanimated`.
+    - [x] Animate list items entering the screen using `moti`.
 
 ## Phase 6: Build & Deployment
 

@@ -86,14 +86,14 @@ export default function Missions() {
           <View className="pb-10">
             <Text className="mb-3 text-sm font-bold text-on-surface-variant">Daily Missions</Text>
             <View className="mb-6 gap-3">
-              {dailyMissions.map(m => (
-                <MissionCard key={m.id} mission={m} onComplete={() => completeMission(m)} />
+              {dailyMissions.map((m, index) => (
+                <MissionCard key={m.id} mission={m} onComplete={() => completeMission(m)} index={index} />
               ))}
             </View>
             <Text className="mb-3 text-sm font-bold text-on-surface-variant">Weekly Missions</Text>
             <View className="mb-6 gap-3">
-              {weeklyMissions.map(m => (
-                <MissionCard key={m.id} mission={m} onComplete={() => completeMission(m)} />
+              {weeklyMissions.map((m, index) => (
+                <MissionCard key={m.id} mission={m} onComplete={() => completeMission(m)} index={index} />
               ))}
             </View>
           </View>
@@ -121,11 +121,16 @@ export default function Missions() {
   );
 }
 
-function MissionCard({ mission, onComplete }: { mission: Mission; onComplete: () => void }) {
+function MissionCard({ mission, onComplete, index = 0 }: { mission: Mission; onComplete: () => void; index?: number }) {
   return (
-    <View className={`flex-row items-center gap-4 rounded-2xl p-4 min-h-[72px] ${
-      mission.completed ? 'bg-tertiary-container' : 'bg-surface-container-low'
-    }`}>
+    <MotiView 
+      from={{ opacity: 0, translateY: 20 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ delay: index * 100 }}
+      className={`flex-row items-center gap-4 rounded-2xl p-4 min-h-[72px] ${
+        mission.completed ? 'bg-tertiary-container' : 'bg-surface-container-low'
+      }`}
+    >
       <TouchableOpacity
         onPress={onComplete}
         disabled={mission.completed}
@@ -144,6 +149,6 @@ function MissionCard({ mission, onComplete }: { mission: Mission; onComplete: ()
         <Text className="text-[11px] text-on-surface-variant">{mission.description}</Text>
       </View>
       <Text className="text-sm font-bold text-primary">+{mission.reward} XP</Text>
-    </View>
+    </MotiView>
   );
 }

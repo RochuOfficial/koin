@@ -298,14 +298,19 @@ export default function Goals() {
         ) : (
           <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
             <View className="gap-4 pb-24">
-              {goals.map((g) => {
+              {goals.map((g, index) => {
                 const pct = Math.round((g.savedAmount / g.targetAmount) * 100);
                 return (
-                  <TouchableOpacity 
-                    key={g.id} 
-                    onPress={() => setViewGoal(g)} 
-                    className="w-full rounded-2xl bg-surface-container-low p-4"
+                  <MotiView
+                    key={g.id}
+                    from={{ opacity: 0, translateY: 20 }}
+                    animate={{ opacity: 1, translateY: 0 }}
+                    transition={{ delay: index * 100 }}
                   >
+                    <TouchableOpacity 
+                      onPress={() => setViewGoal(g)} 
+                      className="w-full rounded-2xl bg-surface-container-low p-4"
+                    >
                     <View className="flex-row items-center gap-4">
                       <Text className="text-3xl">{g.icon}</Text>
                       <View className="flex-1">
@@ -325,7 +330,8 @@ export default function Goals() {
                         </View>
                       </View>
                     </View>
-                  </TouchableOpacity>
+                    </TouchableOpacity>
+                  </MotiView>
                 );
               })}
             </View>

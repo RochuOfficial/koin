@@ -1,10 +1,13 @@
 import * as React from "react";
-import { TouchableOpacity, Text, type TouchableOpacityProps } from "react-native";
+import { Pressable, Text, type PressableProps } from "react-native";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const buttonVariants = cva(
-  "flex-row items-center justify-center gap-2 rounded-full transition-all active:scale-[0.98] disabled:opacity-50",
+  "flex-row items-center justify-center gap-2 rounded-full disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -58,18 +61,39 @@ const buttonTextVariants = cva(
 );
 
 export interface ButtonProps
-  extends TouchableOpacityProps,
+  extends PressableProps,
     VariantProps<typeof buttonVariants> {
   label?: string;
   textClassName?: string;
 }
 
-const Button = React.forwardRef<React.ElementRef<typeof TouchableOpacity>, ButtonProps>(
-  ({ className, textClassName, variant, size, label, children, ...props }, ref) => {
+const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
+  ({ className, textClassName, variant, size, label, children, onPressIn, onPressOut, style, ...props }, ref) => {
+    const scale = useSharedValue(1);
+
+    const animatedStyle = useAnimatedStyle(() => {
+      return {
+        transform: [{ scale: scale.value }],
+      };
+    });
+
+    const handlePressIn = (e: any) => {
+      scale.value = withSpring(0.96, { damping: 15, stiffness: 300 });
+      if (onPressIn) onPressIn(e);
+    };
+
+    const handlePressOut = (e: any) => {
+      scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+      if (onPressOut) onPressOut(e);
+    };
+
     return (
-      <TouchableOpacity
+      <AnimatedPressable
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={[animatedStyle, style as any]}
         {...props}
       >
         {label ? (
@@ -77,7 +101,7 @@ const Button = React.forwardRef<React.ElementRef<typeof TouchableOpacity>, Butto
             {label}
           </Text>
         ) : children}
-      </TouchableOpacity>
+      </AnimatedPressable>
     );
   }
 );
