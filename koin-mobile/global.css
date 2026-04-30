@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* M3 Primary */
+    --primary: 224 80% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-container: 214 95% 93%;
+    --on-primary-container: 222 47% 20%;
+
+    /* M3 Secondary */
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-container: 214 80% 92%;
+    --on-secondary-container: 217 50% 25%;
+
+    /* M3 Tertiary (accent/progress green) */
+    --tertiary: 160 84% 39%;
+    --tertiary-foreground: 0 0% 100%;
+    --tertiary-container: 152 60% 90%;
+    --on-tertiary-container: 160 60% 18%;
+
+    /* M3 Surfaces */
+    --background: 220 30% 98%;
+    --foreground: 222 47% 11%;
+    --surface: 220 30% 98%;
+    --surface-dim: 220 20% 94%;
+    --surface-container-lowest: 0 0% 100%;
+    --surface-container-low: 220 25% 96%;
+    --surface-container: 220 20% 94%;
+    --surface-container-high: 220 18% 91%;
+    --surface-container-highest: 220 15% 88%;
+    --on-surface: 222 47% 11%;
+    --on-surface-variant: 215 16% 47%;
+
+    /* M3 Outline */
+    --outline: 215 15% 75%;
+    --outline-variant: 215 15% 85%;
+
+    /* Semantic - kept for compatibility */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --muted: 220 20% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 42%;
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 32 95% 44%;
+    --warning-foreground: 0 0% 100%;
+    --warning-container: 38 90% 92%;
+
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+
+    --progress: 160 84% 39%;
+    --progress-light: 160 73% 52%;
+    --progress-subtle: 152 30% 90%;
+
+    --border: 215 15% 85%;
+    --input: 215 15% 85%;
+    --ring: 224 80% 48%;
+
+    --radius: 16px;
+  }
+}

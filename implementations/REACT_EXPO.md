@@ -5,24 +5,24 @@ This document outlines a detailed, step-by-step technical plan to rewrite the Ko
 ## Phase 1: Project Initialization & Infrastructure
 
 1.  **Initialize Expo Project**
-    - [ ] Create a new Expo project using the Expo Router template: `npx create-expo-app koin-mobile -t expo-template-blank-typescript`
-    - [ ] Set up Expo Router for file-based routing.
+    - [x] Create a new Expo project using the Expo Router template: `npx create-expo-app koin-mobile -t expo-template-blank-typescript`
+    - [x] Set up Expo Router for file-based routing.
 
 2.  **Configure Styling (NativeWind)**
-    - [ ] Install NativeWind (v4 is recommended for better performance and Expo Router compatibility).
-    - [ ] Port the existing `tailwind.config.ts` colors (e.g., `primary`, `surface-container`, `warning`, `tertiary`) to the mobile tailwind configuration.
-    - [ ] Set up `global.css` for any necessary base styles.
+    - [x] Install NativeWind (v4 is recommended for better performance and Expo Router compatibility).
+    - [x] Port the existing `tailwind.config.ts` colors (e.g., `primary`, `surface-container`, `warning`, `tertiary`) to the mobile tailwind configuration.
+    - [x] Set up `global.css` for any necessary base styles.
 
 3.  **Install Core Dependencies**
-    - [ ] **Icons**: Replace `lucide-react` with `lucide-react-native`.
-    - [ ] **Storage**: Install `@react-native-async-storage/async-storage` or `expo-secure-store` for state persistence.
-    - [ ] **Animations**: Install `react-native-reanimated` and `moti` (to replace `framer-motion`).
-    - [ ] **SVG Support**: Install `react-native-svg` (essential for porting `ProgressRing.tsx`).
-    - [ ] **Safe Areas**: Install `react-native-safe-area-context`.
-    - [ ] **Keyboard Handling**: Install `react-native-keyboard-aware-scroll-view`.
+    - [x] **Icons**: Replace `lucide-react` with `lucide-react-native`.
+    - [x] **Storage**: Install `@react-native-async-storage/async-storage` or `expo-secure-store` for state persistence.
+    - [x] **Animations**: Install `react-native-reanimated` and `moti` (to replace `framer-motion`).
+    - [x] **SVG Support**: Install `react-native-svg` (essential for porting `ProgressRing.tsx`).
+    - [x] **Safe Areas**: Install `react-native-safe-area-context`.
+    - [x] **Keyboard Handling**: Install `react-native-keyboard-aware-scroll-view`.
 
 4.  **Path Aliasing**
-    - [ ] Configure `tsconfig.json` and `babel.config.js` / `metro.config.js` to support `@/*` aliases, mirroring the web setup.
+    - [x] Configure `tsconfig.json` and `babel.config.js` / `metro.config.js` to support `@/*` aliases, mirroring the web setup.
 
 ## Phase 2: State Management & Business Logic
 
