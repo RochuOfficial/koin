@@ -61,32 +61,32 @@ React Native uses native primitives (`View`, `Text`, `TouchableOpacity`) instead
 Map the existing web pages to Expo Router file paths (`app/(tabs)/*` and `app/*`).
 
 1.  **Dashboard (`app/(tabs)/index.tsx`)**
-    - [ ] Translate the grid layout (`grid-cols-2`) using Flexbox (`flex-row`, `flex-wrap` or fixed widths).
-    - [ ] Implement the `AddExpenseModal` logic.
-    - [ ] Ensure the screen is wrapped in a `ScrollView` and respects `SafeAreaView` so content doesn't overlap with the notch.
+    - [x] Translate the grid layout (`grid-cols-2`) using Flexbox (`flex-row`, `flex-wrap` or fixed widths).
+    - [x] Implement the `AddExpenseModal` logic.
+    - [x] Ensure the screen is wrapped in a `ScrollView` and respects `SafeAreaView` so content doesn't overlap with the notch.
 
 2.  **Goals (`app/(tabs)/goals.tsx`)**
-    - [ ] Port the goals list and the "Create Goal" flow.
-    - [ ] Replace `framer-motion` layout animations with `moti` or standard `react-native-reanimated` layout transitions.
+    - [x] Port the goals list and the "Create Goal" flow.
+    - [x] Replace `framer-motion` layout animations with `moti` or standard `react-native-reanimated` layout transitions.
 
 3.  **Missions (`app/(tabs)/missions.tsx`)**
-    - [ ] Implement the daily and weekly mission cards.
-    - [ ] Replace `canvas-confetti` with `react-native-confetti-cannon` for celebration effects when a mission is completed.
+    - [x] Implement the daily and weekly mission cards.
+    - [x] Replace `canvas-confetti` with `react-native-confetti-cannon` for celebration effects when a mission is completed.
 
 4.  **Profile (`app/(tabs)/profile.tsx`)**
-    - [ ] Implement the profile card, editing logic, and notification toggles.
-    - [ ] The settings grid can be built using standard `View` and `Text` components.
+    - [x] Implement the profile card, editing logic, and notification toggles.
+    - [x] The settings grid can be built using standard `View` and `Text` components.
 
 5.  **AI Coach (`app/(tabs)/coach.tsx`)**
-    - [ ] Port the chat interface (`AICoach.tsx`).
-    - [ ] The `fetch` logic for the n8n webhook can be ported exactly as is.
-    - [ ] Use a library like `react-native-markdown-display` to render the coach's markdown responses natively.
-    - [ ] Ensure `KeyboardAvoidingView` is correctly configured so the input field isn't hidden by the virtual keyboard.
+    - [x] Port the chat interface (`AICoach.tsx`).
+    - [x] The `fetch` logic for the n8n webhook can be ported exactly as is.
+    - [x] Use a library like `react-native-markdown-display` to render the coach's markdown responses natively.
+    - [x] Ensure `KeyboardAvoidingView` is correctly configured so the input field isn't hidden by the virtual keyboard.
 
 6.  **Onboarding (`app/onboarding.tsx`)**
-    - [ ] Port the multi-step onboarding wizard.
-    - [ ] Use `react-native-pager-view` or a horizontal `ScrollView` with paging enabled for smooth step transitions.
-    - [ ] Route to the main `(tabs)` layout upon completion.
+    - [x] Port the multi-step onboarding wizard.
+    - [x] Use `react-native-pager-view` or a horizontal `ScrollView` with paging enabled for smooth step transitions.
+    - [x] Route to the main `(tabs)` layout upon completion.
 
 ## Phase 5: Animations & Polish
 
