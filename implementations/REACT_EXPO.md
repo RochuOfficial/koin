@@ -29,13 +29,13 @@ This document outlines a detailed, step-by-step technical plan to rewrite the Ko
 The core logic currently resides in `src/lib/store.ts`. This needs to be adapted for mobile.
 
 1.  **Data Models & Constants**
-    - [ ] Copy over all interfaces (`Goal`, `Expense`, `Mission`, `Achievement`, `UserProfile`).
-    - [ ] Copy over all constants (`GOAL_TEMPLATES`, `COUNTRIES`, `CURRENCIES`, `EXPENSE_CATEGORIES`). These require zero changes.
+    - [x] Copy over all interfaces (`Goal`, `Expense`, `Mission`, `Achievement`, `UserProfile`).
+    - [x] Copy over all constants (`GOAL_TEMPLATES`, `COUNTRIES`, `CURRENCIES`, `EXPENSE_CATEGORIES`). These require zero changes.
 
 2.  **Refactor Storage Engine**
-    - [ ] **Challenge**: `localStorage` is synchronous. Mobile storage (`AsyncStorage`) is asynchronous.
-    - [ ] **Solution**: Option A: Use `zustand` with `persist` middleware configured for `AsyncStorage`. Option B: Refactor the custom store to be asynchronous (`async/await` on `get` and `set`), requiring components to handle loading states while the store hydrates.
-    - [ ] Implement store methods: `getProfile`, `setProfile`, `addGoal`, `completeMission`, `addExpense`, `addXP`, etc.
+    - [x] **Challenge**: `localStorage` is synchronous. Mobile storage (`AsyncStorage`) is asynchronous.
+    - [x] **Solution**: Option A: Use `zustand` with `persist` middleware configured for `AsyncStorage`. Option B: Refactor the custom store to be asynchronous (`async/await` on `get` and `set`), requiring components to handle loading states while the store hydrates.
+    - [x] Implement store methods: `getProfile`, `setProfile`, `addGoal`, `completeMission`, `addExpense`, `addXP`, etc.
 
 ## Phase 3: UI Foundation & Components
 
