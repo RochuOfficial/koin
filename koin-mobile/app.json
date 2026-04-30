@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "koin-mobile",
+    "name": "Koin",
     "slug": "koin-mobile",
     "scheme": "koin",
     "version": "1.0.0",
@@ -14,7 +14,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.koin.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +23,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.koin.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"

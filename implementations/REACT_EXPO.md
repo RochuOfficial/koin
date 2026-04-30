@@ -97,11 +97,11 @@ Map the existing web pages to Expo Router file paths (`app/(tabs)/*` and `app/*`
 ## Phase 6: Build & Deployment
 
 1.  **App Configuration (`app.json`)**
-    - [ ] Set the app name to "Koin".
-    - [ ] Configure the `bundleIdentifier` (iOS) and `package` (Android).
-    - [ ] Set up the app icon and splash screen assets.
+    - [x] Set the app name to "Koin".
+    - [x] Configure the `bundleIdentifier` (iOS) and `package` (Android).
+    - [x] Set up the app icon and splash screen assets.
 
 2.  **Expo Application Services (EAS)**
-    - [ ] Initialize EAS: `eas build:configure`.
-    - [ ] Create development builds to test on physical devices.
-    - [ ] Prepare for production builds (`eas build --platform ios`, `eas build --platform android`).
+    - [x] Initialize EAS: `eas build:configure`.
+    - [x] Create development builds to test on physical devices.
+    - [x] Prepare for production builds (`eas build --platform ios`, `eas build --platform android`).
