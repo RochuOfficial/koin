@@ -1,5 +1,5 @@
 {
-  "name": "koin-mobile",
+  "name": "koin",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {

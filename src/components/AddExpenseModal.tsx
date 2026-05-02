@@ -3,6 +3,8 @@ import { Modal, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useStore, EXPENSE_CATEGORIES, Expense } from '@/lib/store';
+import { X } from 'lucide-react-native';
+
 
 interface Props {
   open: boolean;
@@ -44,7 +46,7 @@ export function AddExpenseModal({ open, onClose }: Props) {
           <View className="flex-row justify-between items-center mb-6">
             <Text className="text-2xl font-bold text-on-surface">Add Expense</Text>
             <TouchableOpacity onPress={onClose} className="p-2 bg-surface-container-low rounded-full">
-              <Text className="text-on-surface-variant font-medium">✕</Text>
+              <X size={20} color="#a1a1aa" />
             </TouchableOpacity>
           </View>
           

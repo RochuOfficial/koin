@@ -43,33 +43,33 @@ Consolidate the codebase by making the root directory the primary Expo project, 
 
 ## Phase 3: Dependency & Configuration Consolidation
 
-- [ ] 1. **Consolidate `package.json`**
-   - [ ] Replace the root `package.json` dependencies and scripts with those from `koin-mobile/package.json`.
-   - [ ] **Important**: Keep the project name and versioning consistent.
-   - [ ] Remove web-only dependencies:
+- [x] 1. **Consolidate `package.json`**
+   - [x] Replace the root `package.json` dependencies and scripts with those from `koin-mobile/package.json`.
+   - [x] **Important**: Keep the project name and versioning consistent.
+   - [x] Remove web-only dependencies:
      - `@radix-ui/*`
      - `react-router-dom`
      - `lucide-react` (replaced by `lucide-react-native`)
      - `framer-motion` (replaced by `moti` / `reanimated`)
 
-- [ ] 2. **Update TypeScript Config**
-   - [ ] Replace root `tsconfig.json` with the mobile version.
-   - [ ] Ensure path aliases (`@/*`) correctly point to the new root-level `src/` directory.
+- [x] 2. **Update TypeScript Config**
+   - [x] Replace root `tsconfig.json` with the mobile version.
+   - [x] Ensure path aliases (`@/*`) correctly point to the new root-level `src/` directory.
 
-- [ ] 3. **Environment & EAS Config**
-   - [ ] Ensure `app.json` and `eas.json` are at the root level for proper Expo Application Services (EAS) integration.
+- [x] 3. **Environment & EAS Config**
+   - [x] Ensure `app.json` and `eas.json` are at the root level for proper Expo Application Services (EAS) integration.
 
 ---
 
 ## Phase 4: Asset & Styling Finalization
 
-- [ ] 1. **NativeWind Integration**
-   - [ ] Ensure `tailwind.config.js` is correctly configured for NativeWind v4 in the root.
-   - [ ] Verify that `global.css` is imported in `app/_layout.tsx`.
+- [x] 1. **NativeWind Integration**
+   - [x] Ensure `tailwind.config.js` is correctly configured for NativeWind v4 in the root.
+   - [x] Verify that `global.css` is imported in `app/_layout.tsx`.
 
-- [ ] 2. **Iconography**
-   - [ ] Standardize on `lucide-react-native` across all components.
-   - [ ] Ensure `expo-constants` is used for status bar heights and other native metrics.
+- [x] 2. **Iconography**
+   - [x] Standardize on `lucide-react-native` across all components.
+   - [x] Ensure `expo-constants` is used for status bar heights and other native metrics.
 
 ---
 

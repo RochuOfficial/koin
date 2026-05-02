@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Switch } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Bell, CreditCard, User, RotateCcw, Pencil, Check } from 'lucide-react-native';
+import Constants from 'expo-constants';
+
 import { useStore, EXPENSE_CATEGORIES } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 
@@ -183,6 +185,16 @@ export default function Profile() {
           <RotateCcw size={14} color="#a1a1aa" />
           <Text className="text-sm font-bold text-on-surface-variant">Reset All Data (Demo)</Text>
         </Button>
+
+        {/* Footer info */}
+        <View className="mb-12 items-center">
+          <Text className="text-[10px] text-on-surface-variant/40 uppercase tracking-widest">
+            Koin v{Constants.expoConfig?.version || '1.0.0'}
+          </Text>
+          <Text className="text-[10px] text-on-surface-variant/30 mt-1">
+            Device: {Constants.deviceName} • SB: {Constants.statusBarHeight}px
+          </Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
