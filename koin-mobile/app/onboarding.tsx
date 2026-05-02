@@ -121,9 +121,8 @@ export default function Onboarding() {
           {[0, 1, 2, 3, 4, 5].map((i) => (
             <View
               key={i}
-              className={`h-2 rounded-full ${
-                i === step ? 'w-6 bg-primary' : i < step ? 'w-2 bg-primary/40' : 'w-2 bg-surface-container'
-              }`}
+              className={`h-2 rounded-full ${i === step ? 'w-6 bg-primary' : i < step ? 'w-2 bg-primary/40' : 'w-2 bg-surface-container'
+                }`}
             />
           ))}
         </View>
@@ -143,8 +142,8 @@ export default function Onboarding() {
               <Text className="mb-8 text-sm font-medium text-on-surface-variant text-center">
                 Let's set up your first savings goal in 60 seconds.
               </Text>
-              <Button 
-                onPress={() => setStep(1)} 
+              <Button
+                onPress={() => setStep(1)}
                 className="w-full flex-row items-center justify-center gap-2 h-14"
               >
                 <Text className="text-base font-bold text-primary-foreground">Start your first goal</Text>
@@ -160,22 +159,20 @@ export default function Onboarding() {
             >
               <Text className="mb-2 text-2xl font-bold text-on-surface">What are you saving for?</Text>
               <Text className="mb-6 text-sm font-medium text-on-surface-variant">Pick a goal that excites you</Text>
-              
+
               <View className="flex-row flex-wrap justify-between">
                 {GOAL_TEMPLATES.map((t) => (
                   <TouchableOpacity
                     key={t.id}
                     onPress={() => handleTemplateSelect(t.id)}
-                    className={`mb-3 w-[48%] flex-col items-center gap-2 rounded-2xl p-4 ${
-                      selectedTemplate === t.id
+                    className={`mb-3 w-[48%] flex-col items-center gap-2 rounded-2xl p-4 ${selectedTemplate === t.id
                         ? 'bg-primary-container border-2 border-primary'
                         : 'bg-surface-container-low'
-                    }`}
+                      }`}
                   >
                     <Text className="text-3xl">{t.icon}</Text>
-                    <Text className={`text-sm font-bold ${
-                      selectedTemplate === t.id ? 'text-on-primary-container' : 'text-on-surface'
-                    }`}>{t.name}</Text>
+                    <Text className={`text-sm font-bold ${selectedTemplate === t.id ? 'text-on-primary-container' : 'text-on-surface'
+                      }`}>{t.name}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -200,7 +197,7 @@ export default function Onboarding() {
               <Text className="mb-4 text-center text-4xl">{template?.icon}</Text>
               <Text className="mb-2 text-2xl font-bold text-on-surface text-center">Set your {goalName} goal</Text>
               <Text className="mb-6 text-sm font-medium text-on-surface-variant text-center">How much do you need?</Text>
-              
+
               <View className="gap-5">
                 <View>
                   <Text className="mb-2 text-xs font-medium text-on-surface-variant">Goal name</Text>
@@ -235,7 +232,7 @@ export default function Onboarding() {
             >
               <Text className="mb-2 text-2xl font-bold text-on-surface">A little about you</Text>
               <Text className="mb-6 text-sm font-medium text-on-surface-variant">This helps us personalize your experience</Text>
-              
+
               <View className="gap-5">
                 <View>
                   <Text className="mb-2 text-xs font-medium text-on-surface-variant">Your name</Text>
@@ -274,7 +271,7 @@ export default function Onboarding() {
             >
               <Text className="mb-2 text-2xl font-bold text-on-surface">Where are you based?</Text>
               <Text className="mb-6 text-sm font-medium text-on-surface-variant">We'll use this to set your currency and reminders</Text>
-              
+
               <View className="gap-5">
                 <View>
                   <Text className="mb-2 text-xs font-medium text-on-surface-variant">Email</Text>
@@ -295,7 +292,7 @@ export default function Onboarding() {
                   />
                   {emailError ? <Text className="mt-1.5 text-xs text-[#ef4444]">{emailError}</Text> : null}
                 </View>
-                
+
                 {/* Due to lacking @react-native-picker/picker, just a simple text input/button combo can work, but we'll use TextInput for simplicity since this is a demo. */}
                 <View>
                   <Text className="mb-2 text-xs font-medium text-on-surface-variant">Country (Code)</Text>
@@ -336,7 +333,7 @@ export default function Onboarding() {
                     <Text className="text-2xl font-bold text-on-surface">Quick money quiz</Text>
                   </View>
                   <Text className="mb-3 text-sm font-medium text-on-surface-variant">Question {currentQuiz + 1} of {QUIZ_QUESTIONS.length}</Text>
-                  
+
                   <View className="mb-6 flex-row gap-1">
                     {QUIZ_QUESTIONS.map((_, i) => (
                       <View key={i} className={`h-1.5 flex-1 rounded-full ${i <= currentQuiz ? 'bg-primary' : 'bg-surface-container'}`} />
@@ -344,7 +341,7 @@ export default function Onboarding() {
                   </View>
 
                   <Text className="mb-6 text-xl font-bold text-on-surface">{QUIZ_QUESTIONS[currentQuiz].question}</Text>
-                  
+
                   <View className="gap-3">
                     {QUIZ_QUESTIONS[currentQuiz].options.map((opt, i) => (
                       <TouchableOpacity
@@ -364,14 +361,14 @@ export default function Onboarding() {
                   <Text className="mb-8 text-base font-medium text-on-surface-variant text-center">
                     {PERSONALITY_TYPES[personalityResult].desc}
                   </Text>
-                  
+
                   <View className="w-full rounded-2xl bg-tertiary-container p-4 mb-8">
                     <View className="flex-row items-center justify-center gap-2">
                       <Check size={18} color="#064e3b" />
                       <Text className="text-sm font-bold text-on-tertiary-container">Achievement unlocked: Smart Saver 🧠</Text>
                     </View>
                   </View>
-                  
+
                   <Button onPress={finishOnboarding} className="w-full flex-row items-center justify-center gap-2 h-14">
                     <Text className="text-base font-bold text-primary-foreground">Let's go!</Text>
                     <ArrowRight size={18} color="#ffffff" />
@@ -381,7 +378,7 @@ export default function Onboarding() {
             </MotiView>
           )}
         </ScrollView>
-        {confetti && <ConfettiCannon count={100} origin={{x: -10, y: 0}} fallSpeed={2000} />}
+        {confetti && <ConfettiCannon count={100} origin={{ x: -10, y: 0 }} fallSpeed={2000} />}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
