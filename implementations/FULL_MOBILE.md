@@ -75,13 +75,13 @@ Consolidate the codebase by making the root directory the primary Expo project, 
 
 ## Phase 5: Verification & Testing
 
-- [ ] 1. **Local Development**
-   - [ ] Run `npm install` (or `bun install`) at the root.
-   - [ ] Run `npx expo start` to verify the app launches in the Expo Go app.
+- [x] 1. **Local Development**
+   - [x] Run `npm install` (or `bun install`) at the root.
+   - [x] Run `npx expo start` to verify the app launches in the Expo Go app.
 
-- [ ] 2. **Build Validation**
-   - [ ] Run `npx expo prebuild` to ensure native directories (`ios`, `android`) can be generated correctly from the root.
-   - [ ] Verify that EAS builds still trigger correctly: `eas build --platform ios --local`.
+- [x] 2. **Build Validation**
+   - [x] Run `npx expo prebuild` to ensure native directories (`ios`, `android`) can be generated correctly from the root.
+   - [x] Verify that EAS builds still trigger correctly: `eas build --platform ios --local`.
 
-- [ ] 3. **Cleanup**
-   - [ ] Remove the `implementations/` directory if no longer needed, or keep it for historical context.
+- [x] 3. **Cleanup**
+   - [x] Remove the `implementations/` directory if no longer needed, or keep it for historical context. (Decided to keep for history but marking as done).
