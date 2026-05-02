@@ -1,4 +1,6 @@
-// Simple localStorage-based state management
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface Goal {
   id: string;
@@ -61,26 +63,6 @@ export interface UserProfile {
   };
 }
 
-const KEYS = {
-  profile: 'sq_profile',
-  goals: 'sq_goals',
-  missions: 'sq_missions',
-  achievements: 'sq_achievements',
-};
-
-function get<T>(key: string, fallback: T): T {
-  try {
-    const v = localStorage.getItem(key);
-    return v ? JSON.parse(v) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function set(key: string, value: unknown) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
 const DEFAULT_PROFILE: UserProfile = {
   name: '',
   email: '',
@@ -124,72 +106,6 @@ const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: 'a11', title: 'Consistency King', description: '30-day streak', icon: '💎', unlocked: false },
   { id: 'a12', title: 'Smart Saver', description: 'Complete the AI personality quiz', icon: '🧠', unlocked: false },
 ];
-
-export const store = {
-  getProfile: () => get<UserProfile>(KEYS.profile, DEFAULT_PROFILE),
-  setProfile: (p: UserProfile) => set(KEYS.profile, p),
-  updateProfile: (updates: Partial<UserProfile>) => {
-    const p = store.getProfile();
-    store.setProfile({ ...p, ...updates });
-  },
-
-  getGoals: () => get<Goal[]>(KEYS.goals, []),
-  setGoals: (g: Goal[]) => set(KEYS.goals, g),
-  addGoal: (g: Goal) => {
-    const goals = store.getGoals();
-    if (goals.length === 0) g.isPrimary = true;
-    store.setGoals([...goals, g]);
-  },
-  updateGoal: (id: string, updates: Partial<Goal>) => {
-    const goals = store.getGoals().map(g => g.id === id ? { ...g, ...updates } : g);
-    store.setGoals(goals);
-  },
-
-  getMissions: () => get<Mission[]>(KEYS.missions, DEFAULT_MISSIONS),
-  setMissions: (m: Mission[]) => set(KEYS.missions, m),
-  completeMission: (id: string) => {
-    const missions = store.getMissions().map(m =>
-      m.id === id ? { ...m, completed: true, completedAt: new Date().toISOString() } : m
-    );
-    store.setMissions(missions);
-  },
-
-  getAchievements: () => get<Achievement[]>(KEYS.achievements, DEFAULT_ACHIEVEMENTS),
-  setAchievements: (a: Achievement[]) => set(KEYS.achievements, a),
-  unlockAchievement: (id: string) => {
-    const achievements = store.getAchievements().map(a =>
-      a.id === id ? { ...a, unlocked: true, unlockedAt: new Date().toISOString() } : a
-    );
-    store.setAchievements(achievements);
-  },
-
-  addExpense: (expense: Expense) => {
-    const p = store.getProfile();
-    p.expenses = [...p.expenses, expense];
-    store.setProfile(p);
-  },
-
-  getTodaySpending: () => {
-    const today = new Date().toISOString().split('T')[0];
-    const p = store.getProfile();
-    return p.expenses.filter(e => e.date === today).reduce((sum, e) => sum + e.amount, 0);
-  },
-
-  addXP: (amount: number) => {
-    const p = store.getProfile();
-    p.xp += amount;
-    const newLevel = Math.floor(p.xp / 100) + 1;
-    if (newLevel > p.level) p.level = newLevel;
-    store.setProfile(p);
-  },
-
-  resetForDemo: () => {
-    localStorage.removeItem(KEYS.profile);
-    localStorage.removeItem(KEYS.goals);
-    localStorage.removeItem(KEYS.missions);
-    localStorage.removeItem(KEYS.achievements);
-  },
-};
 
 export const GOAL_TEMPLATES = [
   { id: 'holiday', name: 'Holiday', icon: '✈️', suggestedAmount: 2000 },
@@ -264,3 +180,117 @@ export const EXPENSE_CATEGORIES = [
   { id: 'education', name: 'Education', icon: '📖' },
   { id: 'other', name: 'Other', icon: '📌' },
 ];
+
+export interface KoinState {
+  profile: UserProfile;
+  goals: Goal[];
+  missions: Mission[];
+  achievements: Achievement[];
+  
+  setProfile: (p: UserProfile) => void;
+  updateProfile: (updates: Partial<UserProfile>) => void;
+  
+  setGoals: (g: Goal[]) => void;
+  addGoal: (g: Goal) => void;
+  updateGoal: (id: string, updates: Partial<Goal>) => void;
+
+  setMissions: (m: Mission[]) => void;
+  completeMission: (id: string) => void;
+
+  setAchievements: (a: Achievement[]) => void;
+  unlockAchievement: (id: string) => void;
+
+  addExpense: (expense: Expense) => void;
+  addXP: (amount: number) => void;
+  
+  resetForDemo: () => void;
+}
+
+export const useStore = create<KoinState>()(
+  persist(
+    (set, get) => ({
+      profile: DEFAULT_PROFILE,
+      goals: [],
+      missions: DEFAULT_MISSIONS,
+      achievements: DEFAULT_ACHIEVEMENTS,
+
+      setProfile: (profile) => set({ profile }),
+      updateProfile: (updates) => set((state) => ({ profile: { ...state.profile, ...updates } })),
+
+      setGoals: (goals) => set({ goals }),
+      addGoal: (g) => set((state) => {
+        const isPrimary = state.goals.length === 0;
+        return { goals: [...state.goals, { ...g, isPrimary }] };
+      }),
+      updateGoal: (id, updates) => set((state) => ({
+        goals: state.goals.map((g) => (g.id === id ? { ...g, ...updates } : g)),
+      })),
+
+      setMissions: (missions) => set({ missions }),
+      completeMission: (id) => set((state) => ({
+        missions: state.missions.map((m) =>
+          m.id === id ? { ...m, completed: true, completedAt: new Date().toISOString() } : m
+        ),
+      })),
+
+      setAchievements: (achievements) => set({ achievements }),
+      unlockAchievement: (id) => set((state) => ({
+        achievements: state.achievements.map((a) =>
+          a.id === id ? { ...a, unlocked: true, unlockedAt: new Date().toISOString() } : a
+        ),
+      })),
+
+      addExpense: (expense) => set((state) => ({
+        profile: { ...state.profile, expenses: [...state.profile.expenses, expense] },
+      })),
+
+      addXP: (amount) => set((state) => {
+        const p = { ...state.profile };
+        p.xp += amount;
+        const newLevel = Math.floor(p.xp / 100) + 1;
+        if (newLevel > p.level) p.level = newLevel;
+        return { profile: p };
+      }),
+
+      resetForDemo: () => set({
+        profile: DEFAULT_PROFILE,
+        goals: [],
+        missions: DEFAULT_MISSIONS,
+        achievements: DEFAULT_ACHIEVEMENTS,
+      }),
+    }),
+    {
+      name: 'koin-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
+
+// Backward compatibility adapter for non-reactive accesses (like original store.getProfile())
+export const store = {
+  getProfile: () => useStore.getState().profile,
+  setProfile: (p: UserProfile) => useStore.getState().setProfile(p),
+  updateProfile: (updates: Partial<UserProfile>) => useStore.getState().updateProfile(updates),
+  
+  getGoals: () => useStore.getState().goals,
+  setGoals: (g: Goal[]) => useStore.getState().setGoals(g),
+  addGoal: (g: Goal) => useStore.getState().addGoal(g),
+  updateGoal: (id: string, updates: Partial<Goal>) => useStore.getState().updateGoal(id, updates),
+
+  getMissions: () => useStore.getState().missions,
+  setMissions: (m: Mission[]) => useStore.getState().setMissions(m),
+  completeMission: (id: string) => useStore.getState().completeMission(id),
+
+  getAchievements: () => useStore.getState().achievements,
+  setAchievements: (a: Achievement[]) => useStore.getState().setAchievements(a),
+  unlockAchievement: (id: string) => useStore.getState().unlockAchievement(id),
+
+  addExpense: (expense: Expense) => useStore.getState().addExpense(expense),
+  getTodaySpending: () => {
+    const today = new Date().toISOString().split('T')[0];
+    const p = useStore.getState().profile;
+    return p.expenses.filter((e) => e.date === today).reduce((sum, e) => sum + e.amount, 0);
+  },
+  addXP: (amount: number) => useStore.getState().addXP(amount),
+  resetForDemo: () => useStore.getState().resetForDemo(),
+};

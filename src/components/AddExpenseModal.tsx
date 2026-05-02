@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Modal, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { store, EXPENSE_CATEGORIES, Expense } from '@/lib/store';
+import { useStore, EXPENSE_CATEGORIES, Expense } from '@/lib/store';
 
 interface Props {
   open: boolean;
@@ -13,17 +13,19 @@ export function AddExpenseModal({ open, onClose }: Props) {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [note, setNote] = useState('');
+  
+  const addExpense = useStore(state => state.addExpense);
 
   const handleSave = () => {
     if (!amount || !category) return;
     const expense: Expense = {
-      id: crypto.randomUUID(),
+      id: Math.random().toString(36).substring(7),
       amount: Number(amount),
       category,
       date: new Date().toISOString().split('T')[0],
       note: note || undefined,
     };
-    store.addExpense(expense);
+    addExpense(expense);
     setAmount('');
     setCategory('');
     setNote('');
@@ -31,41 +33,74 @@ export function AddExpenseModal({ open, onClose }: Props) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="mx-auto max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle>Add Expense</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <label className="mb-1.5 block text-label-medium text-on-surface-variant">Amount ($)</label>
-            <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0" className="text-xl font-bold" autoFocus />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-label-medium text-on-surface-variant">Category</label>
-            <div className="grid grid-cols-4 gap-2">
-              {EXPENSE_CATEGORIES.map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => setCategory(c.id)}
-                  className={`flex flex-col items-center gap-1 rounded-2xl p-2 text-label-small transition-all ${
-                    category === c.id
-                      ? 'bg-primary-container text-on-primary-container ring-2 ring-primary'
-                      : 'bg-surface-container-low text-on-surface-variant'
-                  }`}
-                >
-                  <span className="text-lg">{c.icon}</span>
-                  <span className="truncate w-full text-center">{c.name.split(' ')[0]}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <Input value={note} onChange={e => setNote(e.target.value)} placeholder="Note (optional)" />
-          <Button onClick={handleSave} disabled={!amount || !category} className="w-full">
-            Save Expense
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <Modal
+      visible={open}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <View className="flex-1 justify-end bg-black/50">
+        <View className="bg-surface rounded-t-3xl p-6 shadow-xl pt-8">
+          <View className="flex-row justify-between items-center mb-6">
+            <Text className="text-2xl font-bold text-on-surface">Add Expense</Text>
+            <TouchableOpacity onPress={onClose} className="p-2 bg-surface-container-low rounded-full">
+              <Text className="text-on-surface-variant font-medium">✕</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView className="space-y-4" keyboardShouldPersistTaps="handled">
+            <View className="mb-4">
+              <Text className="mb-2 text-sm text-on-surface-variant font-medium">Amount ($)</Text>
+              <Input 
+                keyboardType="numeric" 
+                value={amount} 
+                onChangeText={setAmount} 
+                placeholder="0" 
+                className="text-xl font-bold bg-surface-container-low" 
+                autoFocus 
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="mb-2 text-sm text-on-surface-variant font-medium">Category</Text>
+              <View className="flex-row flex-wrap gap-2">
+                {EXPENSE_CATEGORIES.map(c => (
+                  <TouchableOpacity
+                    key={c.id}
+                    onPress={() => setCategory(c.id)}
+                    className={`flex-col items-center justify-center p-2 rounded-2xl w-[23%] aspect-square transition-all ${
+                      category === c.id
+                        ? 'bg-primary-container border-2 border-primary'
+                        : 'bg-surface-container-low'
+                    }`}
+                  >
+                    <Text className="text-2xl mb-1">{c.icon}</Text>
+                    <Text 
+                      className={`text-xs text-center ${category === c.id ? 'text-on-primary-container font-bold' : 'text-on-surface-variant'}`}
+                      numberOfLines={1}
+                    >
+                      {c.name.split(' ')[0]}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+            <View className="mb-6">
+              <Input 
+                value={note} 
+                onChangeText={setNote} 
+                placeholder="Note (optional)" 
+                className="bg-surface-container-low"
+              />
+            </View>
+            <Button 
+              onPress={handleSave} 
+              disabled={!amount || !category} 
+              className="w-full mb-8"
+              label="Save Expense"
+            />
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
   );
 }

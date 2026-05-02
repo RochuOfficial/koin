@@ -1,48 +1,110 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
+import { Pressable, Text, type PressableProps } from "react-native";
 import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "../../lib/utils";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
-import { cn } from "@/lib/utils";
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-label-large ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
+  "flex-row items-center justify-center gap-2 rounded-full disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 rounded-full",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full",
-        outline: "border border-outline bg-transparent hover:bg-surface-container rounded-full",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-full",
-        ghost: "hover:bg-surface-container rounded-full",
-        link: "text-primary underline-offset-4 hover:underline",
-        tonal: "bg-primary-container text-on-primary-container hover:bg-primary-container/80 rounded-full",
+        default: "bg-primary",
+        destructive: "bg-destructive",
+        outline: "border border-outline bg-transparent",
+        secondary: "bg-secondary",
+        ghost: "bg-transparent",
+        link: "bg-transparent",
+        tonal: "bg-primary-container",
       },
       size: {
         default: "h-12 px-6 py-3",
-        sm: "h-10 rounded-full px-4",
-        lg: "h-14 rounded-full px-8",
-        icon: "h-12 w-12 rounded-full",
+        sm: "h-10 px-4",
+        lg: "h-14 px-8",
+        icon: "h-12 w-12",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
     },
-  },
+  }
+);
+
+const buttonTextVariants = cva(
+  "text-center font-medium",
+  {
+    variants: {
+      variant: {
+        default: "text-primary-foreground",
+        destructive: "text-destructive-foreground",
+        outline: "text-primary",
+        secondary: "text-secondary-foreground",
+        ghost: "text-primary",
+        link: "text-primary underline",
+        tonal: "text-on-primary-container",
+      },
+      size: {
+        default: "text-base",
+        sm: "text-sm",
+        lg: "text-lg",
+        icon: "",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends PressableProps,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
+  label?: string;
+  textClassName?: string;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
-  },
+const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
+  ({ className, textClassName, variant, size, label, children, onPressIn, onPressOut, style, ...props }, ref) => {
+    const scale = useSharedValue(1);
+
+    const animatedStyle = useAnimatedStyle(() => {
+      return {
+        transform: [{ scale: scale.value }],
+      };
+    });
+
+    const handlePressIn = (e: any) => {
+      scale.value = withSpring(0.96, { damping: 15, stiffness: 300 });
+      if (onPressIn) onPressIn(e);
+    };
+
+    const handlePressOut = (e: any) => {
+      scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+      if (onPressOut) onPressOut(e);
+    };
+
+    return (
+      <AnimatedPressable
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={[animatedStyle, style as any]}
+        {...props}
+      >
+        {label ? (
+          <Text className={cn(buttonTextVariants({ variant, size, className: textClassName }))}>
+            {label}
+          </Text>
+        ) : children}
+      </AnimatedPressable>
+    );
+  }
 );
 Button.displayName = "Button";
 
-export { Button, buttonVariants };
+export { Button, buttonVariants, buttonTextVariants };

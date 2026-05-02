@@ -3,16 +3,42 @@ logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Dependencies
+node_modules/
 
-# Editor directories and files
+# Build and Dist
+dist/
+dist-ssr/
+web-build/
+*.tsbuildinfo
+
+# Expo
+.expo/
+expo-env.d.ts
+/ios
+/android
+
+# Native Assets/Keys
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Metro
+.metro-health-check*
+
+# Environment
+*.local
+.env*.local
+
+# Editor and System
 .vscode/*
 !.vscode/extensions.json
 .idea
