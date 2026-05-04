@@ -199,15 +199,6 @@ export default function Dashboard() {
             </View>
           </View>
         )}
-        {/* Sentry Test Button */}
-        <Button
-          onPress={() => {
-            throw new Error('Sentry Test Error');
-          }}
-          variant="ghost"
-          className="mb-10 opacity-20"
-          label="Sentry Test"
-        />
       </ScrollView>
 
       <AddExpenseModal open={showExpense} onClose={() => setShowExpense(false)} />
