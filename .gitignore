@@ -37,6 +37,7 @@ expo-env.d.ts
 # Environment
 *.local
 .env*.local
+.env
 
 # Editor and System
 .vscode/*
