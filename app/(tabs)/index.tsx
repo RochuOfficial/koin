@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, Redirect } from 'expo-router';
 import { Plus, Flame, TrendingUp, ChevronRight } from 'lucide-react-native';
 import { ProgressRing } from '@/components/ProgressRing';
 import { useStore } from '@/lib/store';
@@ -26,11 +26,9 @@ export default function Dashboard() {
     setTodaySpend(calculateTodaySpend());
   }, [calculateTodaySpend]);
 
-  useEffect(() => {
-    if (!profile.onboardingCompleted) {
-      router.replace('/onboarding');
-    }
-  }, [profile.onboardingCompleted, router]);
+  if (!profile.onboardingCompleted) {
+    return <Redirect href="/onboarding" />;
+  }
 
   const primaryGoal = goals.find((g) => g.isPrimary) || goals[0];
   const progress = primaryGoal
@@ -53,10 +51,6 @@ export default function Dashboard() {
     if (h < 17) return 'Good afternoon';
     return 'Good evening';
   };
-
-  if (!profile.onboardingCompleted) {
-    return null;
-  }
 
   return (
     <SafeAreaView className="flex-1 bg-surface" edges={['top', 'left', 'right']}>
