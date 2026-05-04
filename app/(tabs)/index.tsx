@@ -204,6 +204,7 @@ export default function Dashboard() {
               ))}
             </View>
           </View>
+        )}
         {/* Sentry Test Button */}
         <Button
           onPress={() => {

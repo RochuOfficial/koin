@@ -37,7 +37,9 @@
           "organization": "koin-gz",
           "project": "koin"
         }
-      ]
+      ],
+      "@sentry/react-native",
+      "expo-font"
     ]
   }
 }
