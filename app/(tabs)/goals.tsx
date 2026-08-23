@@ -29,6 +29,8 @@ import { springPresets } from '@/lib/springPresets';
 import { Mascot } from '@/components/Mascot';
 import { formatMonthYear } from '@/lib/i18n/format';
 import type { SupportedLanguage } from '@/lib/i18n/detect';
+import { GOAL_CHIPS, getGoalIconKey } from '@/lib/catalogs';
+import { Icon, type IconName } from '@/components/icons/Icon';
 
 const CARD_SHADOW = {
   shadowColor: '#000',
@@ -38,24 +40,10 @@ const CARD_SHADOW = {
   elevation: 4,
 };
 
-/** `label` stays the untranslated canonical goalName — see the equivalent
- * comment on GOAL_CHIPS in app/onboarding.tsx. Displayed text is translated
- * via `id` reusing onboarding.json's goal.chips.* keys (identical chip set). */
-const GOAL_CHIPS = [
-  { id: 'vacation', label: 'Vacation', emoji: '🏝️' },
-  { id: 'newCar', label: 'New Car', emoji: '🚗' },
-  { id: 'houseDeposit', label: 'House Deposit', emoji: '🏠' },
-  { id: 'emergencyFund', label: 'Emergency Fund', emoji: '💰' },
-  { id: 'somethingElse', label: 'Something Else', emoji: '✏️' },
-];
-
-const GOAL_ICONS: Record<string, string> = {
-  Vacation: '🏝️',
-  'New Car': '🚗',
-  'House Deposit': '🏠',
-  'Emergency Fund': '💰',
-  'Something Else': '✏️',
-};
+// GOAL_CHIPS/GOAL_ICONS moved to src/lib/catalogs.ts as GOAL_CHIPS/getGoalIconKey
+// (#128) — was duplicated verbatim here and in app/onboarding.tsx; now a
+// single shared source of truth. Displayed chip text is translated via `id`
+// reusing onboarding.json's goal.chips.* keys (identical chip set).
 
 /** Named steps for the add-goal flow — see the equivalent enum in app/onboarding.tsx. */
 enum CreateStep {
@@ -132,7 +120,7 @@ export default function Goals() {
   const savingsExceedsIncome =
     !!monthlyIncome && monthlyIncome > 0 && totalMonthlyWithNewGoal > monthlyIncome;
 
-  const goalIcon = GOAL_ICONS[goalName] ?? '🎯';
+  const goalIcon = getGoalIconKey(goalName);
 
   // Resolved current goal + its deposits reversed (most-recent first). Hoisted
   // above the viewGoal conditional so useMemo stays unconditional; `g.deposits`
@@ -231,7 +219,7 @@ export default function Goals() {
 
                 <View className="items-center mb-6">
                   <ProgressRing progress={pct} size={180} strokeWidth={16}>
-                    <Text className="text-4xl">{g.icon}</Text>
+                    <Icon name={g.icon} size={44} />
                     <Text className="mt-1 text-4xl font-black text-on-surface">{pct}%</Text>
                   </ProgressRing>
                   <Text className="mt-4 text-xl font-black text-on-surface">{g.name}</Text>
@@ -265,7 +253,11 @@ export default function Goals() {
                         className={`flex-row items-center gap-3 rounded-2xl p-4 ${pct >= m ? 'bg-tertiary-container' : 'bg-surface-container-low'}`}
                         style={pct >= m ? { borderWidth: 1, borderColor: 'rgba(34,197,94,0.25)' } : {}}
                       >
-                        <Text className="text-lg">{pct >= m ? '✅' : '⬜'}</Text>
+                        {pct >= m ? (
+                          <Icon name="check-circle" size={20} />
+                        ) : (
+                          <View className="h-5 w-5 rounded-full border-2 border-outline-variant" />
+                        )}
                         <View className="flex-1">
                           <Text className="text-sm font-black text-on-surface">{m}%</Text>
                           <Text className="text-xs text-on-surface-variant mt-0.5">
@@ -331,7 +323,7 @@ export default function Goals() {
                             : 'bg-surface-container-low border-outline'
                         }`}
                       >
-                        <Text className="text-lg">{chip.emoji}</Text>
+                        <Icon name={chip.icon} size={18} />
                         <Text className={`text-sm font-semibold ${goalName === chip.label ? 'text-on-primary-container' : 'text-on-surface'}`}>
                           {t(`onboarding:goal.chips.${chip.id}`)}
                         </Text>
@@ -436,7 +428,7 @@ export default function Goals() {
                 </Text>
 
                 <View className="rounded-3xl bg-surface p-6 gap-4 mb-4" style={CARD_SHADOW}>
-                  <ReviewRow label={t('onboarding:blueprint.rowGoal')} value={`${goalIcon}  ${goalName}`} />
+                  <ReviewRow label={t('onboarding:blueprint.rowGoal')} value={goalName} icon={goalIcon} />
                   <ReviewRow label={t('onboarding:blueprint.rowTarget')} value={formatCurrency(Number(targetAmount), currency)} />
                   <View className="h-px bg-outline-variant" />
                   <ReviewRow
@@ -552,7 +544,7 @@ const GoalListRow = memo(function GoalListRow({
     <FadeInStagger index={index} delayStep={100} replay={replay}>
       <TouchableOpacity onPress={() => onPress(goal)} className="w-full rounded-3xl bg-surface p-4" style={CARD_SHADOW}>
         <View className="flex-row items-center gap-4">
-          <Text className="text-3xl">{goal.icon}</Text>
+          <Icon name={goal.icon} size={34} />
           <View className="flex-1">
             <View className="flex-row items-center justify-between">
               <Text className="text-sm font-bold text-on-surface" numberOfLines={1}>{goal.name}</Text>
@@ -596,11 +588,24 @@ function ProgressSegment({ active }: { active: boolean }) {
   );
 }
 
-function ReviewRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+function ReviewRow({
+  label,
+  value,
+  icon,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  icon?: IconName;
+  highlight?: boolean;
+}) {
   return (
     <View className="flex-row items-center justify-between">
       <Text className="text-sm font-medium text-on-surface-variant">{label}</Text>
-      <Text className={`text-sm font-bold ${highlight ? 'text-primary' : 'text-on-surface'}`}>{value}</Text>
+      <View className="flex-row items-center gap-1.5">
+        {icon && <Icon name={icon} size={16} />}
+        <Text className={`text-sm font-bold ${highlight ? 'text-primary' : 'text-on-surface'}`}>{value}</Text>
+      </View>
     </View>
   );
 }

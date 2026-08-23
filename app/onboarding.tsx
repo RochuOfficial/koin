@@ -17,6 +17,8 @@ import { springPresets } from '@/lib/springPresets';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useStore, COUNTRIES, CURRENCIES, Goal, formatCurrency, getCurrencySymbol } from '@/lib/store';
+import { GOAL_CHIPS, getGoalIconKey } from '@/lib/catalogs';
+import { Icon, type IconName } from '@/components/icons/Icon';
 import { useAuthLock } from '@/lib/authLock';
 import { requestEmailOtp, verifyEmailOtp, SessionSecretUnavailableError } from '@/lib/auth';
 import { ArrowRight, ArrowLeft, ChevronDown, AlertTriangle, ShieldCheck } from 'lucide-react-native';
@@ -36,20 +38,8 @@ import { Mascot } from '@/components/Mascot';
 import { formatMonthYear } from '@/lib/i18n/format';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/lib/i18n/detect';
 
-/**
- * `label` is the canonical (English) goal name written to `goalName` and, from
- * there, to the persisted Goal and the onboarding webhook payload — it is NOT
- * re-translated per language, matching how plan names stay untranslated (see
- * implementations/I18N_PL.md's Decisions). Only the on-screen chip text is
- * translated, via `id` into goal.chips.* below.
- */
-const GOAL_CHIPS = [
-  { id: 'vacation', label: 'Vacation', emoji: '🏝️' },
-  { id: 'newCar', label: 'New Car', emoji: '🚗' },
-  { id: 'houseDeposit', label: 'House Deposit', emoji: '🏠' },
-  { id: 'emergencyFund', label: 'Emergency Fund', emoji: '💰' },
-  { id: 'somethingElse', label: 'Something Else', emoji: '✏️' },
-];
+// GOAL_CHIPS moved to src/lib/catalogs.ts (#128) — was duplicated verbatim
+// here and in app/(tabs)/goals.tsx; now a single shared source of truth.
 
 const LEGAL_LINK_STYLE = 'text-primary underline';
 
@@ -519,7 +509,7 @@ export default function Onboarding() {
       const goal: Goal = {
         id: Math.random().toString(36).substring(7),
         template: '',
-        icon: '🎯',
+        icon: getGoalIconKey(goalName),
         name: goalName,
         targetAmount: Number(targetAmount),
         savedAmount: 0,
@@ -971,7 +961,9 @@ export default function Onboarding() {
               the draft so relaunching the app doesn't hand out a fresh gate) */}
           {step === OnboardingStep.AgeGate && ageBlocked && (
             <Animated.View entering={FadeInDown.springify()} className="items-center pt-10">
-              <Text className="text-6xl text-center mb-4">🔒</Text>
+              <View className="mb-4">
+                <Icon name="padlock" size={72} />
+              </View>
               <Text className="mb-3 text-2xl font-black text-on-surface text-center">
                 {t('ageGate.blockedTitle')}
               </Text>
@@ -1080,7 +1072,7 @@ export default function Onboarding() {
                           : 'bg-surface-container-low border-outline'
                       }`}
                     >
-                      <Text className="text-lg">{chip.emoji}</Text>
+                      <Icon name={chip.icon} size={18} />
                       <Text
                         className={`text-sm font-semibold ${
                           goalName === chip.label ? 'text-on-primary-container' : 'text-on-surface'
@@ -1242,7 +1234,9 @@ export default function Onboarding() {
               only way to reach someone who leaves before giving us an email. */}
           {step === OnboardingStep.PushPermission && (
             <Animated.View entering={FadeInDown.springify()}>
-              <Text className="text-6xl text-center mb-4">🔔</Text>
+              <View className="items-center mb-4">
+                <Icon name="bell" size={72} />
+              </View>
               <Text className="mb-2 text-3xl font-black text-on-surface">
                 {t('pushPermission.headline', { firstName })}
               </Text>
@@ -1252,11 +1246,13 @@ export default function Onboarding() {
 
               <View className="gap-3">
                 <PermissionPoint
+                  icon="flame"
                   emoji="🔥"
                   title={t('pushPermission.streakTitle')}
                   body={t('pushPermission.streakBody')}
                 />
                 <PermissionPoint
+                  icon="target"
                   emoji="🎯"
                   title={t('pushPermission.milestoneTitle')}
                   body={
@@ -1428,10 +1424,20 @@ function ProgressSegment({ active }: { active: boolean }) {
 }
 
 /** One benefit row on the notification pre-permission screen. */
-function PermissionPoint({ emoji, title, body }: { emoji: string; title: string; body: string }) {
+function PermissionPoint({
+  icon,
+  emoji,
+  title,
+  body,
+}: {
+  icon?: IconName;
+  emoji: string;
+  title: string;
+  body: string;
+}) {
   return (
     <View className="flex-row items-start gap-3 rounded-2xl bg-surface-container-low p-4">
-      <Text className="text-xl">{emoji}</Text>
+      {icon ? <Icon name={icon} size={24} /> : <Text className="text-xl">{emoji}</Text>}
       <View className="flex-1">
         <Text className="text-sm font-bold text-on-surface">{title}</Text>
         <Text className="mt-0.5 text-xs leading-5 text-on-surface-variant">{body}</Text>

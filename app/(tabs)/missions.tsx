@@ -35,6 +35,8 @@ import { AnimatedProgressBar } from '@/components/animation/AnimatedProgressBar'
 import { SkiaConfetti } from '@/components/animation/SkiaConfetti';
 import { useCelebrate } from '@/components/animation/useCelebrate';
 import { timingPresets } from '@/lib/springPresets';
+import { ACHIEVEMENT_ICONS } from '@/lib/catalogs';
+import { Icon } from '@/components/icons/Icon';
 
 const CARD_SHADOW = {
   shadowColor: '#000',
@@ -181,7 +183,11 @@ export default function Missions() {
                 }`}
                 style={a.unlocked ? { borderWidth: 1, borderColor: 'rgba(34,197,94,0.25)' } : {}}
               >
-                <Text className="text-3xl">{a.icon}</Text>
+                {ACHIEVEMENT_ICONS[a.id]?.icon ? (
+                  <Icon name={ACHIEVEMENT_ICONS[a.id].icon!} size={34} />
+                ) : (
+                  <Text className="text-3xl">{ACHIEVEMENT_ICONS[a.id]?.emoji ?? '🏅'}</Text>
+                )}
                 <Text className="text-xs font-bold text-on-surface text-center leading-tight">{t(`content:achievements.${a.id}.title`)}</Text>
                 <Text className="text-[9px] text-on-surface-variant text-center leading-tight">{t(`content:achievements.${a.id}.description`)}</Text>
               </Animated.View>

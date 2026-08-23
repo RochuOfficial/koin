@@ -16,6 +16,7 @@ import { Query, type Models } from 'react-native-appwrite';
 import { tablesDB, DATABASE_ID } from './appwrite';
 import { createLogger } from './logger';
 import type { Goal } from './store';
+import { getGoalIconKey } from './catalogs';
 
 const log = createLogger('goalsSync');
 
@@ -32,7 +33,7 @@ function toClientGoal(row: ServerGoalRow, isPrimary: boolean): Goal {
   return {
     id: row.$id,
     template: '',
-    icon: '🎯',
+    icon: getGoalIconKey(row.goal_name),
     name: row.goal_name,
     targetAmount: row.price_cents / 100,
     savedAmount: 0,

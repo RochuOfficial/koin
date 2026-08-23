@@ -17,6 +17,7 @@ import { useAuthLock } from '@/lib/authLock';
 import { PIN_LENGTH } from '@/lib/pin';
 import { PinPad, PinDots } from '@/components/auth/PinPad';
 import { PinCreationFlow } from '@/components/auth/PinCreationFlow';
+import { Icon } from '@/components/icons/Icon';
 
 function formatRemaining(ms: number, t: TFunction<'auth'>): string {
   const s = Math.ceil(ms / 1000);
@@ -106,7 +107,9 @@ export default function ChangePin() {
           <X size={22} color="#6b7280" />
         </Pressable>
         <Animated.View entering={FadeInDown.springify()} className="w-full items-center">
-          <Text className="text-5xl mb-4">🔐</Text>
+          <View className="mb-4">
+            <Icon name="padlock" size={56} />
+          </View>
           <Text className="text-2xl font-black text-on-surface mb-1">{t('changePin.confirmTitle')}</Text>
           <Text className="text-sm font-medium text-on-surface-variant mb-10 text-center">
             {t('changePin.confirmSubtitle')}

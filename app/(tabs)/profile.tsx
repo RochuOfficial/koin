@@ -15,6 +15,7 @@ import { FadeInStagger } from '@/components/animation/FadeInStagger';
 import { requestNotificationPermission, getNotificationPermissionStatus } from '@/lib/notifications';
 import { TEXT_INPUT_CENTERING } from '@/lib/utils';
 import { Mascot } from '@/components/Mascot';
+import { Icon } from '@/components/icons/Icon';
 
 const CARD_SHADOW = {
   shadowColor: '#000',
@@ -249,7 +250,11 @@ export default function Profile() {
                   return (
                     <View key={cat} className="flex-row items-center justify-between">
                       <View className="flex-row items-center gap-3">
-                        <Text className="text-xl">{c?.icon || '📌'}</Text>
+                        {c?.icon ? (
+                          <Icon name={c.icon} size={22} />
+                        ) : (
+                          <Text className="text-xl">{c?.emoji || '📌'}</Text>
+                        )}
                         <Text className="text-sm font-semibold text-on-surface">{c ? tContent(`expenseCategories.${c.id}`) : cat}</Text>
                       </View>
                       <Text className="text-sm font-bold text-on-surface">{formatCurrency(amount, profile.currency)}</Text>

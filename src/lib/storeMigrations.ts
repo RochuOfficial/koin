@@ -9,7 +9,7 @@
 import { migrateGoalDepositDates } from './deposits';
 
 /** Bump alongside a new migration step below, and in store.ts's persist config. */
-export const PIGGY_STORE_VERSION = 6;
+export const PIGGY_STORE_VERSION = 7;
 
 /** Pre-#83 name of the entry tier, still present in every persisted blob. */
 const LEGACY_BEGINNER = 'free';
@@ -117,6 +117,45 @@ export function migratePiggyState(persisted: unknown, from: number): unknown {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructuring to drop these two keys
         ({ title, description, ...rest }: { title?: unknown; description?: unknown; [key: string]: unknown }) => rest
       ),
+    };
+  }
+
+  // v6 → v7: icon system migration (#128, implementations/ICON_SYSTEM.md).
+  //
+  // Drops `icon` from persisted `achievements` — same rationale as v5 → v6's
+  // title/description drop: it's now resolved by `id` from
+  // catalogs.ts's ACHIEVEMENT_ICONS at render time (app/(tabs)/missions.tsx),
+  // not carried per-instance.
+  //
+  // Remaps persisted `goals[].icon` from the old emoji values to the new
+  // icon-registry keys (src/components/icons/registry.ts). Unlike
+  // achievements, a goal's icon IS still persisted per-instance — it's
+  // stamped once at creation (getGoalIconKey in catalogs.ts) onto a
+  // free-typed goal name, not looked up fresh by a stable id — so an
+  // unmigrated goal would hand its old emoji straight to <Icon name=.../>,
+  // which only accepts registry keys. EMOJI_TO_ICON_KEY covers every value
+  // the creation flow could ever have written (onboarding.tsx, goals.tsx,
+  // goalsSync.ts); anything unrecognized falls back to the generic target
+  // icon rather than being dropped.
+  if (from < 7) {
+    const EMOJI_TO_ICON_KEY: Record<string, string> = {
+      '🎯': 'target',
+      '🏝️': 'airplane',
+      '🚗': 'car',
+      '🏠': 'house',
+      '💰': 'shield-check',
+      '✏️': 'pencil',
+    };
+    state = {
+      ...state,
+      achievements: (state.achievements ?? []).map(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructuring to drop this key
+        ({ icon, ...rest }: { icon?: unknown; [key: string]: unknown }) => rest
+      ),
+      goals: (state.goals ?? []).map((g: { icon?: string; [key: string]: unknown }) => ({
+        ...g,
+        icon: EMOJI_TO_ICON_KEY[g.icon ?? ''] ?? 'target',
+      })),
     };
   }
 

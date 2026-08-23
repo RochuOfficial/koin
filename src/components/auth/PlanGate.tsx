@@ -26,6 +26,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ArrowRight, Check, ShieldCheck } from 'lucide-react-native';
 import { Button } from '@/components/ui/button';
 import { Mascot } from '@/components/Mascot';
+import { Icon } from '@/components/icons/Icon';
 import { useStore } from '@/lib/store';
 import { useAuthLock } from '@/lib/authLock';
 import { getPlanConfig, PLAN_ORDER, formatUSD } from '@/lib/entitlements';
@@ -197,7 +198,9 @@ export function PlanGate() {
       <SafeAreaView className="flex-1 bg-surface">
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}>
           <Animated.View entering={FadeInDown.springify()}>
-            <Text className="text-6xl text-center mb-6">🔒</Text>
+            <View className="items-center mb-6">
+              <Icon name="padlock" size={72} />
+            </View>
             <Text className="mb-3 text-3xl font-black text-on-surface text-center">
               {lapsedTrial ? t('planGate.locked.trialEndedTitle') : t('planGate.locked.subscriptionEndedTitle')}
             </Text>

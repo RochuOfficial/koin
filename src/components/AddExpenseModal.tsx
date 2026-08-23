@@ -6,6 +6,7 @@ import { PressableScale } from '@/components/animation/PressableScale';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useStore, EXPENSE_CATEGORIES, Expense, getCurrencySymbol } from '@/lib/store';
+import { Icon } from '@/components/icons/Icon';
 import { X } from 'lucide-react-native';
 
 
@@ -79,7 +80,9 @@ export function AddExpenseModal({ open, onClose }: Props) {
                         : 'bg-surface-container-low'
                     }`}
                   >
-                    <Text className="text-2xl mb-1">{c.icon}</Text>
+                    <View className="mb-1">
+                      {c.icon ? <Icon name={c.icon} size={28} /> : <Text className="text-2xl">{c.emoji}</Text>}
+                    </View>
                     <Text
                       className={`text-xs text-center ${category === c.id ? 'text-on-primary-container font-bold' : 'text-on-surface-variant'}`}
                       numberOfLines={1}
