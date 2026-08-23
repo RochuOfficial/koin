@@ -18,7 +18,13 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react-native';
 import { useStore } from '@/lib/store';
 import { useAuthLock } from '@/lib/authLock';
-import { requestEmailOtp, verifyEmailOtp, SessionSecretUnavailableError } from '@/lib/auth';
+import {
+  requestEmailOtp,
+  verifyEmailOtp,
+  signInWithPassword,
+  isReviewerDemoEmail,
+  SessionSecretUnavailableError,
+} from '@/lib/auth';
 import { clearClientSession } from '@/lib/appwrite';
 import { createLogger } from '@/lib/logger';
 import NitroCookies from 'react-native-nitro-cookies';
@@ -44,15 +50,22 @@ export function LoginGate() {
   // is false — that detour needs an exit back to onboarding).
   const canGoBack = !onboardingCompleted;
 
-  const [stage, setStage] = useState<'email' | 'code'>('email');
+  const [stage, setStage] = useState<'email' | 'code' | 'password'>('email');
   const [email, setEmail] = useState(profileEmail ?? '');
   const [code, setCode] = useState('');
+  const [password, setPassword] = useState('');
   const [otpUserId, setOtpUserId] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   const sendCode = async () => {
     if (!isEmailValid(email)) return setError(t('login.invalidEmail'));
+    // App Store/Play reviewer demo accounts sign in with a static password —
+    // no OTP is ever requested or emailed for these two whitelisted addresses.
+    if (isReviewerDemoEmail(email)) {
+      setStage('password');
+      return;
+    }
     setBusy(true);
     setError('');
     try {
@@ -61,6 +74,35 @@ export function LoginGate() {
       setStage('code');
     } catch {
       setError(t('login.sendCodeError'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitPassword = async () => {
+    if (!password) return;
+    setBusy(true);
+    setError('');
+    try {
+      // Same defensive session-clearing dance as verify() below — a session
+      // creation call 401s if one is already active on the client, and only
+      // clearing our own header isn't enough (see verify()'s comment).
+      clearClientSession();
+      await NitroCookies.clearAll();
+      const { userId, secret } = await signInWithPassword(email.trim(), password);
+      if (!onboardingCompleted) updateProfile({ onboardingCompleted: true });
+      onLoggedIn(userId, secret);
+    } catch (err) {
+      log.error('password sign-in failed:', err);
+      if (err instanceof SessionSecretUnavailableError) {
+        // The password was correct and the session was created — only reading
+        // the token back out of the cookie jar failed. The password isn't
+        // "spent" (unlike an OTP code), so it's kept for an immediate retry.
+        setError(t('login.sessionSecretError'));
+      } else {
+        setError(t('login.passwordIncorrect'));
+        setPassword('');
+      }
     } finally {
       setBusy(false);
     }
@@ -153,6 +195,32 @@ export function LoginGate() {
                     <ActivityIndicator color="#ffffff" />
                   ) : (
                     <Text className="text-base font-bold text-primary-foreground">{t('login.sendCode')}</Text>
+                  )}
+                </Button>
+              </>
+            ) : stage === 'password' ? (
+              <>
+                <Text className="text-2xl font-black text-on-surface mb-2 text-center">{t('login.enterPassword')}</Text>
+                <Text className="text-sm font-medium text-on-surface-variant mb-8 text-center">
+                  {t('login.enterPasswordSub', { email })}
+                </Text>
+                <Input
+                  value={password}
+                  onChangeText={(v) => {
+                    setPassword(v);
+                    if (error) setError('');
+                  }}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  placeholder={t('login.passwordPlaceholder')}
+                  autoFocus
+                />
+                {error ? <Text className="mt-2 text-xs text-destructive">{error}</Text> : null}
+                <Button onPress={submitPassword} disabled={busy || !password} className="mt-8 w-full h-14">
+                  {busy ? (
+                    <ActivityIndicator color="#ffffff" />
+                  ) : (
+                    <Text className="text-base font-bold text-primary-foreground">{t('login.signIn')}</Text>
                   )}
                 </Button>
               </>

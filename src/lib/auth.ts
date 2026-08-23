@@ -12,6 +12,12 @@
  *
  * NOTE: the emailed OTP is NOT the device PIN. UI copy must keep them distinct.
  *
+ * Env:
+ *   EXPO_PUBLIC_REVIEWER_DEMO_EMAILS  optional, comma-separated allowlist of
+ *     App Store/Play reviewer demo emails that sign in with a static password
+ *     instead of Email OTP (see isReviewerDemoEmail below and LoginGate.tsx).
+ *     Unset/empty means the feature is entirely inert.
+ *
  * IMPORTANT — session secret is never in the SDK's response body: Appwrite
  * deliberately omits it (sessions are meant to live in cookies — confirmed
  * upstream, https://github.com/appwrite/appwrite/issues/8673). It's only
@@ -133,6 +139,23 @@ async function resolveSessionSecret(sdkSecret: string): Promise<string> {
   );
 }
 
+/**
+ * Whether `email` is a whitelisted App Store/Play reviewer demo account —
+ * these sign in with a static password (see LoginGate.tsx) instead of Email
+ * OTP, since reviewers have no inbox access. Comparison is case-insensitive
+ * and whitespace-trimmed on both sides. Returns false (never matches) when
+ * EXPO_PUBLIC_REVIEWER_DEMO_EMAILS is unset or empty.
+ */
+export function isReviewerDemoEmail(email: string): boolean {
+  const allowlist = process.env.EXPO_PUBLIC_REVIEWER_DEMO_EMAILS ?? '';
+  const normalized = email.trim().toLowerCase();
+  return allowlist
+    .split(',')
+    .map((e: string) => e.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(normalized);
+}
+
 export interface EmailOtpRequest {
   /** Appwrite user id to use in verifyEmailOtp (created on first request). */
   userId: string;
@@ -170,6 +193,25 @@ export async function verifyEmailOtp(
   code: string
 ): Promise<VerifiedSession> {
   const session = await account.createSession({ userId, secret: code });
+  const secret = await resolveSessionSecret(session.secret);
+  applySession(secret);
+  return { userId: session.userId, secret };
+}
+
+/**
+ * Sign in with a static email+password — used only for whitelisted App
+ * Store/Play reviewer demo accounts (see isReviewerDemoEmail above), never
+ * for regular users. `createEmailPasswordSession` returns the same
+ * `Models.Session` shape as `createSession` above, including the same empty
+ * `secret` in the response body, so it goes through the identical
+ * cookie-recovery path. Appwrite's own errors (wrong password, unknown user)
+ * propagate as-is; the caller maps them to a generic "sign-in failed" message.
+ */
+export async function signInWithPassword(
+  email: string,
+  password: string
+): Promise<VerifiedSession> {
+  const session = await account.createEmailPasswordSession({ email, password });
   const secret = await resolveSessionSecret(session.secret);
   applySession(secret);
   return { userId: session.userId, secret };
