@@ -198,6 +198,25 @@ export async function verifyEmailOtp(
   return { userId: session.userId, secret };
 }
 
+/**
+ * Sign in with a static email+password — used only for whitelisted App
+ * Store/Play reviewer demo accounts (see isReviewerDemoEmail above), never
+ * for regular users. `createEmailPasswordSession` returns the same
+ * `Models.Session` shape as `createSession` above, including the same empty
+ * `secret` in the response body, so it goes through the identical
+ * cookie-recovery path. Appwrite's own errors (wrong password, unknown user)
+ * propagate as-is; the caller maps them to a generic "sign-in failed" message.
+ */
+export async function signInWithPassword(
+  email: string,
+  password: string
+): Promise<VerifiedSession> {
+  const session = await account.createEmailPasswordSession({ email, password });
+  const secret = await resolveSessionSecret(session.secret);
+  applySession(secret);
+  return { userId: session.userId, secret };
+}
+
 /** Fetch the current account; throws (401) if the applied session is invalid. */
 export async function getCurrentAccount() {
   return account.get();
