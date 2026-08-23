@@ -251,11 +251,16 @@ export default function Dashboard() {
 
         {incomeSkipped && (
           <FadeInStagger index={0} delayStep={60} replay={replay}>
-            <View className="mb-4 rounded-2xl bg-warning-container p-4" style={{ borderLeftWidth: 4, borderLeftColor: '#F59E0B' }}>
+            <TouchableOpacity
+              onPress={() => router.push({ pathname: '/profile', params: { editIncome: '1' } })}
+              activeOpacity={0.85}
+              className="mb-4 rounded-2xl bg-warning-container p-4"
+              style={{ borderLeftWidth: 4, borderLeftColor: '#F59E0B' }}
+            >
               <Text className="text-sm font-semibold text-warning">
                 {t('incomeSkippedTip')}
               </Text>
-            </View>
+            </TouchableOpacity>
           </FadeInStagger>
         )}
 

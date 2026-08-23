@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Switch } from 'react-native';
 import { ScreenTransition } from '@/components/ScreenTransition';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Bell, CreditCard, RotateCcw, Pencil, Check, Settings as SettingsIcon } from 'lucide-react-native';
 
 import { useStore, EXPENSE_CATEGORIES, formatCurrency } from '@/lib/store';
 import { useAuthLock } from '@/lib/authLock';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmountInput } from '@/components/ui/currency-amount-input';
 import { FadeInStagger } from '@/components/animation/FadeInStagger';
 import { requestNotificationPermission, getNotificationPermissionStatus } from '@/lib/notifications';
 import { TEXT_INPUT_CENTERING } from '@/lib/utils';
@@ -27,6 +28,7 @@ export default function Profile() {
   const { t } = useTranslation('profile');
   const { t: tContent } = useTranslation('content');
   const router = useRouter();
+  const { editIncome } = useLocalSearchParams<{ editIncome?: string }>();
   const profile = useStore((state) => state.profile);
   const goals = useStore((state) => state.goals);
   const achievements = useStore((state) => state.achievements);
@@ -37,6 +39,8 @@ export default function Profile() {
 
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(profile.name);
+  const [editingIncome, setEditingIncome] = useState(false);
+  const [incomeInput, setIncomeInput] = useState(profile.monthlyIncome != null ? String(profile.monthlyIncome) : '');
 
   const totalSaved = goals.reduce((s, g) => s + g.savedAmount, 0);
   const unlockedBadges = achievements.filter((a) => a.unlocked).length;
@@ -107,6 +111,26 @@ export default function Profile() {
     updateProfile({ name: nameInput.trim() });
     setEditingName(false);
   };
+
+  const openIncomeEdit = () => {
+    setIncomeInput(profile.monthlyIncome != null ? String(profile.monthlyIncome) : '');
+    setEditingIncome(true);
+  };
+
+  const saveIncome = () => {
+    const parsed = Number(incomeInput);
+    if (!(parsed > 0)) return;
+    updateProfile({ monthlyIncome: parsed, incomeSkipped: false });
+    setEditingIncome(false);
+  };
+
+  // Deep-linked from the dashboard's income-skipped nudge (?editIncome=1) —
+  // open the income card straight into edit mode instead of leaving the user
+  // to find the pencil themselves.
+  useEffect(() => {
+    if (editIncome === '1') openIncomeEdit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editIncome]);
 
   return (
     <ScreenTransition>
@@ -182,9 +206,33 @@ export default function Profile() {
             <CreditCard size={16} color="#64748B" />
             <Text className="text-sm font-bold text-on-surface">{t('monthlyIncome')}</Text>
           </View>
-          <Text className="text-3xl font-black text-on-surface">
-            {profile.monthlyIncome != null ? formatCurrency(profile.monthlyIncome, profile.currency) : t('notProvided')}
-          </Text>
+          {editingIncome ? (
+            <View className="flex-row items-center gap-2">
+              <View className="flex-1">
+                <CurrencyAmountInput
+                  currencyCode={profile.currency}
+                  value={incomeInput}
+                  onChangeText={setIncomeInput}
+                  placeholder={t('onboarding:contribution.amountPlaceholder')}
+                  autoFocus
+                />
+              </View>
+              <TouchableOpacity
+                onPress={saveIncome}
+                hitSlop={8}
+                className="h-10 w-10 items-center justify-center rounded-full bg-primary/20"
+              >
+                <Check size={18} color="#1D4ED8" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity onPress={openIncomeEdit} className="flex-row items-center gap-2">
+              <Text className="text-3xl font-black text-on-surface">
+                {profile.monthlyIncome != null ? formatCurrency(profile.monthlyIncome, profile.currency) : t('notProvided')}
+              </Text>
+              <Pencil size={14} color="#1D4ED8" />
+            </TouchableOpacity>
+          )}
         </View>
         </FadeInStagger>
 
