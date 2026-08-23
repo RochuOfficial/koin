@@ -39,6 +39,7 @@ import {
   getCurrency,
   getCurrencySymbol,
 } from './catalogs';
+import type { IconName } from '@/components/icons/registry';
 
 export type { Achievement };
 export { GOAL_TEMPLATES, COUNTRIES, CURRENCIES, EXPENSE_CATEGORIES, getCurrency, getCurrencySymbol };
@@ -46,7 +47,10 @@ export { GOAL_TEMPLATES, COUNTRIES, CURRENCIES, EXPENSE_CATEGORIES, getCurrency,
 export interface Goal {
   id: string;
   template: string;
-  icon: string;
+  /** Stamped once at creation via getGoalIconKey (#128) — see
+   * storeMigrations.ts's `v6 → v7` step for why this is persisted per-instance
+   * rather than looked up fresh, unlike Achievement/EXPENSE_CATEGORIES. */
+  icon: IconName;
   name: string;
   targetAmount: number;
   savedAmount: number;

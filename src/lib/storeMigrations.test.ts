@@ -120,15 +120,19 @@ describe('migratePiggyState — v0 (pre-#63) → current', () => {
   });
 
   it('preserves top-level fields outside profile/goals/missions', () => {
-    // v5 → v6 (see below) strips title/description from every persisted
-    // achievement — expected here too, since this migration runs the full
-    // v0 → current chain.
+    // v5 → v6 strips title/description from every persisted achievement, and
+    // v6 → v7 (see below) drops icon on top of that — expected here too,
+    // since this migration runs the full v0 → current chain.
     expect(migrated.achievements).toEqual([
-      { id: 'a1', icon: '🎯', unlocked: true, unlockedAt: '2026-06-01T10:00:00.000Z' },
-      { id: 'a4', icon: '🏆', unlocked: false },
+      { id: 'a1', unlocked: true, unlockedAt: '2026-06-01T10:00:00.000Z' },
+      { id: 'a4', unlocked: false },
     ]);
     expect(migrated.coachMessagesUsed).toBe(2);
     expect(migrated.lastDailyReset).toBe('2026-08-14');
+  });
+
+  it('remaps the goal icon emoji to an icon-registry key (v6 → v7, full chain)', () => {
+    expect(migrated.goals[0].icon).toBe('target');
   });
 });
 
@@ -229,7 +233,7 @@ describe('migratePiggyState — edge cases', () => {
   it('PIGGY_STORE_VERSION matches the highest migration step', () => {
     // Sanity guard: if a step is added above without bumping this, zustand
     // would never invoke migrate for it on a fresh install already at the old version.
-    expect(PIGGY_STORE_VERSION).toBe(6);
+    expect(PIGGY_STORE_VERSION).toBe(7);
   });
 });
 
@@ -297,11 +301,14 @@ describe('migratePiggyState — v5 → v6 (drop persisted achievement copy)', ()
     { id: 'a4', title: 'Mission Master', description: 'Complete 5 missions', icon: '🏆', unlocked: false },
   ];
 
-  it('strips title/description but keeps id/icon/unlocked/unlockedAt', () => {
+  it('strips title/description (and, cascading into v6 → v7, icon too) keeping id/unlocked/unlockedAt', () => {
+    // from=5 runs every step through current, not just this one — v6 → v7
+    // (below) drops icon on top of what this step strips, same as the v0
+    // payload case already accounted for above.
     const migrated = migratePiggyState({ achievements }, 5) as any;
     expect(migrated.achievements).toEqual([
-      { id: 'a1', icon: '🎯', unlocked: true, unlockedAt: '2026-06-01T10:00:00.000Z' },
-      { id: 'a4', icon: '🏆', unlocked: false },
+      { id: 'a1', unlocked: true, unlockedAt: '2026-06-01T10:00:00.000Z' },
+      { id: 'a4', unlocked: false },
     ]);
   });
 
@@ -314,5 +321,54 @@ describe('migratePiggyState — v5 → v6 (drop persisted achievement copy)', ()
   it('carries the strip through a full v0 payload', () => {
     const migrated = migratePiggyState(V0_PAYLOAD, 0) as any;
     expect(migrated.achievements.every((a: any) => !('title' in a) && !('description' in a))).toBe(true);
+  });
+});
+
+describe('migratePiggyState — v6 → v7 (icon system migration, #128)', () => {
+  const achievements = [
+    { id: 'a1', icon: '🎯', unlocked: true, unlockedAt: '2026-06-01T10:00:00.000Z' },
+    { id: 'a4', icon: '🏆', unlocked: false },
+  ];
+
+  it('drops icon from persisted achievements, keeping id/unlocked/unlockedAt', () => {
+    const migrated = migratePiggyState({ achievements }, 6) as any;
+    expect(migrated.achievements).toEqual([
+      { id: 'a1', unlocked: true, unlockedAt: '2026-06-01T10:00:00.000Z' },
+      { id: 'a4', unlocked: false },
+    ]);
+  });
+
+  it('remaps every known legacy goal icon emoji to its icon-registry key', () => {
+    const goals = [
+      { id: 'g1', icon: '🎯' },
+      { id: 'g2', icon: '🏝️' },
+      { id: 'g3', icon: '🚗' },
+      { id: 'g4', icon: '🏠' },
+      { id: 'g5', icon: '💰' },
+      { id: 'g6', icon: '✏️' },
+    ];
+    const migrated = migratePiggyState({ goals }, 6) as any;
+    expect(migrated.goals.map((g: any) => g.icon)).toEqual([
+      'target', 'airplane', 'car', 'house', 'shield-check', 'pencil',
+    ]);
+  });
+
+  it('falls back to the generic target icon for an unrecognized or missing goal icon', () => {
+    const goals = [{ id: 'g1', icon: '🤷' }, { id: 'g2' }];
+    const migrated = migratePiggyState({ goals }, 6) as any;
+    expect(migrated.goals.map((g: any) => g.icon)).toEqual(['target', 'target']);
+  });
+
+  it('does not throw on a payload with no achievements or goals array', () => {
+    expect(() => migratePiggyState({ profile: {} }, 6)).not.toThrow();
+    const migrated = migratePiggyState({ profile: {} }, 6) as any;
+    expect(migrated.achievements).toEqual([]);
+    expect(migrated.goals).toEqual([]);
+  });
+
+  it('carries both steps through a full v0 payload', () => {
+    const migrated = migratePiggyState(V0_PAYLOAD, 0) as any;
+    expect(migrated.achievements.every((a: any) => !('icon' in a))).toBe(true);
+    expect(migrated.goals[0].icon).toBe('target');
   });
 });
