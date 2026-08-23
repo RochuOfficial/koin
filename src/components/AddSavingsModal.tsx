@@ -6,6 +6,7 @@ import { PressableScale } from '@/components/animation/PressableScale';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useStore, getCurrencySymbol, type Goal } from '@/lib/store';
+import { Icon } from '@/components/icons/Icon';
 import { getTodayString } from '@/lib/deposits';
 import { X } from 'lucide-react-native';
 
@@ -91,7 +92,7 @@ export function AddSavingsModal({ open, onClose, goals, defaultGoalId, onSaved }
                           : 'bg-surface-container-low'
                       }`}
                     >
-                      <Text className="text-lg">{g.icon}</Text>
+                      <Icon name={g.icon} size={18} />
                       <Text
                         className={`text-sm ${goalId === g.id ? 'text-on-primary-container font-bold' : 'text-on-surface-variant'}`}
                         numberOfLines={1}

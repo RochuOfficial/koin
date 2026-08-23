@@ -20,6 +20,7 @@ import { useStore, type UserPlan } from '@/lib/store';
 import { getPlanConfig } from '@/lib/entitlements';
 import { evaluateDowngradeRetention, validateRetentionSelection } from '@/lib/retention';
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/icons/Icon';
 
 export default function DowngradeSelection() {
   const { t } = useTranslation('plans');
@@ -128,7 +129,7 @@ export default function DowngradeSelection() {
                   kept ? 'border-primary bg-primary-container' : 'border-outline bg-surface-container-low'
                 } ${disabled ? 'opacity-50' : ''}`}
               >
-                <Text className="text-2xl">{g.icon}</Text>
+                <Icon name={g.icon} size={28} />
                 <View className="flex-1">
                   <Text className="text-base font-bold text-on-surface" numberOfLines={1}>
                     {g.name}
