@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/icons/Icon';
 import { useStore } from '@/lib/store';
 import { PIN_LENGTH, setPin, validatePinStrength, isPinReused, type PinReuseSource } from '@/lib/pin';
 import {
@@ -158,7 +159,9 @@ export function PinCreationFlow({
     return (
       <View className="flex-1 items-center justify-center px-8">
         <Animated.View entering={FadeInDown.springify()} className="w-full items-center">
-          <Text className="text-5xl mb-4">🔐</Text>
+          <View className="mb-4">
+            <Icon name="padlock" size={56} />
+          </View>
           <Text className="text-2xl font-black text-on-surface mb-2 text-center">
             {isFace ? t('pinCreation.unlockFasterWithFaceId') : t('pinCreation.unlockFasterWithBiometrics')}
           </Text>
