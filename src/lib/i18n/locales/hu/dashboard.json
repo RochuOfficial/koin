@@ -43,6 +43,7 @@
   "savedToday": "Ma megtakarítva",
   "savedThisMonth": "E hónapban megtakarítva",
   "quickAddExpense": "Gyors kiadás hozzáadása",
+  "quickAddSavings": "Gyors megtakarítás hozzáadása",
   "saverLevel": "Megtakarítói szint {{level}}",
   "xpProgress": "{{xp}}/100 XP",
   "yourGoals": "A céljaid",
@@ -57,5 +58,12 @@
     "categoryLabel": "Kategória",
     "notePlaceholder": "Megjegyzés (opcionális)",
     "save": "Kiadás mentése"
+  },
+  "addSavings": {
+    "title": "Megtakarítás hozzáadása",
+    "amountLabel": "Összeg ({{symbol}})",
+    "amountPlaceholder": "0",
+    "goalLabel": "Cél",
+    "save": "Mentés"
   }
 }

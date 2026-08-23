@@ -43,6 +43,7 @@
   "savedToday": "Heute gespart",
   "savedThisMonth": "Diesen Monat gespart",
   "quickAddExpense": "Ausgabe schnell hinzufügen",
+  "quickAddSavings": "Ersparnis schnell hinzufügen",
   "saverLevel": "Sparer-Lv.{{level}}",
   "xpProgress": "{{xp}}/100 XP",
   "yourGoals": "Deine Ziele",
@@ -57,5 +58,12 @@
     "categoryLabel": "Kategorie",
     "notePlaceholder": "Notiz (optional)",
     "save": "Ausgabe speichern"
+  },
+  "addSavings": {
+    "title": "Ersparnis hinzufügen",
+    "amountLabel": "Betrag ({{symbol}})",
+    "amountPlaceholder": "0",
+    "goalLabel": "Ziel",
+    "save": "Speichern"
   }
 }
