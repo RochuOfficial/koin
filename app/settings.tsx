@@ -4,7 +4,7 @@
  * app-version footer were relocated here from profile.tsx (which keeps only
  * profile display + notification toggles).
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -25,9 +25,10 @@ import {
   FingerprintPattern as Fingerprint,
   ScanFace,
   Globe,
+  Coins,
 } from 'lucide-react-native';
 
-import { useStore } from '@/lib/store';
+import { useStore, CURRENCIES } from '@/lib/store';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/lib/i18n/detect';
 import { useAuthLock } from '@/lib/authLock';
 import { getPlanConfig, formatUSD } from '@/lib/entitlements';
@@ -39,9 +40,13 @@ import {
   type BiometricKind,
 } from '@/lib/biometrics';
 import { safeOpenURL, SUPPORT_EMAIL } from '@/lib/linking';
+import { hasConvertibleMonetaryData } from '@/lib/currencyConversion';
+import { fetchExchangeRate } from '@/lib/exchangeRates';
+import { timingPresets } from '@/lib/springPresets';
 import { ScreenTransition } from '@/components/ScreenTransition';
 import { FadeInStagger } from '@/components/animation/FadeInStagger';
 import { PickerModal } from '@/components/ui/picker-modal';
+import { CurrencyConvertModal } from '@/components/ui/currency-convert-modal';
 
 const CARD_SHADOW = {
   shadowColor: '#000',
@@ -106,7 +111,9 @@ export default function Settings() {
   const router = useRouter();
   const { t } = useTranslation(['settings', 'common']);
   const profile = useStore((state) => state.profile);
+  const goals = useStore((state) => state.goals);
   const updateProfile = useStore((state) => state.updateProfile);
+  const applyCurrencyConversion = useStore((state) => state.applyCurrencyConversion);
   const refreshNotifications = useStore((state) => state.refreshNotifications);
   const logout = useAuthLock((state) => state.logout);
 
@@ -117,6 +124,19 @@ export default function Settings() {
   const [bioKind, setBioKind] = useState<BiometricKind>('none');
   const [bioEnabled, setBioEnabled] = useState(false);
   const [languagePickerVisible, setLanguagePickerVisible] = useState(false);
+  const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
+  /** The newly-picked currency awaiting the convert-vs-relabel decision; null closes CurrencyConvertModal. */
+  const [pendingCurrency, setPendingCurrency] = useState<string | null>(null);
+  const [conversionRate, setConversionRate] = useState<number | null>(null);
+  const [rateLoading, setRateLoading] = useState(false);
+  const [rateUnavailable, setRateUnavailable] = useState(false);
+  const currencySelectionTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (currencySelectionTimeout.current) clearTimeout(currencySelectionTimeout.current);
+    };
+  }, []);
 
   // Re-read on every focus: covers both the initial mount and returning from
   // /enable-biometric after a successful PIN confirmation.
@@ -166,6 +186,57 @@ export default function Settings() {
       { text: t('cancel'), style: 'cancel' },
       { text: t('logOut'), style: 'destructive', onPress: () => logout() },
     ]);
+  };
+
+  const closeConvertModal = () => {
+    setPendingCurrency(null);
+    setConversionRate(null);
+    setRateLoading(false);
+    setRateUnavailable(false);
+  };
+
+  const handleSelectCurrency = (item: { code: string }) => {
+    const code = item.code;
+    if (currencySelectionTimeout.current) clearTimeout(currencySelectionTimeout.current);
+
+    // Deferred past the currency PickerModal's own close animation
+    // (BottomSheet's timingPresets.sheet duration — the same 280ms it
+    // animates out over). Acting in the same tick as PickerModal's own
+    // onClose() stacks two native <Modal>s mid-animation (this one closing,
+    // CurrencyConvertModal opening), which made the confirm sheet easy to
+    // miss and looked like selecting a currency did nothing (#152).
+    currencySelectionTimeout.current = setTimeout(() => {
+      currencySelectionTimeout.current = null;
+      if (code === profile.currency) return;
+
+      // Nothing to convert yet — relabel instantly, no modal.
+      if (!hasConvertibleMonetaryData(profile, goals)) {
+        updateProfile({ currency: code });
+        return;
+      }
+
+      setPendingCurrency(code);
+      setConversionRate(null);
+      setRateUnavailable(false);
+      setRateLoading(true);
+      fetchExchangeRate(profile.currency, code).then((rate) => {
+        setRateLoading(false);
+        setConversionRate(rate);
+        setRateUnavailable(rate == null);
+      });
+    }, timingPresets.sheet.duration);
+  };
+
+  const handleConvertCurrency = () => {
+    if (pendingCurrency == null || conversionRate == null) return;
+    applyCurrencyConversion(pendingCurrency, conversionRate);
+    closeConvertModal();
+  };
+
+  const handleKeepCurrencyNumbers = () => {
+    if (pendingCurrency == null) return;
+    updateProfile({ currency: pendingCurrency });
+    closeConvertModal();
   };
 
   return (
@@ -286,8 +357,21 @@ export default function Settings() {
             </View>
           </FadeInStagger>
 
-          {/* Account */}
+          {/* Currency */}
           <FadeInStagger index={3} delayStep={60}>
+            <SectionLabel>{t('currency.sectionLabel')}</SectionLabel>
+            <View className="mb-7 rounded-2xl bg-surface-container-low px-6" style={CARD_SHADOW}>
+              <Row
+                icon={<Coins size={18} color="#64748B" />}
+                label={t('currency.sectionLabel')}
+                value={profile.currency}
+                onPress={() => setCurrencyPickerVisible(true)}
+              />
+            </View>
+          </FadeInStagger>
+
+          {/* Account */}
+          <FadeInStagger index={4} delayStep={60}>
             <SectionLabel>{t('sections.account')}</SectionLabel>
             <View className="mb-7 rounded-2xl bg-surface-container-low px-6" style={CARD_SHADOW}>
               <Row icon={<LogOut size={18} color="#64748B" />} label={t('logOut')} onPress={handleLogout} />
@@ -302,7 +386,7 @@ export default function Settings() {
           </FadeInStagger>
 
           {/* Support & About */}
-          <FadeInStagger index={4} delayStep={60}>
+          <FadeInStagger index={5} delayStep={60}>
             <SectionLabel>{t('sections.supportAndAbout')}</SectionLabel>
             <View className="mb-7 rounded-2xl bg-surface-container-low px-6" style={CARD_SHADOW}>
               {PRIVACY_URL ? (
@@ -348,7 +432,7 @@ export default function Settings() {
             </View>
           </FadeInStagger>
 
-          <FadeInStagger index={5} delayStep={60}>
+          <FadeInStagger index={6} delayStep={60}>
             <View className="mb-[54px] items-center">
               <Text className="text-[11px] text-on-surface-variant/40 uppercase tracking-widest">
                 {t('versionLabel', { version: Constants.expoConfig?.version || '1.0.0' })}
@@ -385,6 +469,27 @@ export default function Settings() {
           items={SUPPORTED_LANGUAGES.map((code) => ({ code, name: t(`common:language.${code}`) }))}
           selectedCode={profile.language}
           title={t('language.sectionLabel')}
+        />
+
+        <PickerModal
+          isVisible={currencyPickerVisible}
+          onClose={() => setCurrencyPickerVisible(false)}
+          onSelect={handleSelectCurrency}
+          items={CURRENCIES.map((c) => ({ code: c.code, name: t(`content:currencies.${c.code}`), symbol: c.symbol }))}
+          selectedCode={profile.currency}
+          title={t('currency.sectionLabel')}
+        />
+
+        <CurrencyConvertModal
+          isVisible={pendingCurrency != null}
+          fromCurrency={profile.currency}
+          toCurrency={pendingCurrency ?? profile.currency}
+          rate={conversionRate}
+          loading={rateLoading}
+          unavailable={rateUnavailable}
+          onConvert={handleConvertCurrency}
+          onKeepNumbers={handleKeepCurrencyNumbers}
+          onClose={closeConvertModal}
         />
       </SafeAreaView>
     </ScreenTransition>
