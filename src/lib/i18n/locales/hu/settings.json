@@ -2,6 +2,17 @@
   "language": {
     "sectionLabel": "Nyelv"
   },
+  "currency": {
+    "sectionLabel": "Pénznem"
+  },
+  "currencyConvertModal": {
+    "title": "Pénznem frissítése",
+    "body": "{{from}} pénznemben mentett összegeid vannak. Váltasz erre: {{to}} — mi történjen velük?",
+    "rateLine": "1 {{from}} ≈ {{rate}} {{to}}",
+    "unavailableNote": "Most nem tudjuk lekérni a mai árfolyamot ehhez: {{to}}, ezért az összegek megtartják jelenlegi értéküket.",
+    "convert": "Átváltás",
+    "keepNumbers": "Nincs átváltás"
+  },
   "title": "Beállítások",
   "sections": {
     "subscription": "Előfizetés",
