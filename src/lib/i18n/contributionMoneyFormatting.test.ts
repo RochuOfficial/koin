@@ -55,13 +55,13 @@ describe('pl + PLN money interpolation at the 3 fixed ContributionStep sites', (
     expect(result).toBe(`Przy 1${NBSP}000 zł/mies. osiągniesz cel do`);
   });
 
-  it('needToSetAside: symbol after the amount, comma decimal separator', () => {
+  it('needToSetAside: symbol after the amount, rounded to a whole number', () => {
     const amount = formatMoney(1234.56, PLN, 'pl');
     const result = i18next.t('onboarding:contribution.needToSetAside', { amount, date: 'TEST_DATE', lng: 'pl' });
-    expect(result).toBe(`Musisz odkładać <bold>1${NBSP}234,56 zł/mies.</bold> aby zdążyć do TEST_DATE.`);
+    expect(result).toBe(`Musisz odkładać <bold>1${NBSP}235 zł/mies.</bold> aby zdążyć do TEST_DATE.`);
   });
 
-  it('hu + HUF: symbol after the amount, NBSP-grouped, comma decimal separator', () => {
+  it('hu + HUF: symbol after the amount, NBSP-grouped, rounded to a whole number', () => {
     const HUF = { symbol: 'Ft', symbolAfter: true } as const;
     expect(
       i18next.t('onboarding:contribution.suggestionChip', { pct: 10, amount: formatMoney(1000, HUF, 'hu'), lng: 'hu' })
@@ -75,10 +75,10 @@ describe('pl + PLN money interpolation at the 3 fixed ContributionStep sites', (
         date: 'TEST_DATE',
         lng: 'hu',
       })
-    ).toBe(`<bold>1${NBSP}234,56 Ft/hó</bold> összeget kell félretenned, hogy elérd ezt eddig: TEST_DATE.`);
+    ).toBe(`<bold>1${NBSP}235 Ft/hó</bold> összeget kell félretenned, hogy elérd ezt eddig: TEST_DATE.`);
   });
 
-  it('de + EUR: symbol before the amount, period-grouped, comma decimal separator', () => {
+  it('de + EUR: symbol before the amount, period-grouped, rounded to a whole number', () => {
     const EUR = { symbol: '€', symbolAfter: false } as const;
     expect(
       i18next.t('onboarding:contribution.suggestionChip', { pct: 10, amount: formatMoney(1000, EUR, 'de'), lng: 'de' })
@@ -92,7 +92,7 @@ describe('pl + PLN money interpolation at the 3 fixed ContributionStep sites', (
         date: 'TEST_DATE',
         lng: 'de',
       })
-    ).toBe('Du musst <bold>€1.234,56/Monat</bold> zurücklegen, um dies bis TEST_DATE zu erreichen.');
+    ).toBe('Du musst <bold>€1.235/Monat</bold> zurücklegen, um dies bis TEST_DATE zu erreichen.');
   });
 
   it('regression guard: the same 3 sites for en + USD still read naturally', () => {
@@ -105,6 +105,6 @@ describe('pl + PLN money interpolation at the 3 fixed ContributionStep sites', (
     ).toBe("At $1,000/month you'll reach your goal by");
     expect(
       i18next.t('onboarding:contribution.needToSetAside', { amount: formatMoney(1234.56, USD, 'en'), date: 'TEST_DATE', lng: 'en' })
-    ).toBe("You'll need to set aside <bold>$1,234.56/month</bold> to hit this by TEST_DATE.");
+    ).toBe("You'll need to set aside <bold>$1,235/month</bold> to hit this by TEST_DATE.");
   });
 });

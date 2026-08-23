@@ -74,13 +74,17 @@ export function formatNumber(
   return negative && rounded !== 0 ? `-${result}` : result;
 }
 
-/** Formats a money amount given a currency's symbol and its position (before/after the number). */
+/**
+ * Formats a money amount given a currency's symbol and its position
+ * (before/after the number). Always whole numbers — no cents/decimals are
+ * ever shown, regardless of what precision the underlying value carries.
+ */
 export function formatMoney(
   amount: number,
   currency: { symbol: string; symbolAfter: boolean },
   language: SupportedLanguage
 ): string {
-  const formatted = formatNumber(amount, language);
+  const formatted = formatNumber(amount, language, { maximumFractionDigits: 0 });
   return currency.symbolAfter ? `${formatted} ${currency.symbol}` : `${currency.symbol}${formatted}`;
 }
 
