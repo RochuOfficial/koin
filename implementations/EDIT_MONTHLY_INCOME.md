@@ -131,14 +131,14 @@ site anywhere is inside onboarding.
 
 ## Phase 3 — Verification
 
-- [ ] `npm run typecheck` — clean.
-- [ ] `npm run test` — full suite passing, same count as `main`.
-- [ ] Grep confirms no other screen needs updating: `goals.tsx`'s
-      "exceeds income" warning and `index.tsx`'s `incomeSkipped` nudge both
-      read `profile.monthlyIncome`/`profile.incomeSkipped` live from the
-      store, so they pick up an edited value automatically with no code
-      change of their own — confirmed by reading both call sites, not
-      assumed.
+- [x] `npm run typecheck` — clean.
+- [x] `npm run test` — 356/356 passing, same count as `main`.
+- [x] Grep confirms no other screen needs updating: `goals.tsx:83` and
+      `index.tsx:70` both read `monthlyIncome`/`incomeSkipped` via
+      `useStore((s) => s.profile...)` selectors, so `goals.tsx`'s "exceeds
+      income" warning and the dashboard nudge pick up an edited value
+      automatically with no code change of their own — confirmed by reading
+      both call sites, not assumed.
 - [ ] Manual pass on device/simulator — **left to the user to verify
       directly** (per prior guidance: visual/UI changes are self-verified,
       not pushed through simulator automation): skip income in onboarding →
@@ -150,7 +150,7 @@ site anywhere is inside onboarding.
 checkbox updates.
 
 **Phase complete when:**
-- [ ] Typecheck and full test suite are clean.
+- [x] Typecheck and full test suite are clean.
 - [ ] The user has confirmed the manual pass above works end-to-end.
 - [ ] Issue [#150](https://github.com/Koin-App-Official/pignify/issues/150) is
   ready to close per the `github-issues-prs` skill's Phase 3.
