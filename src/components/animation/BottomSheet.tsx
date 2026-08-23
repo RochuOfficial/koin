@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
-import type { LayoutChangeEvent } from 'react-native';
+import { Keyboard, Modal, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import type { KeyboardEvent, LayoutChangeEvent } from 'react-native';
 import type { ReactNode } from 'react';
 import Animated, {
   Extrapolation,
@@ -45,10 +45,42 @@ export function BottomSheet({ visible, onClose, children, maxHeight }: BottomShe
   const [sheetHeight, setSheetHeight] = useState(0);
   const translateY = useSharedValue(windowHeight);
   const startY = useSharedValue(0);
+  const keyboardOffset = useSharedValue(0);
 
   useEffect(() => {
     if (visible) setMounted(true);
   }, [visible]);
+
+  useEffect(() => {
+    // This content renders inside a native Modal, which presents in its own
+    // window/layer on iOS — KeyboardAvoidingView's measureInWindow-based
+    // offset calculation doesn't resolve correctly across that boundary, so
+    // it silently no-ops here. Track the keyboard height directly instead
+    // and drive the sheet's own transform with it. iOS fires `will` events
+    // ahead of the animation (letting our shared-value timing sync with it);
+    // Android only reliably fires the `did` variants.
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const onShow = (e: KeyboardEvent) => {
+      // `endCoordinates.height` measures from the very bottom of the screen,
+      // which overlaps the safe-area padding already reserved on the sheet —
+      // subtract it so the sheet doesn't get shifted up further than needed.
+      const height = Math.max(0, e.endCoordinates.height - insets.bottom);
+      keyboardOffset.value = withTiming(height, { duration: e.duration || 250 });
+    };
+    const onHide = (e: KeyboardEvent) => {
+      keyboardOffset.value = withTiming(0, { duration: e.duration || 250 });
+    };
+
+    const showSub = Keyboard.addListener(showEvent, onShow);
+    const hideSub = Keyboard.addListener(hideEvent, onHide);
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!mounted) return;
@@ -100,7 +132,7 @@ export function BottomSheet({ visible, onClose, children, maxHeight }: BottomShe
   }));
 
   const sheetStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
+    transform: [{ translateY: translateY.value - keyboardOffset.value }],
   }));
 
   if (!mounted) return null;
