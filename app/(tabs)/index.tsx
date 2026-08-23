@@ -18,6 +18,7 @@ import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } f
 import { ProgressRing } from '@/components/ProgressRing';
 import { useStore, formatCurrency, CURRENCIES, type Goal, type UserPlan } from '@/lib/store';
 import { AddExpenseModal } from '@/components/AddExpenseModal';
+import { AddSavingsModal } from '@/components/AddSavingsModal';
 import { Button } from '@/components/ui/button';
 import { ScreenTransition } from '@/components/ScreenTransition';
 import { useFocusReplay } from '@/hooks/useFocusReplay';
@@ -74,6 +75,7 @@ export default function Dashboard() {
   const xp = useStore((s) => s.profile.xp);
   const goals = useStore((state) => state.goals);
   const [showExpense, setShowExpense] = useState(false);
+  const [showSavings, setShowSavings] = useState(false);
   const [activeGoalIndex, setActiveGoalIndex] = useState(0);
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const replay = useFocusReplay();
@@ -411,14 +413,24 @@ export default function Dashboard() {
           </View>
         </FadeInStagger>
 
-        {/* Quick Add Expense */}
+        {/* Quick Add Expense / Savings */}
         <FadeInStagger index={6} delayStep={60} replay={replay}>
-          <Button
-            onPress={() => setShowExpense(true)}
-            variant="tonal"
-            className="mb-5 w-full flex-row items-center justify-center h-14"
-            label={t('quickAddExpense')}
-          />
+          <View className="mb-5 flex-row gap-3">
+            <Button
+              onPress={() => setShowExpense(true)}
+              variant="tonal"
+              className={`flex-row items-center justify-center h-14 ${goals.length > 0 ? 'flex-1' : 'w-full'}`}
+              label={t('quickAddExpense')}
+            />
+            {goals.length > 0 && (
+              <Button
+                onPress={() => setShowSavings(true)}
+                variant="default"
+                className="flex-1 flex-row items-center justify-center h-14"
+                label={t('quickAddSavings')}
+              />
+            )}
+          </View>
         </FadeInStagger>
 
         {/* Level & Progress */}
@@ -479,6 +491,14 @@ export default function Dashboard() {
       </ScrollView>
 
       <AddExpenseModal open={showExpense} onClose={() => setShowExpense(false)} />
+
+      <AddSavingsModal
+        open={showSavings}
+        onClose={() => setShowSavings(false)}
+        goals={goals}
+        defaultGoalId={activeGoal?.id}
+        onSaved={celebrate}
+      />
 
       {confettiActive && (
         <SkiaConfetti progress={confettiProgress} width={screenWidth} height={screenHeight} />

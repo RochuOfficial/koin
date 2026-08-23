@@ -43,6 +43,7 @@
   "savedToday": "Saved Today",
   "savedThisMonth": "Saved This Month",
   "quickAddExpense": "Quick Add Expense",
+  "quickAddSavings": "Quick Add Savings",
   "saverLevel": "Saver Lv.{{level}}",
   "xpProgress": "{{xp}}/100 XP",
   "yourGoals": "Your Goals",
@@ -57,5 +58,12 @@
     "categoryLabel": "Category",
     "notePlaceholder": "Note (optional)",
     "save": "Save Expense"
+  },
+  "addSavings": {
+    "title": "Add Savings",
+    "amountLabel": "Amount ({{symbol}})",
+    "amountPlaceholder": "0",
+    "goalLabel": "Goal",
+    "save": "Save"
   }
 }
