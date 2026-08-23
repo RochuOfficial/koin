@@ -12,6 +12,12 @@
  *
  * NOTE: the emailed OTP is NOT the device PIN. UI copy must keep them distinct.
  *
+ * Env:
+ *   EXPO_PUBLIC_REVIEWER_DEMO_EMAILS  optional, comma-separated allowlist of
+ *     App Store/Play reviewer demo emails that sign in with a static password
+ *     instead of Email OTP (see isReviewerDemoEmail below and LoginGate.tsx).
+ *     Unset/empty means the feature is entirely inert.
+ *
  * IMPORTANT — session secret is never in the SDK's response body: Appwrite
  * deliberately omits it (sessions are meant to live in cookies — confirmed
  * upstream, https://github.com/appwrite/appwrite/issues/8673). It's only
@@ -131,6 +137,23 @@ async function resolveSessionSecret(sdkSecret: string): Promise<string> {
   throw new SessionSecretUnavailableError(
     'Signed in, but the session token could not be read from the cookie store.'
   );
+}
+
+/**
+ * Whether `email` is a whitelisted App Store/Play reviewer demo account —
+ * these sign in with a static password (see LoginGate.tsx) instead of Email
+ * OTP, since reviewers have no inbox access. Comparison is case-insensitive
+ * and whitespace-trimmed on both sides. Returns false (never matches) when
+ * EXPO_PUBLIC_REVIEWER_DEMO_EMAILS is unset or empty.
+ */
+export function isReviewerDemoEmail(email: string): boolean {
+  const allowlist = process.env.EXPO_PUBLIC_REVIEWER_DEMO_EMAILS ?? '';
+  const normalized = email.trim().toLowerCase();
+  return allowlist
+    .split(',')
+    .map((e: string) => e.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(normalized);
 }
 
 export interface EmailOtpRequest {
