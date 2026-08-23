@@ -25,6 +25,7 @@ import {
   type MissionContext,
 } from './missions';
 import { PIGGY_STORE_VERSION, migratePiggyState } from './storeMigrations';
+import { convertProfileAmounts, convertGoalAmounts } from './currencyConversion';
 import { PLAN_RANK } from './entitlements';
 import { detectDeviceLanguage, type SupportedLanguage } from './i18n/detect';
 import { formatMoney } from './i18n/format';
@@ -322,6 +323,8 @@ export interface PiggyState {
 
   setProfile: (p: UserProfile) => void;
   updateProfile: (updates: Partial<UserProfile>) => void;
+  /** Converts every stored monetary amount by `rate` and sets `currency` to `targetCurrency`. */
+  applyCurrencyConversion: (targetCurrency: string, rate: number) => void;
 
   /**
    * Apply a plan change. Upgrades (higher rank) take effect immediately (C1);
@@ -504,6 +507,10 @@ export const useStore = create<PiggyState>()(
 
       setProfile: (profile) => set({ profile }),
       updateProfile: (updates) => set((state) => ({ profile: { ...state.profile, ...updates } })),
+      applyCurrencyConversion: (targetCurrency, rate) => set((state) => ({
+        profile: { ...convertProfileAmounts(state.profile, rate), currency: targetCurrency },
+        goals: convertGoalAmounts(state.goals, rate),
+      })),
 
       changePlan: (target) => set((state) => {
         const current = state.profile.plan;
