@@ -33,6 +33,7 @@ import { UpgradeModal } from '@/components/UpgradeModal';
 import { DeepAnalysisConfirmModal } from '@/components/DeepAnalysisConfirmModal';
 import { SkiaConfetti } from '@/components/animation/SkiaConfetti';
 import { useCelebrate } from '@/components/animation/useCelebrate';
+import { Icon } from '@/components/icons/Icon';
 import { triggerDeepAnalysis } from '@/lib/deepAnalysis';
 import { safeOpenURL, SUPPORT_EMAIL } from '@/lib/linking';
 import { Mascot } from '@/components/Mascot';
@@ -219,9 +220,12 @@ export default function Dashboard() {
               activeOpacity={0.85}
               className="mb-4 rounded-2xl bg-primary-container p-4"
             >
-              <Text className="text-sm font-bold text-on-primary-container">
-                {t('welcomeBanner.title')}{name ? `, ${name}` : ''}! 🎉
-              </Text>
+              <View className="flex-row items-center gap-1.5">
+                <Text className="text-sm font-bold text-on-primary-container">
+                  {t('welcomeBanner.title')}{name ? `, ${name}` : ''}!
+                </Text>
+                <Icon name="confetti" size={20} />
+              </View>
               <Text className="mt-1 text-xs leading-5 text-on-primary-container">
                 {t('welcomeBanner.body')}
                 {primaryGoal ? ` ${t('welcomeBanner.bodyGoalSuffix', { goalName: primaryGoal.name })}` : ''}
@@ -468,7 +472,7 @@ export default function Dashboard() {
                     className="flex-row items-center gap-4 rounded-2xl bg-surface p-4 min-h-[72px]"
                     style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 4 }}
                   >
-                    <Text className="text-2xl">{g.icon}</Text>
+                    <Icon name={g.icon} size={28} />
                     <View className="flex-1">
                       <Text className="text-sm font-bold text-on-surface mb-2" numberOfLines={1}>
                         {g.name}
@@ -540,7 +544,9 @@ const GoalCarouselItem = memo(function GoalCarouselItem({
   return (
     <View style={{ width: screenWidth }} className="items-center px-5">
       <ProgressRing progress={pct} size={200} strokeWidth={16}>
-        <Text className="text-3xl mb-1">{goal.icon}</Text>
+        <View className="mb-1">
+          <Icon name={goal.icon} size={36} />
+        </View>
         <Text className="text-4xl font-black text-on-surface">{pct}%</Text>
         <Text className="text-sm font-medium text-on-surface-variant mt-1">{goal.name}</Text>
       </ProgressRing>
