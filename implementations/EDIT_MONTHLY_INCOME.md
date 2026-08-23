@@ -98,32 +98,34 @@ site anywhere is inside onboarding.
 
 ## Phase 2 — Dashboard: wire the income-skipped nudge to the new entry point
 
-- [ ] Change the `incomeSkipped` nudge block
+- [x] Change the `incomeSkipped` nudge block
       (`app/(tabs)/index.tsx:245-253`) from a plain `<View>` to a
       `TouchableOpacity` (`activeOpacity={0.85}`, matching the `past_due`
       banner right above it) that calls
       `router.push({ pathname: '/profile', params: { editIncome: '1' } })`.
       Copy (`t('incomeSkippedTip')`) is unchanged — it already reads as a
       call to action ("Add your monthly income to unlock...").
-- [ ] In `profile.tsx`, read the `editIncome` param via
+- [x] In `profile.tsx`, read the `editIncome` param via
       `useLocalSearchParams()` (new import from `expo-router`) and, in a
       `useEffect` that runs once on mount, call the same open-edit-mode logic
-      as the pencil tap (set `editingIncome(true)`, seed `incomeInput`) when
-      `editIncome === '1'`. No scroll-into-view needed — the income card is
-      the second card on the screen (right after the user-stats card) and is
-      on-screen without scrolling on all supported device sizes.
+      as the pencil tap (`openIncomeEdit()`) when `editIncome === '1'`. No
+      scroll-into-view needed — the income card is the second card on the
+      screen (right after the user-stats card) and is on-screen without
+      scrolling on all supported device sizes.
 
 **Modified files:**
 - [app/(tabs)/index.tsx](../app/(tabs)/index.tsx)
 - [app/(tabs)/profile.tsx](../app/(tabs)/profile.tsx)
 
 **Phase complete when:**
-- [ ] Tapping the dashboard nudge navigates to the Profile tab with the
-  income card already in edit mode, cursor focused, ready to type.
-- [ ] Navigating to Profile normally (tapping the tab bar, no `editIncome`
-  param) behaves exactly as before — card starts in its normal display state.
-- [ ] `npm run typecheck` is clean.
-- [ ] `npm run test` passes with no regressions.
+- [x] Tapping the dashboard nudge navigates to the Profile tab with the
+  income card already in edit mode, cursor focused, ready to type — confirmed
+  by reading the `router.push` target and the mount `useEffect`.
+- [x] Navigating to Profile normally (tapping the tab bar, no `editIncome`
+  param) behaves exactly as before — card starts in its normal display state,
+  since the effect only fires `openIncomeEdit()` when `editIncome === '1'`.
+- [x] `npm run typecheck` is clean.
+- [x] `npm run test` — 356/356 passing, unchanged from before this phase.
 
 ---
 

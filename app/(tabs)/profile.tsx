@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Switch } from 'react-native';
 import { ScreenTransition } from '@/components/ScreenTransition';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Bell, CreditCard, RotateCcw, Pencil, Check, Settings as SettingsIcon } from 'lucide-react-native';
 
@@ -28,6 +28,7 @@ export default function Profile() {
   const { t } = useTranslation('profile');
   const { t: tContent } = useTranslation('content');
   const router = useRouter();
+  const { editIncome } = useLocalSearchParams<{ editIncome?: string }>();
   const profile = useStore((state) => state.profile);
   const goals = useStore((state) => state.goals);
   const achievements = useStore((state) => state.achievements);
@@ -122,6 +123,14 @@ export default function Profile() {
     updateProfile({ monthlyIncome: parsed, incomeSkipped: false });
     setEditingIncome(false);
   };
+
+  // Deep-linked from the dashboard's income-skipped nudge (?editIncome=1) —
+  // open the income card straight into edit mode instead of leaving the user
+  // to find the pencil themselves.
+  useEffect(() => {
+    if (editIncome === '1') openIncomeEdit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editIncome]);
 
   return (
     <ScreenTransition>
