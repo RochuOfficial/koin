@@ -151,9 +151,18 @@ checkbox updates.
 
 **Phase complete when:**
 - [x] Typecheck and full test suite are clean.
-- [ ] The user has confirmed the manual pass above works end-to-end.
-- [ ] Issue [#150](https://github.com/Koin-App-Official/pignify/issues/150) is
+- [x] The user has confirmed the manual pass above works end-to-end:
+  "everything works perfectly."
+- [x] Issue [#150](https://github.com/Koin-App-Official/pignify/issues/150) is
   ready to close per the `github-issues-prs` skill's Phase 3.
+
+## Verified
+
+**2026-08-23** — All 3 phases complete. `npm run typecheck` and `npm run test`
+(356/356) clean throughout. Live manual pass confirmed working by the user
+directly: skip income in onboarding → dashboard nudge appears → tap it →
+lands on Profile with the income field already open → save a value → nudge
+disappears → value persists after app restart.
 
 ---
 
