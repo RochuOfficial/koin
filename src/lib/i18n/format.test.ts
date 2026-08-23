@@ -88,6 +88,11 @@ describe('formatMoney', () => {
   it('formats EUR with the symbol before the amount (de), period-grouped', () => {
     expect(formatMoney(1000, { symbol: '€', symbolAfter: false }, 'de')).toBe('€1.000');
   });
+
+  it('always drops to a whole number, regardless of the input precision', () => {
+    expect(formatMoney(1234.56, { symbol: '$', symbolAfter: false }, 'en')).toBe('$1,235');
+    expect(formatMoney(9.4, { symbol: '$', symbolAfter: false }, 'en')).toBe('$9');
+  });
 });
 
 describe('formatMonthYear', () => {

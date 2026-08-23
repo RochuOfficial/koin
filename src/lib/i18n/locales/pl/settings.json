@@ -2,6 +2,17 @@
   "language": {
     "sectionLabel": "Język"
   },
+  "currency": {
+    "sectionLabel": "Waluta"
+  },
+  "currencyConvertModal": {
+    "title": "Zaktualizuj swoją walutę",
+    "body": "Masz kwoty zapisane w {{from}}. Zmieniasz na {{to}} — co zrobić z tymi kwotami?",
+    "rateLine": "1 {{from}} ≈ {{rate}} {{to}}",
+    "unavailableNote": "Nie możemy teraz pobrać dzisiejszego kursu dla {{to}}, więc kwoty zachowają swoje obecne wartości.",
+    "convert": "Przelicz",
+    "keepNumbers": "Nie przeliczaj"
+  },
   "title": "Ustawienia",
   "sections": {
     "subscription": "Subskrypcja",

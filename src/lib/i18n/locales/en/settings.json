@@ -2,6 +2,17 @@
   "language": {
     "sectionLabel": "Language"
   },
+  "currency": {
+    "sectionLabel": "Currency"
+  },
+  "currencyConvertModal": {
+    "title": "Update your currency",
+    "body": "You have amounts saved in {{from}}. Switching to {{to}} — what should we do with them?",
+    "rateLine": "1 {{from}} ≈ {{rate}} {{to}}",
+    "unavailableNote": "We can't fetch today's rate for {{to}} right now, so amounts will keep their current numbers.",
+    "convert": "Convert",
+    "keepNumbers": "Don't convert"
+  },
   "title": "Settings",
   "sections": {
     "subscription": "Subscription",
