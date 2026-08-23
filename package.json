@@ -77,6 +77,7 @@
     "@types/react": "~19.1.0",
     "babel-plugin-module-resolver": "^5.0.3",
     "babel-plugin-transform-remove-console": "^6.9.4",
+    "babel-preset-expo": "~54.0.12",
     "dotenv": "^17.4.2",
     "eas-cli": "^21.5.0",
     "node-appwrite": "^26.2.0",
@@ -86,6 +87,14 @@
   "private": true,
   "overrides": {
     "postcss": ">=8.5.10",
-    "uuid": ">=11.1.1"
+    "uuid": ">=11.1.1",
+    "eas-cli": {
+      "ajv": "^8.18.0",
+      "joi": "^17.13.4",
+      "nanoid": "^3.3.18",
+      "tar": "^7.5.21",
+      "ts-deepmerge": "^8.0.0",
+      "yaml": "^2.8.3"
+    }
   }
 }
