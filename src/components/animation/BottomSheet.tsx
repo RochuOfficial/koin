@@ -11,7 +11,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { springPresets, timingPresets } from '@/lib/springPresets';
@@ -139,27 +139,33 @@ export function BottomSheet({ visible, onClose, children, maxHeight }: BottomShe
 
   return (
     <Modal transparent visible animationType="none" onRequestClose={onClose} statusBarTranslucent>
-      <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-        <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        </Animated.View>
+      {/* RN's Modal renders into its own native window on Android, outside the
+          app's top-level GestureHandlerRootView — without a nested root here,
+          GestureDetectors inside the sheet (drag handle, buttons) never
+          register and silently swallow all touches on Android. */}
+      <GestureHandlerRootView style={StyleSheet.absoluteFill}>
+        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+          <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}>
+            <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+          </Animated.View>
 
-        <Animated.View
-          onLayout={handleContentLayout}
-          style={[
-            styles.sheet,
-            { maxHeight: cap, paddingBottom: Math.max(insets.bottom, 20) },
-            sheetStyle,
-          ]}
-        >
-          <GestureDetector gesture={handlePan}>
-            <View style={styles.handleZone}>
-              <View style={styles.handle} />
-            </View>
-          </GestureDetector>
-          {children}
-        </Animated.View>
-      </View>
+          <Animated.View
+            onLayout={handleContentLayout}
+            style={[
+              styles.sheet,
+              { maxHeight: cap, paddingBottom: Math.max(insets.bottom, 20) },
+              sheetStyle,
+            ]}
+          >
+            <GestureDetector gesture={handlePan}>
+              <View style={styles.handleZone}>
+                <View style={styles.handle} />
+              </View>
+            </GestureDetector>
+            {children}
+          </Animated.View>
+        </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
