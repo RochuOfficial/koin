@@ -66,7 +66,6 @@
     "upgradeTo": "Frissítés erre: {{plan}}",
     "switchTo": "Váltás erre: {{plan}}"
   },
-  "disclaimer": "A frissítések azonnal életbe lépnek. A visszaminősítések a jelenlegi számlázási időszak végén lépnek életbe, az adataid pedig mindig biztonságban vannak.",
   "gates": {
     "aiCoach": {
       "title": "AI edző feloldása",
@@ -165,5 +164,13 @@
       "perk3": "Szólunk, mielőtt véget ér — semmi meglepetés",
       "cta": "Kezdjük"
     }
+  },
+  "terms": {
+    "billing": "Az előfizetések minden hónapban automatikusan megújulnak a kiválasztott pénznemben, amíg le nem mondod őket.",
+    "cancel": "Bármikor lemondhatod a Beállításokban — a hozzáférésed a jelenlegi számlázási időszak végéig megmarad.",
+    "planMechanics": "A frissítések azonnal életbe lépnek. A visszaminősítések a jelenlegi számlázási időszak végén lépnek életbe, az adataid pedig mindig biztonságban vannak.",
+    "termsOfUse": "Felhasználási feltételek",
+    "privacyPolicy": "Adatvédelmi irányelvek",
+    "linkError": "Nem sikerült megnyitni ezt a hivatkozást."
   }
 }

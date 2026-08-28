@@ -40,7 +40,7 @@ import {
   disableBiometric,
   type BiometricKind,
 } from '@/lib/biometrics';
-import { safeOpenURL, SUPPORT_EMAIL } from '@/lib/linking';
+import { safeOpenURL, SUPPORT_EMAIL, PRIVACY_URL, TERMS_URL } from '@/lib/linking';
 import { AiConsentModal } from '@/components/AiConsentModal';
 import { hasConvertibleMonetaryData } from '@/lib/currencyConversion';
 import { fetchExchangeRate } from '@/lib/exchangeRates';
@@ -57,9 +57,6 @@ const CARD_SHADOW = {
   shadowRadius: 9,
   elevation: 4,
 };
-
-const PRIVACY_URL = 'https://piggnify.com/privacy-policy';
-const TERMS_URL = 'https://piggnify.com/terms-of-service';
 
 const AUTO_LOCK_OPTIONS: { labelKey: 'immediately' | 'oneMin' | 'fiveMin' | 'never'; value: 0 | 1 | 5 | null }[] = [
   { labelKey: 'immediately', value: 0 },

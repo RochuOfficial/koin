@@ -66,7 +66,6 @@
     "upgradeTo": "Auf {{plan}} upgraden",
     "switchTo": "Zu {{plan}} wechseln"
   },
-  "disclaimer": "Upgrades gelten sofort. Downgrades treten am Ende deines aktuellen Abrechnungszeitraums in Kraft, und deine Daten sind immer sicher.",
   "gates": {
     "aiCoach": {
       "title": "Den KI-Coach freischalten",
@@ -165,5 +164,13 @@
       "perk3": "Wir erinnern dich, bevor es endet — keine Überraschungen",
       "cta": "Los geht's"
     }
+  },
+  "terms": {
+    "billing": "Abos verlängern sich automatisch jeden Monat in deiner gewählten Währung, bis du kündigst.",
+    "cancel": "Du kannst jederzeit in den Einstellungen kündigen — dein Zugang bleibt bis zum Ende des aktuellen Abrechnungszeitraums bestehen.",
+    "planMechanics": "Upgrades gelten sofort. Downgrades treten am Ende deines aktuellen Abrechnungszeitraums in Kraft, und deine Daten sind immer sicher.",
+    "termsOfUse": "Nutzungsbedingungen",
+    "privacyPolicy": "Datenschutzerklärung",
+    "linkError": "Dieser Link konnte nicht geöffnet werden."
   }
 }

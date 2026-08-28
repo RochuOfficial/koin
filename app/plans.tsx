@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Check, Star } from 'lucide-react-native';
 import { ScreenTransition } from '@/components/ScreenTransition';
 import { Button } from '@/components/ui/button';
+import { BillingTerms } from '@/components/BillingTerms';
 import { useStore, UserPlan } from '@/lib/store';
 import {
   PLAN_ORDER,
@@ -357,9 +358,9 @@ export default function Plans() {
             })}
           </View>
 
-          <Text className="text-[11px] text-on-surface-variant/50 text-center mt-6 px-4">
-            {t('disclaimer')}
-          </Text>
+          <View className="mt-6">
+            <BillingTerms />
+          </View>
         </ScrollView>
       </SafeAreaView>
     </ScreenTransition>

@@ -73,7 +73,6 @@
     "upgradeTo": "Ulepsz do {{plan}}",
     "switchTo": "Przełącz na {{plan}}"
   },
-  "disclaimer": "Ulepszenia obowiązują natychmiast. Obniżenia planu wchodzą w życie na koniec bieżącego okresu rozliczeniowego, a Twoje dane są zawsze bezpieczne.",
   "gates": {
     "aiCoach": {
       "title": "Odblokuj trenera AI",
@@ -173,5 +172,13 @@
       "perk3": "Przypomnimy Ci przed końcem — żadnych niespodzianek",
       "cta": "Zaczynamy"
     }
+  },
+  "terms": {
+    "billing": "Plany odnawiają się automatycznie co miesiąc, w wybranej przez Ciebie walucie, dopóki nie anulujesz subskrypcji.",
+    "cancel": "Możesz anulować w dowolnym momencie w Ustawieniach — dostęp zachowasz do końca bieżącego okresu rozliczeniowego.",
+    "planMechanics": "Ulepszenia obowiązują natychmiast. Obniżenia planu wchodzą w życie na koniec bieżącego okresu rozliczeniowego, a Twoje dane są zawsze bezpieczne.",
+    "termsOfUse": "Regulamin",
+    "privacyPolicy": "Polityka prywatności",
+    "linkError": "Nie udało się otworzyć tego linku."
   }
 }

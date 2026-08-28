@@ -66,7 +66,6 @@
     "upgradeTo": "Upgrade to {{plan}}",
     "switchTo": "Switch to {{plan}}"
   },
-  "disclaimer": "Upgrades apply immediately. Downgrades take effect at the end of your current billing period, and your data is always kept safe.",
   "gates": {
     "aiCoach": {
       "title": "Unlock the AI Coach",
@@ -165,5 +164,13 @@
       "perk3": "We'll remind you before it ends — no surprises",
       "cta": "Let's go"
     }
+  },
+  "terms": {
+    "billing": "Plans renew automatically each month, in your selected currency, until you cancel.",
+    "cancel": "Cancel anytime from Settings — you'll keep access until the end of your current billing period.",
+    "planMechanics": "Upgrades apply immediately. Downgrades take effect at the end of your current billing period, and your data is always kept safe.",
+    "termsOfUse": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "linkError": "Could not open this link."
   }
 }
