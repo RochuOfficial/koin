@@ -26,6 +26,8 @@ import { useStore, UserPlan } from '@/lib/store';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { gateInfo, type GateInfo, type GateKey } from '@/lib/entitlements';
 import { UpgradeModal } from '@/components/UpgradeModal';
+import { AiConsentModal } from '@/components/AiConsentModal';
+import { needsAiConsent, AI_CONSENT_VERSION } from '@/lib/aiConsent';
 import { PLACEHOLDER_COLOR, TEXT_INPUT_CENTERING } from '@/lib/utils';
 import { ScreenTransition } from '@/components/ScreenTransition';
 import { PressableScale } from '@/components/animation/PressableScale';
@@ -128,11 +130,18 @@ export default function AICoach() {
   const setAddonMessageBalance = useStore((s) => s.setAddonMessageBalance);
   const userID = useStore((s) => s.profile.userID);
   const language = useStore((s) => s.profile.language);
+  const aiConsent = useStore((s) => s.profile.aiConsent);
+  const grantAiConsent = useStore((s) => s.grantAiConsent);
   const messageLimit = typeof config.quotas.aiMessages === 'number' ? config.quotas.aiMessages : Infinity;
   const canBuyMore = config.extraMessagePriceUSD != null;
 
   const [gate, setGate] = useState<GateInfo | null>(null);
   const [gateKey, setGateKey] = useState<GateKey | null>(null);
+  // Holds the message text a send() call was interrupted for while the AI
+  // consent modal is open, so Allow can resume the exact same send without
+  // the user retyping (Phase 3, App Review 5.1.2(i)).
+  const [showAiConsent, setShowAiConsent] = useState(false);
+  const pendingSendTextRef = useRef<string | null>(null);
 
   const openGate = (key: GateKey) => {
     setGateKey(key);
@@ -145,6 +154,18 @@ export default function AICoach() {
   const goUpgrade = (target: UserPlan) => {
     setGate(null);
     router.push(`/plans?highlight=${target}`);
+  };
+
+  const handleAiConsentAllow = () => {
+    grantAiConsent();
+    setShowAiConsent(false);
+    const pendingText = pendingSendTextRef.current;
+    pendingSendTextRef.current = null;
+    if (pendingText) send(pendingText);
+  };
+  const handleAiConsentDecline = () => {
+    setShowAiConsent(false);
+    pendingSendTextRef.current = null;
   };
 
   // Abort any in-flight coach request on unmount so its stream reader can't
@@ -206,6 +227,16 @@ export default function AICoach() {
       // Quota exhausted (C6). Medium/family can buy more messages via a
       // secondary CTA on the same gate; Beginner has no add-on option.
       openGate('aiMessages');
+      return;
+    }
+    // App Review 5.1.2(i): explicit permission before this text (plus goal/
+    // income context) reaches the Coach's AI provider. Checked after the
+    // entitlement gates above — no point asking for consent on a message
+    // that would be blocked anyway — and before incrementCoachMessages()
+    // below, so declining costs no quota.
+    if (needsAiConsent(aiConsent, AI_CONSENT_VERSION)) {
+      pendingSendTextRef.current = text;
+      setShowAiConsent(true);
       return;
     }
 
@@ -503,6 +534,12 @@ export default function AICoach() {
             ? { label: t('buyMoreMessage'), onPress: buyMore }
             : undefined
         }
+      />
+
+      <AiConsentModal
+        isVisible={showAiConsent}
+        onAllow={handleAiConsentAllow}
+        onDecline={handleAiConsentDecline}
       />
     </SafeAreaView>
     </ScreenTransition>
