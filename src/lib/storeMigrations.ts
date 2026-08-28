@@ -9,7 +9,7 @@
 import { migrateGoalDepositDates } from './deposits';
 
 /** Bump alongside a new migration step below, and in store.ts's persist config. */
-export const PIGGY_STORE_VERSION = 7;
+export const PIGGY_STORE_VERSION = 8;
 
 /** Pre-#83 name of the entry tier, still present in every persisted blob. */
 const LEGACY_BEGINNER = 'free';
@@ -156,6 +156,20 @@ export function migratePiggyState(persisted: unknown, from: number): unknown {
         ...g,
         icon: EMOJI_TO_ICON_KEY[g.icon ?? ''] ?? 'target',
       })),
+    };
+  }
+
+  // v7 → v8: adds profile.aiConsent (App Review Guideline 5.1.2(i) — explicit
+  // permission before personal data reaches the Coach/Deep Analysis AI
+  // surfaces, see implementations/APP_REVIEW_BLOCKERS.md Phase 1). Every
+  // existing install predates the consent screen, so this backfills `null`
+  // rather than inferring a grant from prior use — `needsAiConsent(null, …)`
+  // (aiConsent.ts) is true for null, so returning users see the gate once on
+  // their next AI call, same as a brand-new install.
+  if (from < 8) {
+    state = {
+      ...state,
+      profile: { ...state.profile, aiConsent: state.profile?.aiConsent ?? null },
     };
   }
 

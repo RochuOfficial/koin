@@ -233,7 +233,7 @@ describe('migratePiggyState — edge cases', () => {
   it('PIGGY_STORE_VERSION matches the highest migration step', () => {
     // Sanity guard: if a step is added above without bumping this, zustand
     // would never invoke migrate for it on a fresh install already at the old version.
-    expect(PIGGY_STORE_VERSION).toBe(7);
+    expect(PIGGY_STORE_VERSION).toBe(8);
   });
 });
 
@@ -370,5 +370,27 @@ describe('migratePiggyState — v6 → v7 (icon system migration, #128)', () => 
     const migrated = migratePiggyState(V0_PAYLOAD, 0) as any;
     expect(migrated.achievements.every((a: any) => !('icon' in a))).toBe(true);
     expect(migrated.goals[0].icon).toBe('target');
+  });
+});
+
+describe('migratePiggyState — v7 → v8 (AI consent backfill, App Review 5.1.2(i))', () => {
+  it('backfills aiConsent to null on an installed profile with none set', () => {
+    const migrated = migratePiggyState({ profile: { name: 'Jamie' } }, 7) as any;
+    expect(migrated.profile.aiConsent).toBeNull();
+  });
+
+  it('does not override an already-granted consent', () => {
+    const aiConsent = { granted: true, grantedAt: '2026-08-01T00:00:00.000Z', version: 1 };
+    const migrated = migratePiggyState({ profile: { aiConsent } }, 7) as any;
+    expect(migrated.profile.aiConsent).toEqual(aiConsent);
+  });
+
+  it('carries the backfill through a full v0 payload', () => {
+    const migrated = migratePiggyState(V0_PAYLOAD, 0) as any;
+    expect(migrated.profile.aiConsent).toBeNull();
+  });
+
+  it('does not throw on a payload with no profile', () => {
+    expect(() => migratePiggyState({}, 7)).not.toThrow();
   });
 });
