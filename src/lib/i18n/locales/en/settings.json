@@ -18,7 +18,8 @@
     "subscription": "Subscription",
     "security": "Security",
     "account": "Account",
-    "supportAndAbout": "Support & About"
+    "supportAndAbout": "Support & About",
+    "privacy": "Privacy"
   },
   "planLabel": "{{plan}} plan",
   "planStatus": {
@@ -72,5 +73,8 @@
     "contactSupport": "Contact Support",
     "notConfigured": "Support links not configured yet."
   },
-  "versionLabel": "Piggy v{{version}}"
+  "versionLabel": "Piggy v{{version}}",
+  "aiFeatures": {
+    "toggleLabel": "AI features"
+  }
 }

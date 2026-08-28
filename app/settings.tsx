@@ -26,6 +26,7 @@ import {
   ScanFace,
   Globe,
   Coins,
+  Sparkles,
 } from 'lucide-react-native';
 
 import { useStore, CURRENCIES } from '@/lib/store';
@@ -40,6 +41,7 @@ import {
   type BiometricKind,
 } from '@/lib/biometrics';
 import { safeOpenURL, SUPPORT_EMAIL } from '@/lib/linking';
+import { AiConsentModal } from '@/components/AiConsentModal';
 import { hasConvertibleMonetaryData } from '@/lib/currencyConversion';
 import { fetchExchangeRate } from '@/lib/exchangeRates';
 import { timingPresets } from '@/lib/springPresets';
@@ -115,6 +117,8 @@ export default function Settings() {
   const updateProfile = useStore((state) => state.updateProfile);
   const applyCurrencyConversion = useStore((state) => state.applyCurrencyConversion);
   const refreshNotifications = useStore((state) => state.refreshNotifications);
+  const grantAiConsent = useStore((state) => state.grantAiConsent);
+  const revokeAiConsent = useStore((state) => state.revokeAiConsent);
   const logout = useAuthLock((state) => state.logout);
 
   const planConfig = getPlanConfig(profile.plan);
@@ -131,6 +135,11 @@ export default function Settings() {
   const [rateLoading, setRateLoading] = useState(false);
   const [rateUnavailable, setRateUnavailable] = useState(false);
   const currencySelectionTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Turning the toggle ON re-shows the same full-disclosure AiConsentModal
+  // used at the Coach/Deep Analysis call sites, rather than granting
+  // silently — the switch itself isn't the disclosure, the modal is (App
+  // Review 5.1.2(i), Phase 4). Turning OFF revokes immediately, no modal.
+  const [showAiConsent, setShowAiConsent] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -180,6 +189,19 @@ export default function Settings() {
       },
     ]);
   };
+
+  const handleAiConsentToggle = (next: boolean) => {
+    if (next) {
+      setShowAiConsent(true);
+      return;
+    }
+    revokeAiConsent();
+  };
+  const handleAiConsentAllow = () => {
+    grantAiConsent();
+    setShowAiConsent(false);
+  };
+  const handleAiConsentDecline = () => setShowAiConsent(false);
 
   const handleLogout = () => {
     Alert.alert(t('logOut'), t('logOutConfirmBody'), [
@@ -385,8 +407,27 @@ export default function Settings() {
             </View>
           </FadeInStagger>
 
-          {/* Support & About */}
+          {/* Privacy */}
           <FadeInStagger index={5} delayStep={60}>
+            <SectionLabel>{t('sections.privacy')}</SectionLabel>
+            <View className="mb-7 rounded-2xl bg-surface-container-low px-6" style={CARD_SHADOW}>
+              <View className="flex-row items-center justify-between py-4">
+                <View className="flex-row items-center gap-[14px]">
+                  <Sparkles size={18} color="#64748B" />
+                  <Text className="text-[16px] font-semibold text-on-surface">{t('aiFeatures.toggleLabel')}</Text>
+                </View>
+                <Switch
+                  value={profile.aiConsent?.granted === true}
+                  onValueChange={handleAiConsentToggle}
+                  trackColor={{ false: '#CBD5E1', true: '#1D4ED8' }}
+                  thumbColor={'#ffffff'}
+                />
+              </View>
+            </View>
+          </FadeInStagger>
+
+          {/* Support & About */}
+          <FadeInStagger index={6} delayStep={60}>
             <SectionLabel>{t('sections.supportAndAbout')}</SectionLabel>
             <View className="mb-7 rounded-2xl bg-surface-container-low px-6" style={CARD_SHADOW}>
               {PRIVACY_URL ? (
@@ -432,7 +473,7 @@ export default function Settings() {
             </View>
           </FadeInStagger>
 
-          <FadeInStagger index={6} delayStep={60}>
+          <FadeInStagger index={7} delayStep={60}>
             <View className="mb-[54px] items-center">
               <Text className="text-[11px] text-on-surface-variant/40 uppercase tracking-widest">
                 {t('versionLabel', { version: Constants.expoConfig?.version || '1.0.0' })}
@@ -490,6 +531,12 @@ export default function Settings() {
           onConvert={handleConvertCurrency}
           onKeepNumbers={handleKeepCurrencyNumbers}
           onClose={closeConvertModal}
+        />
+
+        <AiConsentModal
+          isVisible={showAiConsent}
+          onAllow={handleAiConsentAllow}
+          onDecline={handleAiConsentDecline}
         />
       </SafeAreaView>
     </ScreenTransition>

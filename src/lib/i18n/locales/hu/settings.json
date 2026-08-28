@@ -18,7 +18,8 @@
     "subscription": "Előfizetés",
     "security": "Biztonság",
     "account": "Fiók",
-    "supportAndAbout": "Támogatás és névjegy"
+    "supportAndAbout": "Támogatás és névjegy",
+    "privacy": "Adatvédelem"
   },
   "planLabel": "{{plan}} csomag",
   "planStatus": {
@@ -72,5 +73,8 @@
     "contactSupport": "Kapcsolatfelvétel az ügyfélszolgálattal",
     "notConfigured": "A támogatási hivatkozások még nincsenek beállítva."
   },
-  "versionLabel": "Piggy v{{version}}"
+  "versionLabel": "Piggy v{{version}}",
+  "aiFeatures": {
+    "toggleLabel": "AI-funkciók"
+  }
 }
