@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useStore, COUNTRIES, CURRENCIES, Goal, formatCurrency, getCurrencySymbol } from '@/lib/store';
 import { GOAL_CHIPS, getGoalIconKey } from '@/lib/catalogs';
+import { AI_TRANSPARENCY_URL } from '@/lib/linking';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { useAuthLock } from '@/lib/authLock';
 import { requestEmailOtp, verifyEmailOtp, SessionSecretUnavailableError } from '@/lib/auth';
@@ -46,7 +47,7 @@ const LEGAL_LINK_STYLE = 'text-primary underline';
 const LEGAL_LINKS = [
   { id: 'privacyPolicy', url: 'https://piggnify.com/privacy-policy' },
   { id: 'termsOfService', url: 'https://piggnify.com/terms-of-service' },
-  { id: 'aiTransparency', url: 'https://piggnify.com/ai-transparency' },
+  { id: 'aiTransparency', url: AI_TRANSPARENCY_URL },
   { id: 'services', url: 'https://piggnify.com/services' },
   { id: 'aiFeatureAccess', url: 'https://piggnify.com/ai-feature-access' },
 ];

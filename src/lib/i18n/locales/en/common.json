@@ -29,5 +29,18 @@
     "pl": "Polski",
     "hu": "Magyar",
     "de": "Deutsch"
+  },
+  "aiConsent": {
+    "title": "Before you use AI features",
+    "intro": "Coach and Deep Analysis send some of your information to outside AI providers to generate a reply or a report.",
+    "dataShared": "What's shared: your first name, savings goals and progress, monthly income, and the messages or requests you send.",
+    "providers": "Who receives it: Coach messages are processed by OpenAI. Deep Analysis reports are processed by OpenAI and Anthropic.",
+    "retention": "We don't control how long these providers keep request logs after generating a reply.",
+    "learnMore": "Read our AI Transparency policy",
+    "learnMoreError": "Could not open the AI Transparency policy link.",
+    "notNow": "Not now",
+    "allow": "Allow",
+    "allowHint": "Lets Coach and Deep Analysis send your data to our AI providers.",
+    "notNowHint": "Declines AI features for now. You can turn this on later in Settings."
   }
 }

@@ -79,7 +79,7 @@ const VARIANT_BOTTOM_BORDERS: Record<string, { borderBottomWidth: number; border
 };
 
 export interface ButtonProps
-  extends Pick<PressableProps, "disabled" | "style">,
+  extends Pick<PressableProps, "disabled" | "style" | "accessibilityLabel" | "accessibilityHint">,
     VariantProps<typeof buttonVariants> {
   onPress?: () => void;
   label?: string;
@@ -89,7 +89,22 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<React.ElementRef<typeof View>, ButtonProps>(
-  ({ className, textClassName, variant, size, label, children, onPress, disabled, style }, ref) => {
+  (
+    {
+      className,
+      textClassName,
+      variant,
+      size,
+      label,
+      children,
+      onPress,
+      disabled,
+      style,
+      accessibilityLabel,
+      accessibilityHint,
+    },
+    ref
+  ) => {
     const pressed = useSharedValue(0);
 
     const animatedStyle = useAnimatedStyle(() => ({
@@ -120,6 +135,11 @@ const Button = React.forwardRef<React.ElementRef<typeof View>, ButtonProps>(
           className={cn(buttonVariants({ variant, size, className }), disabled && "opacity-50")}
           ref={ref}
           style={[animatedStyle, borderBottomStyle, style as any]}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={accessibilityLabel ?? label}
+          accessibilityHint={accessibilityHint}
+          accessibilityState={{ disabled: !!disabled }}
         >
           {label ? (
             <Text className={cn(buttonTextVariants({ variant, size, className: textClassName }))}>
