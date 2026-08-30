@@ -187,7 +187,15 @@ export function PinCreationFlow({
   return (
     <View className="flex-1 items-center justify-center px-8">
       {onCancel && (
-        <Pressable onPress={onCancel} className="absolute top-4 right-4 p-2" hitSlop={12} disabled={busy}>
+        <Pressable
+          onPress={onCancel}
+          className="absolute top-4 right-4 p-2"
+          hitSlop={12}
+          disabled={busy}
+          accessibilityRole="button"
+          accessibilityLabel={t('common:a11y.cancel')}
+          accessibilityState={{ disabled: busy }}
+        >
           <X size={22} color="#6b7280" />
         </Pressable>
       )}

@@ -42,5 +42,20 @@
     "allow": "Allow",
     "allowHint": "Lets Coach and Deep Analysis send your data to our AI providers.",
     "notNowHint": "Declines AI features for now. You can turn this on later in Settings."
+  },
+  "a11y": {
+    "digit": "{{digit}}",
+    "deleteDigit": "Delete digit",
+    "unlockWithFaceId": "Unlock with Face ID",
+    "unlockWithFingerprint": "Unlock with fingerprint",
+    "pinProgress": "{{filled}} of {{length}} digits entered",
+    "goalProgress": "{{percent}} percent of goal reached",
+    "close": "Close",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "addGoal": "Add goal",
+    "openSettings": "Open settings",
+    "sendMessage": "Send message"
   }
 }

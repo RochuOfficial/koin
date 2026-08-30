@@ -13,6 +13,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 import type { BiometricKind } from '@/lib/biometrics';
 
 export function PinDots({
@@ -25,6 +26,7 @@ export function PinDots({
   /** Increment to trigger a shake (e.g. on wrong PIN). */
   shakeKey?: number;
 }) {
+  const { t } = useTranslation('common');
   const tx = useSharedValue(0);
   useEffect(() => {
     if (!shakeKey) return;
@@ -40,7 +42,13 @@ export function PinDots({
   const style = useAnimatedStyle(() => ({ transform: [{ translateX: tx.value }] }));
 
   return (
-    <Animated.View className="flex-row justify-center gap-4" style={style}>
+    <Animated.View
+      className="flex-row justify-center gap-4"
+      style={style}
+      accessible
+      accessibilityRole="progressbar"
+      accessibilityLabel={t('a11y.pinProgress', { filled, length })}
+    >
       {Array.from({ length }).map((_, i) => (
         <View
           key={i}
@@ -73,6 +81,7 @@ export function PinPad({
   biometricKind?: BiometricKind;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation('common');
   const press = (fn: () => void) => () => {
     if (disabled) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -80,13 +89,22 @@ export function PinPad({
   };
 
   const BiometricIcon = biometricKind === 'face' ? ScanFace : Fingerprint;
+  // The icon itself collapses 'fingerprint'/'iris' to the same glyph, so the
+  // label mirrors that rather than claiming a distinct "iris" affordance.
+  const biometricLabel =
+    biometricKind === 'face' ? t('a11y.unlockWithFaceId') : t('a11y.unlockWithFingerprint');
 
   return (
     <View className="gap-4">
       {KEY_ROWS.map((row) => (
         <View key={row.join('')} className="flex-row justify-center" style={{ gap: 20 }}>
           {row.map((k) => (
-            <Key key={k} onPress={press(() => onDigit(k))} disabled={disabled}>
+            <Key
+              key={k}
+              onPress={press(() => onDigit(k))}
+              disabled={disabled}
+              accessibilityLabel={t('a11y.digit', { digit: k })}
+            >
               <Text className="text-3xl font-semibold text-on-surface">{k}</Text>
             </Key>
           ))}
@@ -96,18 +114,22 @@ export function PinPad({
       <View className="flex-row justify-center" style={{ gap: 20 }}>
         {/* bottom-left: biometric or empty */}
         {onBiometric && biometricKind !== 'none' ? (
-          <Key onPress={press(onBiometric)} disabled={disabled} subtle>
+          <Key onPress={press(onBiometric)} disabled={disabled} subtle accessibilityLabel={biometricLabel}>
             <BiometricIcon size={28} color="#1D4ED8" />
           </Key>
         ) : (
           <View style={{ width: 76, height: 76 }} />
         )}
 
-        <Key onPress={press(() => onDigit('0'))} disabled={disabled}>
+        <Key
+          onPress={press(() => onDigit('0'))}
+          disabled={disabled}
+          accessibilityLabel={t('a11y.digit', { digit: '0' })}
+        >
           <Text className="text-3xl font-semibold text-on-surface">0</Text>
         </Key>
 
-        <Key onPress={press(onBackspace)} disabled={disabled} subtle>
+        <Key onPress={press(onBackspace)} disabled={disabled} subtle accessibilityLabel={t('a11y.deleteDigit')}>
           <Delete size={26} color="#64748B" />
         </Key>
       </View>
@@ -120,16 +142,21 @@ function Key({
   onPress,
   disabled,
   subtle,
+  accessibilityLabel,
 }: {
   children: React.ReactNode;
   onPress: () => void;
   disabled?: boolean;
   subtle?: boolean;
+  accessibilityLabel: string;
 }) {
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled: !!disabled }}
       style={{ width: 76, height: 76 }}
       className={`items-center justify-center rounded-full ${
         subtle ? '' : 'bg-surface-container-low'

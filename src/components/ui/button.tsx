@@ -129,6 +129,17 @@ const Button = React.forwardRef<React.ElementRef<typeof View>, ButtonProps>(
 
     const borderBottomStyle = variant ? VARIANT_BOTTOM_BORDERS[variant] ?? {} : {};
 
+    // Dev-only guardrail (Guideline 4.0 / VoiceOver): an icon-only Button
+    // (children, no label) with no explicit accessibilityLabel collapses to
+    // a nameless "button" for screen readers — this can't be caught by
+    // TypeScript since both props are optional by design (text buttons don't
+    // need accessibilityLabel, and it's a valid override for text ones too).
+    if (__DEV__ && !label && !accessibilityLabel) {
+      console.warn(
+        '[Button] rendered with icon-only children and no accessibilityLabel — VoiceOver will announce a nameless button. Pass `label` or `accessibilityLabel`.'
+      );
+    }
+
     return (
       <GestureDetector gesture={tap}>
         <Animated.View

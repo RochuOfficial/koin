@@ -648,7 +648,7 @@ export default function Onboarding() {
         // (see showFixedFooter), so there's deliberately no way forward or back.
         return (
           <View className="flex-row gap-3">
-            <Button variant="outline" onPress={goBack} className="w-14 h-14 items-center justify-center">
+            <Button variant="outline" onPress={goBack} accessibilityLabel={t('common:a11y.back')} className="w-14 h-14 items-center justify-center">
               <ArrowLeft size={16} color="#1D4ED8" />
             </Button>
             <Button
@@ -664,7 +664,7 @@ export default function Onboarding() {
       case OnboardingStep.Localization:
         return (
           <View className="flex-row gap-3">
-            <Button variant="outline" onPress={goBack} className="w-14 items-center justify-center">
+            <Button variant="outline" onPress={goBack} accessibilityLabel={t('common:a11y.back')} className="w-14 items-center justify-center">
               <ArrowLeft size={16} color="#1D4ED8" />
             </Button>
             <Button
@@ -680,7 +680,7 @@ export default function Onboarding() {
       case OnboardingStep.GoalDeclaration:
         return (
           <View className="flex-row gap-3">
-            <Button variant="outline" onPress={goBack} className="w-14 items-center justify-center">
+            <Button variant="outline" onPress={goBack} accessibilityLabel={t('common:a11y.back')} className="w-14 items-center justify-center">
               <ArrowLeft size={16} color="#1D4ED8" />
             </Button>
             <Button
@@ -702,7 +702,7 @@ export default function Onboarding() {
       case OnboardingStep.TargetAmount:
         return (
           <View className="flex-row gap-3">
-            <Button variant="outline" onPress={goBack} className="w-14 items-center justify-center">
+            <Button variant="outline" onPress={goBack} accessibilityLabel={t('common:a11y.back')} className="w-14 items-center justify-center">
               <ArrowLeft size={16} color="#1D4ED8" />
             </Button>
             <Button
@@ -725,7 +725,7 @@ export default function Onboarding() {
         return (
           <View>
             <View className="flex-row gap-3">
-              <Button variant="outline" onPress={goBack} className="w-14 items-center justify-center">
+              <Button variant="outline" onPress={goBack} accessibilityLabel={t('common:a11y.back')} className="w-14 items-center justify-center">
                 <ArrowLeft size={16} color="#1D4ED8" />
               </Button>
               <Button
@@ -752,7 +752,7 @@ export default function Onboarding() {
         return (
           <View>
             <View className="flex-row gap-3">
-              <Button variant="outline" onPress={goBack} className="w-14 items-center justify-center">
+              <Button variant="outline" onPress={goBack} accessibilityLabel={t('common:a11y.back')} className="w-14 items-center justify-center">
                 <ArrowLeft size={16} color="#1D4ED8" />
               </Button>
               <Button
@@ -780,7 +780,7 @@ export default function Onboarding() {
       case OnboardingStep.BlueprintReview:
         return (
           <View className="flex-row gap-3">
-            <Button variant="outline" onPress={goBack} className="w-14 h-14 items-center justify-center">
+            <Button variant="outline" onPress={goBack} accessibilityLabel={t('common:a11y.back')} className="w-14 h-14 items-center justify-center">
               <ArrowLeft size={16} color="#1D4ED8" />
             </Button>
             <Button
@@ -840,6 +840,7 @@ export default function Onboarding() {
                     }
                   : goBack
               }
+              accessibilityLabel={t('common:a11y.back')}
               className="w-14 h-14 items-center justify-center"
             >
               <ArrowLeft size={16} color="#1D4ED8" />

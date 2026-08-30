@@ -43,6 +43,8 @@
   "checkoutNotConfiguredBody": "A Stripe Checkout nincs beállítva ebben a verzióban. Szimuláljunk egy sikeres fizetést a(z) {{plan}} csomagért?",
   "cancel": "Mégse",
   "simulatePayment": "Fizetés szimulálása",
+  "checkoutFailedTitle": "Nem sikerült megnyitni a fizetést",
+  "checkoutFailedBody": "Nem sikerült megnyitni a fizetést. Ellenőrizd a kapcsolatot, és próbáld újra, vagy írj nekünk: {{email}}.",
   "switchToTitle": "Váltasz a(z) {{plan}} csomagra?",
   "switchToBody": "Ez ekkor lép életbe: {{date}}. Semmi sem törlődik — ha ez a csomag kevesebb célt támogat, mint amennyid van, kiválaszthatod, melyek maradjanak aktívak.",
   "keepCurrentPlan": "Jelenlegi csomag megtartása",

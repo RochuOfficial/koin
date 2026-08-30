@@ -26,18 +26,7 @@
       "bundleIdentifier": "com.piggnify.app.ios",
       "infoPlist": {
         "CADisableMinimumFrameDurationOnPhone": true,
-        "NSLocalNetworkUsageDescription": "Piggy uses your local network to connect to the development server while testing.",
-        "NSBonjourServices": [
-          "_expo._tcp",
-          "_metro._tcp",
-          "_expo._tcp",
-          "_metro._tcp"
-        ],
         "CFBundleLocalizations": [
-          "en",
-          "pl",
-          "hu",
-          "de",
           "en",
           "pl",
           "hu",

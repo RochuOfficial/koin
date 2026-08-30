@@ -42,5 +42,20 @@
     "allow": "Erlauben",
     "allowHint": "Erlaubt Coach und Detailanalyse, deine Daten an unsere KI-Anbieter zu senden.",
     "notNowHint": "Lehnt KI-Funktionen vorerst ab. Du kannst dies später in den Einstellungen aktivieren."
+  },
+  "a11y": {
+    "digit": "{{digit}}",
+    "deleteDigit": "Ziffer löschen",
+    "unlockWithFaceId": "Mit Face ID entsperren",
+    "unlockWithFingerprint": "Mit Fingerabdruck entsperren",
+    "pinProgress": "{{filled}} von {{length}} Ziffern eingegeben",
+    "goalProgress": "{{percent}} Prozent des Ziels erreicht",
+    "close": "Schließen",
+    "back": "Zurück",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "addGoal": "Ziel hinzufügen",
+    "openSettings": "Einstellungen öffnen",
+    "sendMessage": "Nachricht senden"
   }
 }

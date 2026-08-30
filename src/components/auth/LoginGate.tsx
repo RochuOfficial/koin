@@ -164,6 +164,8 @@ export function LoginGate() {
           onPress={cancelLoginRequest}
           hitSlop={12}
           className="ml-4 mt-2 h-10 w-10 items-center justify-center rounded-full"
+          accessibilityRole="button"
+          accessibilityLabel={t('common:a11y.back')}
         >
           <ArrowLeft size={22} color="#6b7280" />
         </Pressable>

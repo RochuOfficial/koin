@@ -246,7 +246,12 @@ export function ContributionStep({
 
       {!hideFooter && (
         <View className="mt-6 flex-row gap-3">
-          <Button variant="outline" onPress={onBack} className="w-14 items-center justify-center">
+          <Button
+            variant="outline"
+            onPress={onBack}
+            accessibilityLabel={t('common:a11y.back')}
+            className="w-14 items-center justify-center"
+          >
             <ArrowLeft size={16} color="#1D4ED8" />
           </Button>
           <Button

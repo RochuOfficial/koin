@@ -60,6 +60,9 @@ export function CurrencyConvertModal({
             disabled={loading}
             style={loading ? { opacity: 0.3 } : undefined}
             className="h-9 w-9 items-center justify-center rounded-full bg-surface-container"
+            accessibilityRole="button"
+            accessibilityLabel={t('common:a11y.close')}
+            accessibilityState={{ disabled: loading }}
           >
             <X size={18} color="#64748B" />
           </Pressable>

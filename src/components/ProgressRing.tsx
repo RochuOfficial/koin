@@ -8,11 +8,24 @@ interface ProgressRingProps {
   size?: number;
   strokeWidth?: number;
   children?: React.ReactNode;
+  /**
+   * Announces the ring itself as a progressbar. Applied to the SVG wrapper
+   * only (not the outer container that also holds `children`) — an amount
+   * rendered inside the ring stays its own separately-announced element
+   * instead of being swallowed into one collapsed "X percent" node.
+   */
+  accessibilityLabel?: string;
 }
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-export function ProgressRing({ progress, size = 180, strokeWidth = 16, children }: ProgressRingProps) {
+export function ProgressRing({
+  progress,
+  size = 180,
+  strokeWidth = 16,
+  children,
+  accessibilityLabel,
+}: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   
@@ -34,7 +47,13 @@ export function ProgressRing({ progress, size = 180, strokeWidth = 16, children 
 
   return (
     <View style={{ width: size, height: size }} className="items-center justify-center relative">
-      <View style={{ transform: [{ rotate: '-90deg' }] }}>
+      <View
+        style={{ transform: [{ rotate: '-90deg' }] }}
+        accessible={!!accessibilityLabel}
+        accessibilityRole={accessibilityLabel ? 'progressbar' : undefined}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityValue={accessibilityLabel ? { min: 0, max: 100, now: Math.round(progress) } : undefined}
+      >
         <Svg width={size} height={size}>
           <Circle
             cx={size / 2}

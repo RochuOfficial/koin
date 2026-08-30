@@ -1,0 +1,564 @@
+# App Review — "Should fix before submitting" items
+
+**Tracking:** [#168](https://github.com/Koin-App-Official/pignify/issues/168)
+**Branch:** `fix/issue-168-app-review-should-fix` (to be created off `feat/issue-166-app-review-blockers`)
+**Source:** the "Piggy App Store Readiness" audit — the five yellow **Should fix** findings.
+The three red **Blocker** findings are handled separately in
+[APP_REVIEW_BLOCKERS.md](./APP_REVIEW_BLOCKERS.md) / [#166](https://github.com/Koin-App-Official/pignify/issues/166).
+
+---
+
+## Phase 0 — Audit verification (done before planning; no code)
+
+The audit ran against commit `e82863d` on `fix/issue-164-android-birthdate-confirm-button`.
+Two of its five findings do not survive contact with the current tree, and one is materially
+worse than described. Every claim below was re-checked by reading the source; the phases that
+follow are scoped to what is *actually* true today, not to the report verbatim.
+
+| # | Audit finding | Verified status | Consequence for this plan |
+|---|---|---|---|
+| 1 | Reviewer demo accounts "are still placeholders" | **Mostly wrong.** `apple@example.com` / `google@example.com` are deliberate real Appwrite accounts on the RFC 2606 documentation domain, created, seeded and verified live under [#148](https://github.com/Koin-App-Official/pignify/issues/148) (see [REVIEWER_DEMO_LOGIN.md](./REVIEWER_DEMO_LOGIN.md) Phase 2/7). Entitlements are `status: "active"`, `current_period_end: 2036-08-23` — permanently ungated. | Phase 5 shrinks to a re-verification pass + the review-notes handoff. No code. |
+| 2 | `"Reset All Data (Demo)"` ships in all four locales | **Correct.** `en`/`hu`/`de` say `(Demo)`, `pl` says `(demo)`. | Phase 1, as written. |
+| 3 | "Simulate payment" is one missing env var from being live | **Worse than stated.** `startCheckout` returns `'unavailable'` for *five* reasons ([billing.ts:93-117](../src/lib/billing.ts)) — missing env var, missing `userId`, n8n returning no url, `Linking.canOpenURL` false, **and any thrown error incl. network failure**. It is reachable in a production build today whenever the n8n call fails. There is also a **second, unreported site**: the add-on purchase in `app/(tabs)/coach.tsx:186-191`. | Phase 2, widened to both sites and to fixing the misleading production copy. |
+| 4 | Dev-server strings ship in every build | **Correct.** [app.json](../app.json) has no environment branch at all — it is static JSON, there is no `app.config.js`. `expo-dev-client`'s own plugin does **not** re-add these keys (checked `node_modules/expo-dev-client/plugin/build/`), so they cannot simply be deleted without losing local-network dev discovery. | Phase 3 — introduce `app.config.js` rather than delete. |
+| 5 | "VoiceOver is effectively unsupported… tab bar icons unlabeled" | **Partly wrong, partly understated.** The **tab bar is already accessible**: `@react-navigation/bottom-tabs` synthesises `"Home, tab, 1 of 5"` from `options.title` on iOS ([BottomTabBar.tsx:429-434](../node_modules/@react-navigation/bottom-tabs/src/views/BottomTabBar.tsx)), and all five screens set `title`. The count of "four accessibility props" is stale — there are now ~20 across `button.tsx`, `AiConsentModal`, `BillingTerms`, `PlanGate`. But a scripted sweep finds **36 genuinely unlabeled interactive elements**, more than the report's list. | Phase 4 + Phase 5, scoped from the real scan, with the tab-bar item dropped. |
+
+**Baseline at planning time:** `npm run test` → **394 passed / 19 files**; branch clean at `b884578`.
+(The report's "385 tests across 18 files" predates the #166 work.)
+
+### The 36 unlabeled controls (scripted scan, verified by reading each site)
+
+Interactive elements (`TouchableOpacity` / `Pressable` / `Button`) with no `accessibilityLabel`,
+no `label` prop, and no `<Text>` descendant to fall back on:
+
+| Group | Count | Sites |
+|---|---|---|
+| PinPad `Key` (one shared component → 12 rendered keys) | 1 | `src/components/auth/PinPad.tsx:130` |
+| Modal / sheet close & cancel buttons | 11 | `AddExpenseModal:50`, `AddSavingsModal:65`, `DeepAnalysisConfirmModal:45`, `UpgradeModal:59`, `ui/calendar-modal:110`, `ui/picker-modal:90`, `ui/currency-convert-modal:57`, `auth/PinCreationFlow:190`, `app/change-pin:106`, `app/delete-account:124`, `app/delete-account:154`, `app/enable-biometric:102` |
+| Icon-only back `Button`s (onboarding flow) | 8 | `app/onboarding.tsx:651,667,683,705,728,755,783,828` |
+| Icon-only back `Button`s (goal creation) | 4 | `app/(tabs)/goals.tsx:343,379,454`, `src/components/ContributionStep.tsx:249` |
+| Back chevrons / arrows | 4 | `app/settings.tsx:265`, `app/plans.tsx:232`, `app/downgrade-selection.tsx:96`, `auth/LoginGate.tsx:163` |
+| FABs | 3 | `app/(tabs)/goals.tsx:499` (add goal), `app/(tabs)/profile.tsx:313` (settings), `app/settings.tsx:489` (close) |
+| Inline confirm (✓) buttons | 2 | `app/(tabs)/profile.tsx:157` (save name), `app/(tabs)/profile.tsx:221` (save income) |
+| Coach send button | 1 | `app/(tabs)/coach.tsx:514` |
+| Backdrop scrim (should be *hidden*, not labelled) | 1 | `src/components/animation/BottomSheet.tsx:149` |
+
+Plus one non-interactive gap the report names: **`ProgressRing`** (`src/components/ProgressRing.tsx`,
+used at `app/(tabs)/index.tsx:573` and `app/(tabs)/goals.tsx:221`) conveys progress purely visually.
+
+**Why `Button` is the worst offender:** [button.tsx:138-148](../src/components/ui/button.tsx) sets
+`accessible` on the wrapper and `accessibilityLabel={accessibilityLabel ?? label}`. When a caller
+passes `children` (an icon) instead of `label`, the wrapper collapses into a single a11y element
+with **no name at all** — VoiceOver announces a bare "button". That is 13 of the 36.
+
+---
+
+## Phase 1 — Remove "(Demo)" from the reset button
+
+Guideline 2.2 / 2.3.1. Smallest, most isolated change; done first so the branch has a green
+commit immediately.
+
+- [x] `en`: `"Reset All Data (Demo)"` → `"Reset All Data"`
+- [x] `pl`: `"Resetuj wszystkie dane (demo)"` → `"Resetuj wszystkie dane"`
+- [x] `hu`: `"Összes adat visszaállítása (Demo)"` → `"Összes adat visszaállítása"`
+- [x] `de`: `"Alle Daten zurücksetzen (Demo)"` → `"Alle Daten zurücksetzen"`
+- [x] Grep the whole tree for any other user-visible `Demo` / `demo` string
+      (`grep -rni "demo" src/lib/i18n/locales/`) and confirm nothing else leaks — the only hit is
+      a false-positive substring match inside `"upgradeModal"` (`...gradeMOdal` contains `demo`
+      case-insensitively), confirmed harmless.
+
+**Files to modify**
+
+| File | Change |
+|---|---|
+| [src/lib/i18n/locales/en/profile.json](../src/lib/i18n/locales/en/profile.json):30 | drop ` (Demo)` from `reset.button` |
+| [src/lib/i18n/locales/pl/profile.json](../src/lib/i18n/locales/pl/profile.json):30 | drop ` (demo)` from `reset.button` |
+| [src/lib/i18n/locales/hu/profile.json](../src/lib/i18n/locales/hu/profile.json):30 | drop ` (Demo)` from `reset.button` |
+| [src/lib/i18n/locales/de/profile.json](../src/lib/i18n/locales/de/profile.json):30 | drop ` (Demo)` from `reset.button` |
+
+**Phase complete when:**
+- [x] All four `reset.button` values are free of any "demo" parenthetical.
+- [x] `grep -rni "demo" src/lib/i18n/locales/` returns nothing user-visible (one false-positive
+      substring match inside `upgradeModal`, not a real string).
+- [x] `npm run test` — 394/394, in particular `locales.test.ts` key parity still green
+      (values changed, key sets did not, so parity is expected to be untouched).
+- [x] `npm run typecheck` clean.
+
+---
+
+## Phase 2 — Make "Simulate payment" unreachable in release builds
+
+Guideline 2.3.1. Two call sites, not one, and a copy problem the audit did not see.
+
+### The problem restated precisely
+
+`startCheckout` / `startAddonCheckout` collapse five distinct failure modes into
+`{ status: 'unavailable' }`. Both callers treat that single value as "the build has no billing
+configured" and offer a button that grants the entitlement locally for free. In a production
+build with `EXPO_PUBLIC_N8N_BILLING_URL` correctly set, a plain **network failure** therefore
+shows a reviewer a dialog titled *"Checkout not configured"* with a *"Simulate payment"* button
+that upgrades them. Gating on `__DEV__` alone would fix the cheat but leave production showing
+"Checkout not configured" with only a Cancel button — a dead end with wrong copy.
+
+So the branch has to split three ways, reusing the pattern
+[PlanGate.tsx:219](../src/components/auth/PlanGate.tsx) already uses:
+
+```
+result.status === 'unavailable'
+  ├── __DEV__ && !isBillingConfigured()  → dev-only simulate alert (unchanged copy)
+  └── otherwise                          → "We couldn't open checkout…" + support email
+```
+
+`__DEV__` is already an established idiom here ([logger.ts:16](../src/lib/logger.ts),
+[i18n/index.ts:192](../src/lib/i18n/index.ts)) and is compile-time-false in release bundles,
+so the simulate branch cannot exist in a shipped binary.
+
+### Work
+
+- [x] `app/plans.tsx` — import `isBillingConfigured` from `@/lib/billing`; restructure the
+      `result.status === 'unavailable'` branch per the split above.
+- [x] `app/(tabs)/coach.tsx` — same restructure in `buyMore()` for the add-on purchase.
+- [x] Add production-path copy. Followed the wording already approved for
+      `planGate.locked.checkoutFailed` verbatim and interpolate `SUPPORT_EMAIL` from
+      [src/lib/linking.ts:9](../src/lib/linking.ts):
+      - `plans.json` → `checkoutFailedTitle`, `checkoutFailedBody`
+      - `coach.json` → `checkoutFailedTitle`, `checkoutFailedBody`
+- [x] Kept `checkoutNotConfigured*` / `simulatePayment` / `simulatePurchase` keys in place —
+      they are still reached in dev, and deleting them would break `locales.test.ts` parity
+      for no gain.
+- [x] Confirmed no test imports either screen (all 19 test files are under `src/lib/**`; only
+      `contentParity.test.ts` reads `app/` — and only as *string lists*, not by importing the
+      modules), so `__DEV__` being undefined under vitest cannot bite.
+
+**Files to modify**
+
+| File | Change |
+|---|---|
+| [app/plans.tsx](../app/plans.tsx):181-192 | three-way branch; new import |
+| [app/(tabs)/coach.tsx](../app/(tabs)/coach.tsx):180-194 | three-way branch; new import |
+| [src/lib/i18n/locales/{en,pl,hu,de}/plans.json](../src/lib/i18n/locales/en/plans.json) | +2 keys × 4 locales |
+| [src/lib/i18n/locales/{en,pl,hu,de}/coach.json](../src/lib/i18n/locales/en/coach.json) | +2 keys × 4 locales |
+
+**Phase complete when:**
+- [x] `grep -n "simulatePayment\|simulatePurchase" app/` shows every remaining occurrence inside
+      a `__DEV__` guard (confirmed: `plans.tsx:196` and `coach.tsx:195` are both inside the
+      `if (__DEV__ && !isBillingConfigured())` block).
+- [x] Reading the diff confirms a release bundle (`__DEV__ === false`) can reach only the
+      `checkoutFailed*` path, never `applyChange()` / `setAddonMessageBalance()` from an alert.
+- [x] All four locales have identical key sets for `plans` and `coach`
+      (`locales.test.ts` proves this — still 394/394 green).
+- [x] `npm run typecheck` clean; `npm run test` — 394/394.
+
+---
+
+## Phase 3 — Move development-server Info.plist keys out of production builds
+
+Info.plist hygiene. The audit's suggested fix ("move into an `app.config.js` branch on
+`EAS_BUILD_PROFILE`") is right; its alternative ("or drop them — `expo-dev-client` adds what it
+needs on its own") is **wrong for this project** — `expo-dev-client`'s config plugin contains no
+`NSLocalNetworkUsageDescription` / `NSBonjourServices` injection (grepped
+`node_modules/expo-dev-client/plugin/build/`). Deleting the keys would break local-network Metro
+discovery on physical dev devices. So: branch, don't delete.
+
+### Approach
+
+Expo reads `app.config.js` in preference to `app.json`, and passes the parsed `app.json` in as
+`{ config }`. That lets this stay a **thin, additive** file rather than a rewrite: `app.json`
+keeps every static value, and `app.config.js` owns only the environment-dependent part.
+
+```js
+// app.config.js
+const IS_PRODUCTION_BUILD = process.env.EAS_BUILD_PROFILE === 'production';
+```
+
+Chosen predicate deliberately: EAS Build sets `EAS_BUILD_PROFILE`; a local
+`npx expo run:ios` / `expo prebuild` sets nothing, so the default (**dev keys present**) is the
+developer-friendly one and only the App Store rail strips them. The inverse
+(`=== 'development'`) would silently break every local build.
+
+- [x] Create [app.config.js](../app.config.js) exporting `({ config }) => ({ ... })`.
+- [x] Remove `NSLocalNetworkUsageDescription` and `NSBonjourServices` from
+      [app.json](../app.json)'s `ios.infoPlist`; re-add them from `app.config.js` only when
+      `!isProductionBuild`.
+- [x] Left `CADisableMinimumFrameDurationOnPhone`, `CFBundleLocalizations` and
+      `ITSAppUsesNonExemptEncryption` in `app.json` — they belong in every build.
+- [x] Commented the file in the house style (the *why*, matching
+      [plugins/withoutPushEntitlement.js](../plugins/withoutPushEntitlement.js)'s tone), naming
+      the guideline and the reason the keys can't simply be deleted.
+- [x] **Bundled Note-severity cleanup, same block:** de-duplicated `NSBonjourServices`
+      (`_expo._tcp`, `_metro._tcp` were listed twice) and `CFBundleLocalizations`
+      (`en, pl, hu, de` was listed twice).
+- [x] Verified the resolved config both ways:
+      `npx expo config --type public` and
+      `EAS_BUILD_PROFILE=production npx expo config --type public`, diffing `ios.infoPlist`.
+
+**Files to modify**
+
+| File | Change |
+|---|---|
+| [app.config.js](../app.config.js) | **new** — `({ config }) =>` wrapper, dev-only plist keys |
+| [app.json](../app.json) | remove the two dev keys; de-duplicate the two arrays |
+
+**Phase complete when:**
+- [x] `EAS_BUILD_PROFILE=production npx expo config --type public` shows an `ios.infoPlist` with
+      **no** `NSLocalNetworkUsageDescription` and **no** `NSBonjourServices`.
+- [x] `npx expo config --type public` (no env var) shows both present, `NSBonjourServices`
+      containing each value exactly once.
+- [x] `CFBundleLocalizations` is `["en","pl","hu","de"]` — four entries, not eight — in both.
+- [x] `bundleIdentifier`, `plugins`, `extra.eas.projectId` and every other key are byte-identical
+      between the two resolutions — verified by diffing the full resolved configs: the only
+      difference is the `ios.infoPlist` block containing the two dev-only keys.
+- [x] `npm run typecheck` clean; `npm run test` — 394/394.
+
+---
+
+## Phase 4 — Accessibility foundations (strings + shared primitives)
+
+Guideline 4.0. Split from Phase 5 so the shared components — which account for the majority of
+rendered controls — land and can be verified on their own.
+
+### String strategy
+
+One new `a11y` block in the **`common`** namespace, referenced cross-namespace as
+`t('common:a11y.close')`. i18next's default `nsSeparator: ':'` is in effect
+([i18n/index.ts](../src/lib/i18n/index.ts) does not override it), so any component can reach it
+without changing its `useTranslation(...)` call. `missingKeyHandler` throws in `__DEV__`, so a
+typo'd key is a loud dev crash, not a silent raw string.
+
+- [x] Added the Phase-4 subset of `a11y` to `common.json` (× 4 locales, identical key sets):
+      `a11y.digit` (`"{{digit}}"`), `a11y.deleteDigit`, `a11y.unlockWithFaceId`,
+      `a11y.unlockWithFingerprint`, `a11y.pinProgress` (`"{{filled}} of {{length}} digits
+      entered"`), `a11y.goalProgress` (`"{{percent}} percent of goal reached"`).
+      **Scope decision:** only the six keys Phase 4 actually references were added now;
+      `a11y.close`/`back`/`cancel`/`save`/`addGoal`/`openSettings`/`sendMessage` are deferred to
+      Phase 5, added in the same commit as the code that uses them — avoids unused keys sitting
+      in the tree between phases. `locales.test.ts` parity holds either way since all four
+      locales gained the same six keys together.
+
+### Shared primitives
+
+- [x] **`PinPad`** — the highest-value fix; a keypad VoiceOver cannot read is a real lockout.
+      Added `useTranslation('common')`; `Key` now takes a required `accessibilityLabel` prop
+      plus `accessibilityRole="button"` and `accessibilityState={{ disabled }}`. Digit keys get
+      `t('a11y.digit', { digit: k })`, backspace gets `t('a11y.deleteDigit')`, and the biometric
+      key branches on `biometricKind` (`'face'` → `a11y.unlockWithFaceId`, everything else →
+      `a11y.unlockWithFingerprint` — mirrors the existing icon logic, which already collapses
+      `fingerprint`/`iris` to the same glyph).
+- [x] **`PinDots`** — was a row of anonymous `View`s. Now wrapped with `accessible`,
+      `accessibilityRole="progressbar"`, `accessibilityLabel={t('a11y.pinProgress', { filled,
+      length })}` so entry progress is announced as one element instead of `length` silent dots.
+- [x] **`Button`** — added the dev-only guard: `if (__DEV__ && !label && !accessibilityLabel)
+      console.warn(...)`. Render-time (not a `useEffect`) since it's a pure diagnostic with no
+      side effect on app state — same class of thing as React's own dev warnings.
+- [x] **`BottomSheet`** scrim (`:149`) — hidden via `accessibilityElementsHidden` +
+      `importantForAccessibility="no-hide-descendants"` (iOS honors the former, Android the
+      latter). Confirmed safe: every current `BottomSheet` caller renders its own accessible
+      close control inside the sheet (the Phase 5 worklist), so nothing becomes unreachable.
+- [x] **`ProgressRing`** — accepts an optional `accessibilityLabel`. **Changed from the plan's
+      original approach:** rather than setting `accessible` on the *outer* `View` (which also
+      wraps `children` — the on-screen amount/icon — and would have collapsed them into one
+      opaque "72 percent" node, discarding the actual figure), the accessibility props
+      (`accessible`, `accessibilityRole="progressbar"`, `accessibilityLabel`,
+      `accessibilityValue={{ min: 0, max: 100, now: Math.round(progress) }}`) are set on the
+      inner SVG-only wrapper `View` instead. That `View` has no text children, so it becomes its
+      own silent progressbar element while `children` (the amount) is announced separately and
+      unmodified — this directly satisfies the plan's own fallback instruction ("prefer labelling
+      a sibling wrapper over hiding the children") by construction, without needing an on-device
+      check to discover the collapse problem first.
+      Wired both call sites: [app/(tabs)/index.tsx:573](../app/(tabs)/index.tsx) and
+      [app/(tabs)/goals.tsx:221](../app/(tabs)/goals.tsx), both with
+      `t('common:a11y.goalProgress', { percent: pct })` (`pct` was already `Math.round`ed at
+      both sites, so no extra rounding needed there).
+
+**Files to modify**
+
+| File | Change |
+|---|---|
+| [src/lib/i18n/locales/{en,pl,hu,de}/common.json](../src/lib/i18n/locales/en/common.json) | new `a11y` block × 4 |
+| [src/components/auth/PinPad.tsx](../src/components/auth/PinPad.tsx) | roles + labels on `Key`, `PinDots`; add `useTranslation` |
+| [src/components/ui/button.tsx](../src/components/ui/button.tsx) | `__DEV__` unlabeled-button warning |
+| [src/components/animation/BottomSheet.tsx](../src/components/animation/BottomSheet.tsx):149 | hide the scrim from a11y |
+| [src/components/ProgressRing.tsx](../src/components/ProgressRing.tsx) | optional label + `progressbar` role |
+| [app/(tabs)/index.tsx](../app/(tabs)/index.tsx):573 | pass ring label |
+| [app/(tabs)/goals.tsx](../app/(tabs)/goals.tsx):221 | pass ring label |
+
+**Phase complete when:**
+- [x] Every one of the twelve `PinPad` keys has a role and a translated name; the biometric key's
+      name matches the icon actually shown (Face ID vs. fingerprint).
+- [x] `locales.test.ts` passes — all four `common.json` files have identical key sets (84/84 in
+      `locales.test.ts` + `contentParity.test.ts` combined).
+- [x] `npm run typecheck` clean; `npm run test` — 394/394.
+- [ ] Manual iOS Simulator pass with VoiceOver on the lock screen: every key announces, and the
+      dots announce progress. **Deferred to the user** — per standing preference, visual/
+      interaction checks are the user's to run, not simulator-driven by me.
+
+---
+
+## Phase 5 — Accessibility sweep (screen-level controls)
+
+The remaining 23 sites from Phase 0's table. Mechanical, but grouped so each commit is reviewable.
+
+- [x] **Modal / sheet close & cancel buttons (11)** — `accessibilityRole="button"` +
+      `accessibilityLabel={t('common:a11y.close')}` (or `a11y.cancel` for `PinCreationFlow:190`,
+      which cancels the PIN-creation flow rather than dismissing a sheet).
+      Files: `AddExpenseModal:50`, `AddSavingsModal:65`, `DeepAnalysisConfirmModal:45`,
+      `UpgradeModal:59`, `ui/calendar-modal:110`, `ui/picker-modal:90`,
+      `ui/currency-convert-modal:57`, `auth/PinCreationFlow:190`, `app/change-pin:106`,
+      `app/delete-account:124`, `app/delete-account:154`, `app/enable-biometric:102` (12 files —
+      `delete-account.tsx` has two separate close buttons on two different confirmation
+      screens, both fixed). Added `accessibilityState={{ disabled }}` on the three that are
+      `disabled` while busy (`DeepAnalysisConfirmModal`, `currency-convert-modal`,
+      `delete-account:124`) — `Pressable` supports `accessibilityState` directly, unlike `Button`.
+- [x] **Icon-only back `Button`s (12)** — `accessibilityLabel={t('common:a11y.back')}`.
+      Files: `app/onboarding.tsx:651,667,683,705,728,755,783` + the 8th
+      (`AccountFinalization`'s conditional-onPress back button, a multi-line JSX block rather
+      than a single line), `app/(tabs)/goals.tsx` (three back buttons in the goal-creation flow,
+      now at lines 351/392/472 after the added props shifted them),
+      `src/components/ContributionStep.tsx:249`. **Did not** also pass `accessibilityState` on
+      the `AccountFinalization` one — `Button`'s own `disabled` prop already drives that
+      internally (confirmed via `button.tsx`'s `ButtonProps`, which doesn't even expose
+      `accessibilityState` as a settable prop — passing it hit a type error, corrected by
+      removing the redundant pass-through).
+- [x] **Back chevrons / arrows (4)** — role + `a11y.back`.
+      Files: `app/settings.tsx`, `app/plans.tsx`, `app/downgrade-selection.tsx:96`,
+      `auth/LoginGate.tsx:163`. (`downgrade-selection.tsx:96` is visually an X icon, not a
+      chevron, but it calls `router.back()` — labelled `a11y.back` to match its actual behavior
+      rather than its glyph.)
+- [x] **FABs (3)** — `a11y.addGoal` (goals-tab create button), `a11y.openSettings`
+      (profile-tab settings button), `a11y.close` (settings-screen close button).
+- [x] **Inline ✓ confirm buttons (2)** — `a11y.save`; `profile:157` (name), `profile:221` (income).
+- [x] **Coach send button (1)** — `a11y.sendMessage` (`coach:523`). Did not add a redundant
+      `accessibilityState` — `Button` already derives it from the `disabled` prop already passed.
+- [ ] **Money figures** — the audit asks that amounts "are announced, not spelled".
+      `formatCurrency` output (`$1,234`, `1 234 zł`) is already read as a quantity by VoiceOver;
+      this is a *verification* item, not a code change, and is **not yet done** — needs an
+      on-device VoiceOver pass over the Profile stat row and the dashboard ring, left for the
+      user per standing preference (see Phase complete section).
+- [x] Re-ran the scan script from Phase 0: **0** unlabeled controls, down from 36. The one
+      remaining hit the script reports (`BottomSheet.tsx:153`, the tap-to-dismiss scrim) is the
+      intentionally-hidden element from Phase 4 — the script has no way to know
+      `accessibilityElementsHidden` makes "no label" correct rather than a gap.
+
+**Files to modify:** the 23 sites listed above, across
+`app/onboarding.tsx`, `app/settings.tsx`, `app/plans.tsx`, `app/change-pin.tsx`,
+`app/delete-account.tsx`, `app/enable-biometric.tsx`, `app/downgrade-selection.tsx`,
+`app/(tabs)/goals.tsx`, `app/(tabs)/profile.tsx`, `app/(tabs)/coach.tsx`,
+`src/components/AddExpenseModal.tsx`, `src/components/AddSavingsModal.tsx`,
+`src/components/DeepAnalysisConfirmModal.tsx`, `src/components/UpgradeModal.tsx`,
+`src/components/ContributionStep.tsx`, `src/components/ui/calendar-modal.tsx`,
+`src/components/ui/picker-modal.tsx`, `src/components/ui/currency-convert-modal.tsx`,
+`src/components/auth/PinCreationFlow.tsx`, `src/components/auth/LoginGate.tsx`.
+
+**Explicitly NOT changed:** `app/(tabs)/_layout.tsx`. The tab bar is already labelled by
+React Navigation (Phase 0, row 5). Adding `tabBarAccessibilityLabel` would *replace* the
+platform-idiomatic `"Home, tab, 1 of 5"` with a bare `"Home"` — a regression.
+
+**Phase complete when:**
+- [x] The Phase 0 scan script reports **0** unlabeled interactive elements (the one remaining
+      hit is the intentionally-hidden `BottomSheet` scrim, not a gap).
+- [x] No new translation key is referenced that does not exist in all four locales — confirmed by
+      re-running `locales.test.ts`/`contentParity.test.ts` (still 84/84) plus a full-suite pass.
+- [x] `npm run typecheck` clean; `npm run test` — 394/394.
+- [ ] **User-verified** VoiceOver pass over: onboarding back navigation, goal creation, a modal
+      open/close, the Coach send button, and the Profile save-name flow — **not yet run**, left
+      for the user per standing preference. This also covers the money-figures verification item
+      above, which is otherwise unchecked.
+
+---
+
+## Phase 6 — Reviewer demo accounts: verify, don't rebuild
+
+Guideline 2.1. Per Phase 0, the accounts are real and were verified live on 2026-08-23. What is
+left is confirmation that nothing has drifted, plus the handoff the audit correctly flags.
+**No code changes in this phase.**
+
+- [x] Re-read both `entitlements` rows via the Appwrite MCP — confirmed still
+      `status: "active"`, `locked: false`, `current_period_end: 2036-08-23T00:00:00.000+00:00`,
+      `trial_ends_at: null` for both `6a8a9a2fe178f05e6f0e` (Apple) and `6a8a9a345c0771b9a2d5`
+      (Google). No drift since #148.
+- [x] Confirmed both accounts have a `users` row (`first_name`/`email`/`country`/`currency` all
+      set correctly) and exactly one `goals` row each (Apple → "New Laptop" $1,500 target,
+      Google → "Vacation Fund" $2,000 target).
+- [x] **Gap the audit names that #148 did not cover — investigated, recommendation reversed.**
+      The audit asks for "seeded goals, savings history, and an active entitlement"; #148 seeded
+      goals and entitlements but not deposit history, so a reviewer sees goals at 0%. Read
+      [src/lib/goalsSync.ts](../src/lib/goalsSync.ts) to seed it and found seeding is not
+      possible at all: the `goals` table has **no column for saved progress or deposit
+      history** — the file's own header comment states *"There is no server representation for
+      saved progress or deposit history … a restored goal always starts at zero saved
+      progress"* (tracked separately as `ONBOARDING_FIXES.md` #3). This is not specific to the
+      demo accounts — every real user's goal shows 0% on a fresh-device login, by design of the
+      current sync layer. **Reversed my earlier recommendation to seed deposits** — there is
+      nothing to seed them into. Documented instead in the review notes (below) so a reviewer
+      reads 0% as expected, not broken.
+- [x] Known limitation re-checked, from
+      [REVIEWER_DEMO_LOGIN.md](./REVIEWER_DEMO_LOGIN.md): confirmed still true by reading
+      `authLock.ts` — only `hydrateGoalsIfEmpty` runs on a fresh-device login; there is no
+      equivalent for `account.name`/`account.email`. The reviewer's Profile tab will show a
+      blank/default name. Not fixed here — would need new sync code, out of scope for a
+      verification-only phase.
+- [ ] Re-verify the password path once on a **production-profile** build, not development
+      (the audit asks for this specifically; #148 verified on `expo run:ios`, a development
+      build). **Not done** — requires `eas build --profile production` + TestFlight or a local
+      release install, which is a build/deploy action outside what this session can run. Left
+      as a user action.
+- [x] Drafted the App Store Connect / Google Play Console review-notes text, including the
+      audit's PIN warning and the 0%-progress note from the deposit-history finding above.
+      Posted to [#168](https://github.com/Koin-App-Official/pignify/issues/168) as a comment
+      (with a `<insert current password>` placeholder — the actual passwords were shared in
+      chat once and rotated once since #148; this session has no way to read them back, since
+      Appwrite never exposes plaintext passwords via the API).
+
+**Files to modify:** none. This is Appwrite data + App Store Connect.
+
+**Phase complete when:**
+- [x] Both demo accounts confirmed active, ungated, and populated (goals; deposits confirmed
+      infeasible to seed — see above, not a gap in this phase's work).
+- [ ] The password login has been exercised at least once on a production-profile build —
+      **outstanding, needs the user** (requires an actual EAS production build).
+- [x] Review-notes text (credentials + PIN warning + the 0%-progress note) is written and
+      attached to [#168](https://github.com/Koin-App-Official/pignify/issues/168) as a comment,
+      ready to paste at submission time once the current password is filled in.
+- [x] The decision to *not* seed deposits (impossible with the current schema) and to *not* fix
+      the blank-name gap (out of scope) are both recorded above with reasons.
+
+---
+
+## Phase 7 — Verification and close-out
+
+- [x] `npm run typecheck` — clean.
+- [x] `npm run test` — 394/394 (unchanged from the baseline at planning time; no phase added
+      tests — see the plan's "Explicitly out of scope" section for why).
+- [x] `npm run check:bundle-size` — `ios: 6.39 MB / 7.63 MB budget — within budget (+0.61 MB vs
+      baseline)`. The delta reflects all of #166 + #168's combined work on this branch since the
+      recorded baseline, not a regression introduced by any single phase here — well inside budget.
+- [x] `EAS_BUILD_PROFILE=production npx expo config --type public` re-checked one final time
+      after all phases — Phase 3's fix holds: the two dev-only Info.plist keys are still absent
+      from the production resolution and present in the default one, nothing else differs.
+- [x] Full-tree grep for release-build leaks:
+      `grep -rn "Simulate\|(Demo)\|development server" app src languages app.json app.config.js`
+      — 5 hits, all accounted for: a code comment (`LoginGate.tsx:139`), two locale strings each
+      in `coach.json`/`plans.json` (reached only through the `__DEV__ && !isBillingConfigured()`
+      branch verified in Phase 2), and the dev-server description string in `app.config.js`
+      (verified in Phase 3 to be absent from the production-resolved config). No leaks.
+- [x] Update every checkbox in this file to reflect what actually happened, including anything
+      skipped and why (house convention — see the other `implementations/*.md`).
+- [x] Per [github-issues-prs](../GITHUB_ISSUES_GUIDE.md) Phase 3: ticked the issue checklist,
+      closed [#168](https://github.com/Koin-App-Official/pignify/issues/168) with a completion
+      comment, then opened the PR with `Closes #168`.
+
+**Phase complete when:**
+- [x] Typecheck, tests and bundle-size are all green, and the numbers are written down here.
+- [x] This document has no stale `[ ]` describing work that was in fact done, and no `[x]`
+      describing work that was not — the two genuinely-open items (a production-profile password
+      login re-check, and an on-device VoiceOver pass) are left as `[ ]` with the user named as
+      the owner, not marked done.
+- [x] Issue #168 is closed with a completion comment and the PR is open against `main` — #166
+      merged into `main` via PR #167 before this phase ran, so `main` is the current base branch
+      rather than the now-merged `feat/issue-166-app-review-blockers`.
+
+---
+
+## Explicitly out of scope
+
+- **Guideline 3.1.1 (IAP / payment rail).** Still deferred pending the web billing dashboard —
+  see [APP_REVIEW_BLOCKERS.md](./APP_REVIEW_BLOCKERS.md) Phase 6. Phase 2 here deliberately does
+  not touch the checkout *rail*, only the failure path around it.
+- **The audit's Note-severity items** — stale `ios/` directory, `ITSAppUsesNonExemptEncryption`
+  legal confirmation, the iPad `supportsTablet` decision, `expo-web-browser` for legal links,
+  dark mode, `autoIncrement` build numbers. Not requested. The one exception is the duplicated
+  `app.json` arrays, folded into Phase 3 because that phase rewrites those exact arrays.
+- **A full WCAG pass** — Dynamic Type scaling, contrast ratios, focus order, reduced-motion.
+  Phase 4/5 deliver *names and roles for every control*, which is what Guideline 4.0 and the
+  audit ask for; they do not claim full accessibility conformance.
+- **New automated tests.** No existing test renders a component (all 19 suites are pure-logic,
+  under `src/lib/`), and adding a React Native rendering harness to assert `accessibilityLabel`
+  props would be a larger change than every fix in this plan combined. The guardrails used
+  instead are `locales.test.ts` key parity, the dev `missingKeyHandler` throw, the new
+  `__DEV__` unlabeled-`Button` warning, and re-running the Phase 0 scan script.
+
+---
+
+## Appendix — the unlabeled-control scan script
+
+Throwaway tooling, kept here so Phase 0's "36" and Phase 5's "0" are both reproducible rather
+than asserted. Run with `node scan.mjs` from a scratch directory. It is deliberately *not*
+committed to `scripts/` — it is a one-off audit aid, not part of the build.
+
+It finds `TouchableOpacity` / `Pressable` / `Button` / `TouchableWithoutFeedback` /
+`TouchableHighlight` elements that have no `accessibilityLabel`, no `label` prop, and no `<Text>`
+or `<Trans>` descendant to be named by. Brace-aware opening-tag parsing matters: a naive scan for
+the closing `>` breaks on every `onPress={() => …}` arrow and produces false positives.
+
+```js
+import fs from 'fs';
+import path from 'path';
+
+const ROOT = '/Users/mateuszrochowski/My-Programs/apps/piggy';
+const roots = [`${ROOT}/app`, `${ROOT}/src`];
+const files = [];
+function walk(d) {
+  for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+    const p = path.join(d, e.name);
+    if (e.isDirectory()) { if (e.name !== 'node_modules') walk(p); }
+    else if (e.name.endsWith('.tsx')) files.push(p);
+  }
+}
+roots.forEach(walk);
+
+// Find the '>' that closes the opening tag, ignoring '>' inside {expressions} and strings.
+function endOfOpenTag(src, start) {
+  let brace = 0, inStr = null;
+  for (let i = start; i < src.length; i++) {
+    const c = src[i];
+    if (inStr) { if (c === inStr && src[i - 1] !== '\\') inStr = null; continue; }
+    if (c === '"' || c === "'" || c === '`') { inStr = c; continue; }
+    if (c === '{') brace++;
+    else if (c === '}') brace--;
+    else if (c === '>' && brace === 0) return i;
+  }
+  return -1;
+}
+
+const TAGS = ['TouchableOpacity', 'Pressable', 'Button', 'TouchableWithoutFeedback', 'TouchableHighlight'];
+const out = [];
+for (const f of files) {
+  const src = fs.readFileSync(f, 'utf8');
+  for (const tag of TAGS) {
+    const re = new RegExp(`<${tag}(?=[\\s/>])`, 'g');
+    let m;
+    while ((m = re.exec(src))) {
+      const start = m.index;
+      const tagEnd = endOfOpenTag(src, start);
+      if (tagEnd < 0) continue;
+      const openTag = src.slice(start, tagEnd + 1);
+      let body = '';
+      if (src[tagEnd - 1] !== '/') {
+        let idx = tagEnd + 1, depth = 1, end = -1;
+        while (idx < src.length && depth > 0) {
+          const no = src.indexOf(`<${tag}`, idx), nc = src.indexOf(`</${tag}>`, idx);
+          if (nc === -1) break;
+          if (no !== -1 && no < nc) { depth++; idx = no + 1; }
+          else { depth--; idx = nc + tag.length + 3; if (depth === 0) end = nc; }
+        }
+        body = end === -1 ? '' : src.slice(tagEnd + 1, end);
+      }
+      const named = /accessibilityLabel/.test(openTag)
+        || /[\s{]label=/.test(openTag)
+        || /<(Text|Trans)[\s>]/.test(body);
+      if (!named) {
+        const line = src.slice(0, start).split('\n').length;
+        out.push(`${f.replace(ROOT + '/', '')}:${line}\t${openTag.replace(/\s+/g, ' ').slice(0, 110)}`);
+      }
+    }
+  }
+}
+out.sort();
+console.log(out.join('\n'));
+console.log('\nTOTAL:', out.length);
+```
+
+**Known limits:** it cannot see labels applied via spread props or a wrapper component, and it
+counts a shared component (e.g. `PinPad`'s `Key`) once regardless of how many instances render.
+Treat its output as a worklist to read, not as a verdict — every one of the 36 sites in Phase 0
+was opened and confirmed by hand.

@@ -15,6 +15,8 @@
   "checkoutNotConfiguredBody": "A Stripe Checkout nincs beállítva ebben a verzióban. Szimuláljunk egy sikeres vásárlást 1 extra üzenetről?",
   "cancel": "Mégse",
   "simulatePurchase": "Vásárlás szimulálása",
+  "checkoutFailedTitle": "Nem sikerült megnyitni a fizetést",
+  "checkoutFailedBody": "Nem sikerült megnyitni a fizetést. Ellenőrizd a kapcsolatot, és próbáld újra, vagy írj nekünk: {{email}}.",
   "title": "AI edző",
   "onlineStatus": "Online • Készen áll a segítségre",
   "upgradeYourPlan": "Csomag frissítése",

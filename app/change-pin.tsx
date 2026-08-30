@@ -103,7 +103,13 @@ export default function ChangePin() {
   return (
     <SafeAreaView className="flex-1 bg-surface">
       <View className="flex-1 items-center justify-center px-8">
-        <Pressable onPress={() => router.back()} className="absolute top-4 right-4 p-2" hitSlop={12}>
+        <Pressable
+          onPress={() => router.back()}
+          className="absolute top-4 right-4 p-2"
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={t('common:a11y.close')}
+        >
           <X size={22} color="#6b7280" />
         </Pressable>
         <Animated.View entering={FadeInDown.springify()} className="w-full items-center">

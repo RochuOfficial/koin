@@ -43,6 +43,8 @@
   "checkoutNotConfiguredBody": "Stripe Checkout ist in diesem Build nicht eingerichtet. Eine erfolgreiche Zahlung für {{plan}} simulieren?",
   "cancel": "Abbrechen",
   "simulatePayment": "Zahlung simulieren",
+  "checkoutFailedTitle": "Checkout konnte nicht geöffnet werden",
+  "checkoutFailedBody": "Wir konnten den Checkout nicht öffnen. Überprüfe deine Verbindung und versuche es erneut, oder schreibe uns an {{email}}.",
   "switchToTitle": "Zu {{plan}} wechseln?",
   "switchToBody": "Dies tritt am {{date}} in Kraft. Es wird nie etwas gelöscht — wenn dieser Plan weniger Ziele bietet als du hast, wählst du selbst aus, welche zuerst aktiv bleiben.",
   "keepCurrentPlan": "Aktuellen Plan behalten",

@@ -158,6 +158,8 @@ export default function Profile() {
                 onPress={saveName}
                 hitSlop={8}
                 className="h-8 w-8 items-center justify-center rounded-full bg-primary/20"
+                accessibilityRole="button"
+                accessibilityLabel={t('common:a11y.save')}
               >
                 <Check size={16} color="#1D4ED8" />
               </TouchableOpacity>
@@ -222,6 +224,8 @@ export default function Profile() {
                 onPress={saveIncome}
                 hitSlop={8}
                 className="h-10 w-10 items-center justify-center rounded-full bg-primary/20"
+                accessibilityRole="button"
+                accessibilityLabel={t('common:a11y.save')}
               >
                 <Check size={18} color="#1D4ED8" />
               </TouchableOpacity>
@@ -314,6 +318,8 @@ export default function Profile() {
         onPress={() => router.push('/settings')}
         className="absolute bottom-6 right-5 z-40 h-14 w-14 items-center justify-center rounded-2xl bg-primary"
         style={{ ...CARD_SHADOW, shadowOpacity: 0.2 }}
+        accessibilityRole="button"
+        accessibilityLabel={t('common:a11y.openSettings')}
       >
         <SettingsIcon size={22} color="#FFFFFF" />
       </TouchableOpacity>
