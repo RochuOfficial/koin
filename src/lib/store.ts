@@ -40,6 +40,7 @@ import {
   getCurrencySymbol,
 } from './catalogs';
 import type { IconName } from '@/components/icons/registry';
+import { AI_CONSENT_VERSION, type AiConsent } from './aiConsent';
 
 export type { Achievement };
 export { GOAL_TEMPLATES, COUNTRIES, CURRENCIES, EXPENSE_CATEGORIES, getCurrency, getCurrencySymbol };
@@ -256,6 +257,15 @@ export interface UserProfile {
    * UK wants `pl` copy with `GBP` amounts.
    */
   language: SupportedLanguage;
+  /**
+   * Explicit permission to send data to the Coach/Deep Analysis AI surfaces
+   * (App Review Guideline 5.1.2(i) — see implementations/APP_REVIEW_BLOCKERS.md).
+   * null until the user has ever been asked. `version` pins the consent to the
+   * disclosure copy shown at grant time — `needsAiConsent` (aiConsent.ts) asks
+   * again if AI_CONSENT_VERSION has since moved past it, so widening what's
+   * disclosed doesn't silently ride on an old "yes."
+   */
+  aiConsent: AiConsent | null;
 }
 
 export const DEFAULT_PROFILE: UserProfile = {
@@ -297,6 +307,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   },
   autoLockMinutes: 0,
   language: detectDeviceLanguage(),
+  aiConsent: null,
 };
 
 export interface PiggyState {
@@ -329,6 +340,11 @@ export interface PiggyState {
   updateProfile: (updates: Partial<UserProfile>) => void;
   /** Converts every stored monetary amount by `rate` and sets `currency` to `targetCurrency`. */
   applyCurrencyConversion: (targetCurrency: string, rate: number) => void;
+
+  /** Records explicit permission for the Coach/Deep Analysis AI surfaces, at the current disclosure version. */
+  grantAiConsent: () => void;
+  /** Withdraws AI consent — the next AI call re-shows the modal (Settings toggle, Phase 4). */
+  revokeAiConsent: () => void;
 
   /**
    * Apply a plan change. Upgrades (higher rank) take effect immediately (C1);
@@ -514,6 +530,19 @@ export const useStore = create<PiggyState>()(
       applyCurrencyConversion: (targetCurrency, rate) => set((state) => ({
         profile: { ...convertProfileAmounts(state.profile, rate), currency: targetCurrency },
         goals: convertGoalAmounts(state.goals, rate),
+      })),
+
+      grantAiConsent: () => set((state) => ({
+        profile: {
+          ...state.profile,
+          aiConsent: { granted: true, grantedAt: new Date().toISOString(), version: AI_CONSENT_VERSION },
+        },
+      })),
+      revokeAiConsent: () => set((state) => ({
+        profile: {
+          ...state.profile,
+          aiConsent: { granted: false, grantedAt: state.profile.aiConsent?.grantedAt ?? null, version: AI_CONSENT_VERSION },
+        },
       })),
 
       changePlan: (target) => set((state) => {
@@ -853,7 +882,7 @@ export const useStore = create<PiggyState>()(
     {
       name: 'piggy-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      version: PIGGY_STORE_VERSION,
+      version: PIGGY_STORE_VERSION, // bumped to 8 for profile.aiConsent — see storeMigrations.ts
       // Migration steps live in storeMigrations.ts (pure, unit-tested) — this
       // module transitively pulls in react-native (AsyncStorage,
       // expo-notifications) and can't be imported under vitest at all.

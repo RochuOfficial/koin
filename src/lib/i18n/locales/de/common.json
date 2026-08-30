@@ -29,5 +29,18 @@
     "pl": "Polski",
     "hu": "Magyar",
     "de": "Deutsch"
+  },
+  "aiConsent": {
+    "title": "Bevor du KI-Funktionen nutzt",
+    "intro": "Coach und Detailanalyse senden einige deiner Informationen an externe KI-Anbieter, um eine Antwort oder einen Bericht zu erstellen.",
+    "dataShared": "Was geteilt wird: dein Vorname, Sparziele und ihr Fortschritt, monatliches Einkommen sowie die Nachrichten oder Anfragen, die du sendest.",
+    "providers": "Wer es erhält: Coach-Nachrichten werden von OpenAI verarbeitet. Berichte der Detailanalyse werden von OpenAI und Anthropic verarbeitet.",
+    "retention": "Wir haben keinen Einfluss darauf, wie lange diese Anbieter Anfrageprotokolle nach der Erstellung einer Antwort aufbewahren.",
+    "learnMore": "Unsere Richtlinie zur KI-Transparenz lesen",
+    "learnMoreError": "Der Link zur Richtlinie zur KI-Transparenz konnte nicht geöffnet werden.",
+    "notNow": "Nicht jetzt",
+    "allow": "Erlauben",
+    "allowHint": "Erlaubt Coach und Detailanalyse, deine Daten an unsere KI-Anbieter zu senden.",
+    "notNowHint": "Lehnt KI-Funktionen vorerst ab. Du kannst dies später in den Einstellungen aktivieren."
   }
 }

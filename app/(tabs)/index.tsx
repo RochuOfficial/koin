@@ -31,6 +31,8 @@ import { useEntitlements } from '@/hooks/useEntitlements';
 import { gateInfo, type GateInfo, type GateKey } from '@/lib/entitlements';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { DeepAnalysisConfirmModal } from '@/components/DeepAnalysisConfirmModal';
+import { AiConsentModal } from '@/components/AiConsentModal';
+import { needsAiConsent, AI_CONSENT_VERSION } from '@/lib/aiConsent';
 import { SkiaConfetti } from '@/components/animation/SkiaConfetti';
 import { useCelebrate } from '@/components/animation/useCelebrate';
 import { Icon } from '@/components/icons/Icon';
@@ -106,9 +108,12 @@ export default function Dashboard() {
 
   const { plan, has, deepAnalysis } = useEntitlements();
   const incrementDeepAnalysis = useStore((s) => s.incrementDeepAnalysis);
+  const aiConsent = useStore((s) => s.profile.aiConsent);
+  const grantAiConsent = useStore((s) => s.grantAiConsent);
   const [gate, setGate] = useState<GateInfo | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [confirmingAnalysis, setConfirmingAnalysis] = useState(false);
+  const [showAiConsent, setShowAiConsent] = useState(false);
 
   const openGate = (key: GateKey) => setGate(gateInfo(key, plan, tPlans));
   const closeGate = () => setGate(null);
@@ -120,8 +125,24 @@ export default function Dashboard() {
   const runDeepAnalysis = () => {
     if (!has('deepAnalysis')) return openGate('deepAnalysis');
     if (!deepAnalysis.allowed) return openGate('deepAnalysisQuota');
+    // App Review 5.1.2(i): explicit permission before the request (name,
+    // income, saved amount) reaches the Deep Analysis AI providers. Checked
+    // after the entitlement gates — no point asking on a request that would
+    // be blocked anyway — and before the "are you sure" confirm modal, so a
+    // decline never reaches confirmDeepAnalysis()/triggerDeepAnalysis().
+    if (needsAiConsent(aiConsent, AI_CONSENT_VERSION)) {
+      setShowAiConsent(true);
+      return;
+    }
     setConfirmingAnalysis(true);
   };
+
+  const handleAiConsentAllow = () => {
+    grantAiConsent();
+    setShowAiConsent(false);
+    setConfirmingAnalysis(true);
+  };
+  const handleAiConsentDecline = () => setShowAiConsent(false);
 
   const confirmDeepAnalysis = async () => {
     setIsAnalyzing(true);
@@ -521,6 +542,12 @@ export default function Dashboard() {
         isRunning={isAnalyzing}
         onConfirm={confirmDeepAnalysis}
         onClose={() => setConfirmingAnalysis(false)}
+      />
+
+      <AiConsentModal
+        isVisible={showAiConsent}
+        onAllow={handleAiConsentAllow}
+        onDecline={handleAiConsentDecline}
       />
     </SafeAreaView>
     </ScreenTransition>

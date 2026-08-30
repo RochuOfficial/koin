@@ -18,7 +18,8 @@
     "subscription": "Subskrypcja",
     "security": "Bezpieczeństwo",
     "account": "Konto",
-    "supportAndAbout": "Pomoc i informacje"
+    "supportAndAbout": "Pomoc i informacje",
+    "privacy": "Prywatność"
   },
   "planLabel": "Plan {{plan}}",
   "planStatus": {
@@ -72,5 +73,8 @@
     "contactSupport": "Skontaktuj się z pomocą",
     "notConfigured": "Linki pomocy nie są jeszcze skonfigurowane."
   },
-  "versionLabel": "Piggy v{{version}}"
+  "versionLabel": "Piggy v{{version}}",
+  "aiFeatures": {
+    "toggleLabel": "Funkcje AI"
+  }
 }

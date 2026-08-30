@@ -29,5 +29,18 @@
     "pl": "Polski",
     "hu": "Magyar",
     "de": "Deutsch"
+  },
+  "aiConsent": {
+    "title": "Zanim skorzystasz z funkcji AI",
+    "intro": "Trener i Szczegółowa analiza wysyłają część Twoich informacji do zewnętrznych dostawców AI, aby wygenerować odpowiedź lub raport.",
+    "dataShared": "Co jest udostępniane: Twoje imię, cele oszczędnościowe i postępy, miesięczny dochód oraz wiadomości lub prośby, które wysyłasz.",
+    "providers": "Kto to otrzymuje: wiadomości Trenera przetwarza OpenAI. Raporty Szczegółowej analizy przetwarzają OpenAI i Anthropic.",
+    "retention": "Nie mamy wpływu na to, jak długo ci dostawcy przechowują dzienniki zapytań po wygenerowaniu odpowiedzi.",
+    "learnMore": "Przeczytaj naszą politykę przejrzystości AI",
+    "learnMoreError": "Nie udało się otworzyć linku do polityki przejrzystości AI.",
+    "notNow": "Nie teraz",
+    "allow": "Zezwól",
+    "allowHint": "Umożliwia Trenerowi i Szczegółowej analizie wysyłanie Twoich danych do naszych dostawców AI.",
+    "notNowHint": "Na razie odmawia korzystania z funkcji AI. Możesz to później włączyć w Ustawieniach."
   }
 }

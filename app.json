@@ -74,7 +74,8 @@
         }
       ],
       "./plugins/withoutPushEntitlement",
-      "expo-localization"
+      "expo-localization",
+      "expo-web-browser"
     ],
     "extra": {
       "router": {},
