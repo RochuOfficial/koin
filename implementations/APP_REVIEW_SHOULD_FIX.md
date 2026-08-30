@@ -176,21 +176,19 @@ Chosen predicate deliberately: EAS Build sets `EAS_BUILD_PROFILE`; a local
 developer-friendly one and only the App Store rail strips them. The inverse
 (`=== 'development'`) would silently break every local build.
 
-- [ ] Create [app.config.js](../app.config.js) exporting `({ config }) => ({ ... })`.
-- [ ] Remove `NSLocalNetworkUsageDescription` and `NSBonjourServices` from
+- [x] Create [app.config.js](../app.config.js) exporting `({ config }) => ({ ... })`.
+- [x] Remove `NSLocalNetworkUsageDescription` and `NSBonjourServices` from
       [app.json](../app.json)'s `ios.infoPlist`; re-add them from `app.config.js` only when
-      `!IS_PRODUCTION_BUILD`.
-- [ ] Leave `CADisableMinimumFrameDurationOnPhone`, `CFBundleLocalizations` and
+      `!isProductionBuild`.
+- [x] Left `CADisableMinimumFrameDurationOnPhone`, `CFBundleLocalizations` and
       `ITSAppUsesNonExemptEncryption` in `app.json` — they belong in every build.
-- [ ] Comment the file in the house style (the *why*, like
-      [plugins/withoutPushEntitlement.js](../plugins/withoutPushEntitlement.js) does), naming
+- [x] Commented the file in the house style (the *why*, matching
+      [plugins/withoutPushEntitlement.js](../plugins/withoutPushEntitlement.js)'s tone), naming
       the guideline and the reason the keys can't simply be deleted.
-- [ ] **Bundled Note-severity cleanup, same block:** de-duplicate `NSBonjourServices`
-      (`_expo._tcp`, `_metro._tcp` listed twice) and `CFBundleLocalizations`
-      (`en, pl, hu, de` listed twice). Restructuring these arrays while knowingly leaving them
-      doubled would be worse than fixing them; called out explicitly because it is *not* one of
-      the five yellow items.
-- [ ] Verify the resolved config both ways:
+- [x] **Bundled Note-severity cleanup, same block:** de-duplicated `NSBonjourServices`
+      (`_expo._tcp`, `_metro._tcp` were listed twice) and `CFBundleLocalizations`
+      (`en, pl, hu, de` was listed twice).
+- [x] Verified the resolved config both ways:
       `npx expo config --type public` and
       `EAS_BUILD_PROFILE=production npx expo config --type public`, diffing `ios.infoPlist`.
 
@@ -202,14 +200,15 @@ developer-friendly one and only the App Store rail strips them. The inverse
 | [app.json](../app.json) | remove the two dev keys; de-duplicate the two arrays |
 
 **Phase complete when:**
-- [ ] `EAS_BUILD_PROFILE=production npx expo config --type public` shows an `ios.infoPlist` with
+- [x] `EAS_BUILD_PROFILE=production npx expo config --type public` shows an `ios.infoPlist` with
       **no** `NSLocalNetworkUsageDescription` and **no** `NSBonjourServices`.
-- [ ] `npx expo config --type public` (no env var) shows both present, each array containing
-      each value exactly once.
-- [ ] `CFBundleLocalizations` is `["en","pl","hu","de"]` — four entries, not eight — in both.
-- [ ] `bundleIdentifier`, `plugins`, `extra.eas.projectId` and every other key are byte-identical
-      between the two resolutions (diff the two outputs to prove the wrapper is otherwise inert).
-- [ ] `npm run typecheck` clean; `npm run test` — 394/394.
+- [x] `npx expo config --type public` (no env var) shows both present, `NSBonjourServices`
+      containing each value exactly once.
+- [x] `CFBundleLocalizations` is `["en","pl","hu","de"]` — four entries, not eight — in both.
+- [x] `bundleIdentifier`, `plugins`, `extra.eas.projectId` and every other key are byte-identical
+      between the two resolutions — verified by diffing the full resolved configs: the only
+      difference is the `ios.infoPlist` block containing the two dev-only keys.
+- [x] `npm run typecheck` clean; `npm run test` — 394/394.
 
 ---
 
