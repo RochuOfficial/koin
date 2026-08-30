@@ -372,37 +372,55 @@ Guideline 2.1. Per Phase 0, the accounts are real and were verified live on 2026
 left is confirmation that nothing has drifted, plus the handoff the audit correctly flags.
 **No code changes in this phase.**
 
-- [ ] Re-read both `entitlements` rows via the Appwrite MCP and confirm they are still
-      `status: "active"`, `locked: false`, `current_period_end: 2036-08-23`, `trial_ends_at: null`.
-- [ ] Confirm both accounts still have a `users` row and at least one `goals` row.
-- [ ] **Gap the audit names that #148 did not cover:** the audit asks for "seeded goals, savings
-      history, and an active entitlement". #148 seeded goals and entitlements but **not deposit
-      history** — a reviewer sees goals at 0% with an empty activity list. Decide whether to seed
-      a few deposits (makes the app look alive, ~15 min of MCP writes) or accept it.
-      → **Recommendation: seed them.** An empty dashboard invites the reviewer to go looking for
-      the paywall, which is exactly the surface with an unresolved 3.1.1 blocker.
-- [ ] Known limitation to re-check, from
-      [REVIEWER_DEMO_LOGIN.md](./REVIEWER_DEMO_LOGIN.md): on a fresh device only *goals* hydrate —
-      `account.name` / `account.email` do not, so the reviewer's Profile tab shows a blank name.
-      Confirm whether that is still true and whether it is worth fixing before submission.
+- [x] Re-read both `entitlements` rows via the Appwrite MCP — confirmed still
+      `status: "active"`, `locked: false`, `current_period_end: 2036-08-23T00:00:00.000+00:00`,
+      `trial_ends_at: null` for both `6a8a9a2fe178f05e6f0e` (Apple) and `6a8a9a345c0771b9a2d5`
+      (Google). No drift since #148.
+- [x] Confirmed both accounts have a `users` row (`first_name`/`email`/`country`/`currency` all
+      set correctly) and exactly one `goals` row each (Apple → "New Laptop" $1,500 target,
+      Google → "Vacation Fund" $2,000 target).
+- [x] **Gap the audit names that #148 did not cover — investigated, recommendation reversed.**
+      The audit asks for "seeded goals, savings history, and an active entitlement"; #148 seeded
+      goals and entitlements but not deposit history, so a reviewer sees goals at 0%. Read
+      [src/lib/goalsSync.ts](../src/lib/goalsSync.ts) to seed it and found seeding is not
+      possible at all: the `goals` table has **no column for saved progress or deposit
+      history** — the file's own header comment states *"There is no server representation for
+      saved progress or deposit history … a restored goal always starts at zero saved
+      progress"* (tracked separately as `ONBOARDING_FIXES.md` #3). This is not specific to the
+      demo accounts — every real user's goal shows 0% on a fresh-device login, by design of the
+      current sync layer. **Reversed my earlier recommendation to seed deposits** — there is
+      nothing to seed them into. Documented instead in the review notes (below) so a reviewer
+      reads 0% as expected, not broken.
+- [x] Known limitation re-checked, from
+      [REVIEWER_DEMO_LOGIN.md](./REVIEWER_DEMO_LOGIN.md): confirmed still true by reading
+      `authLock.ts` — only `hydrateGoalsIfEmpty` runs on a fresh-device login; there is no
+      equivalent for `account.name`/`account.email`. The reviewer's Profile tab will show a
+      blank/default name. Not fixed here — would need new sync code, out of scope for a
+      verification-only phase.
 - [ ] Re-verify the password path once on a **production-profile** build, not development
       (the audit asks for this specifically; #148 verified on `expo run:ios`, a development
-      build). Requires `eas build --profile production` + TestFlight or a local release build.
-- [ ] Draft the App Store Connect review-notes text, including the audit's PIN warning:
-      *after signing in, the app asks you to create a 6-digit device PIN — choose any six digits;
-      it is a local device lock, not an account password.*
-      Store the draft **in the issue**, never in this repo (credentials must not be committed).
+      build). **Not done** — requires `eas build --profile production` + TestFlight or a local
+      release install, which is a build/deploy action outside what this session can run. Left
+      as a user action.
+- [x] Drafted the App Store Connect / Google Play Console review-notes text, including the
+      audit's PIN warning and the 0%-progress note from the deposit-history finding above.
+      Posted to [#168](https://github.com/Koin-App-Official/pignify/issues/168) as a comment
+      (with a `<insert current password>` placeholder — the actual passwords were shared in
+      chat once and rotated once since #148; this session has no way to read them back, since
+      Appwrite never exposes plaintext passwords via the API).
 
 **Files to modify:** none. This is Appwrite data + App Store Connect.
 
 **Phase complete when:**
-- [ ] Both demo accounts confirmed active, ungated, and populated (goals + deposits if seeded).
-- [ ] The password login has been exercised at least once on a production-profile build.
-- [ ] Review-notes text (credentials + PIN warning) is written and attached to
-      [#168](https://github.com/Koin-App-Official/pignify/issues/168) as a comment, ready to paste
-      at submission time.
-- [ ] Any decision to *not* seed deposits / *not* fix the blank-name gap is recorded here with a
-      reason, rather than left implicit.
+- [x] Both demo accounts confirmed active, ungated, and populated (goals; deposits confirmed
+      infeasible to seed — see above, not a gap in this phase's work).
+- [ ] The password login has been exercised at least once on a production-profile build —
+      **outstanding, needs the user** (requires an actual EAS production build).
+- [x] Review-notes text (credentials + PIN warning + the 0%-progress note) is written and
+      attached to [#168](https://github.com/Koin-App-Official/pignify/issues/168) as a comment,
+      ready to paste at submission time once the current password is filled in.
+- [x] The decision to *not* seed deposits (impossible with the current schema) and to *not* fix
+      the blank-name gap (out of scope) are both recorded above with reasons.
 
 ---
 
