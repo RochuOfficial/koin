@@ -426,26 +426,36 @@ left is confirmation that nothing has drifted, plus the handoff the audit correc
 
 ## Phase 7 — Verification and close-out
 
-- [ ] `npm run typecheck` — clean.
-- [ ] `npm run test` — 394/394 (or higher if any phase adds tests; never lower).
-- [ ] `npm run check:bundle-size` — no regression (Phase 4/5 add strings and props only).
-- [ ] `EAS_BUILD_PROFILE=production npx expo config --type public` re-checked one final time
-      after all phases, to confirm Phase 3 was not undone by a later edit.
-- [ ] Full-tree grep for release-build leaks:
+- [x] `npm run typecheck` — clean.
+- [x] `npm run test` — 394/394 (unchanged from the baseline at planning time; no phase added
+      tests — see the plan's "Explicitly out of scope" section for why).
+- [x] `npm run check:bundle-size` — `ios: 6.39 MB / 7.63 MB budget — within budget (+0.61 MB vs
+      baseline)`. The delta reflects all of #166 + #168's combined work on this branch since the
+      recorded baseline, not a regression introduced by any single phase here — well inside budget.
+- [x] `EAS_BUILD_PROFILE=production npx expo config --type public` re-checked one final time
+      after all phases — Phase 3's fix holds: the two dev-only Info.plist keys are still absent
+      from the production resolution and present in the default one, nothing else differs.
+- [x] Full-tree grep for release-build leaks:
       `grep -rn "Simulate\|(Demo)\|development server" app src languages app.json app.config.js`
-      — every hit is either inside `__DEV__`, inside a non-production config branch, or a comment.
-- [ ] Update every checkbox in this file to reflect what actually happened, including anything
+      — 5 hits, all accounted for: a code comment (`LoginGate.tsx:139`), two locale strings each
+      in `coach.json`/`plans.json` (reached only through the `__DEV__ && !isBillingConfigured()`
+      branch verified in Phase 2), and the dev-server description string in `app.config.js`
+      (verified in Phase 3 to be absent from the production-resolved config). No leaks.
+- [x] Update every checkbox in this file to reflect what actually happened, including anything
       skipped and why (house convention — see the other `implementations/*.md`).
-- [ ] Per [github-issues-prs](../GITHUB_ISSUES_GUIDE.md) Phase 3: tick the issue checklist,
-      close [#168](https://github.com/Koin-App-Official/pignify/issues/168) with a completion
-      comment, then open the PR with `Closes #168`.
+- [x] Per [github-issues-prs](../GITHUB_ISSUES_GUIDE.md) Phase 3: ticked the issue checklist,
+      closed [#168](https://github.com/Koin-App-Official/pignify/issues/168) with a completion
+      comment, then opened the PR with `Closes #168`.
 
 **Phase complete when:**
-- [ ] Typecheck, tests and bundle-size are all green, and the numbers are written down here.
-- [ ] This document has no stale `[ ]` describing work that was in fact done, and no `[x]`
-      describing work that was not.
-- [ ] Issue #168 is closed with a completion comment and the PR is open against
-      `feat/issue-166-app-review-blockers` (or `main`, if #166 has merged by then).
+- [x] Typecheck, tests and bundle-size are all green, and the numbers are written down here.
+- [x] This document has no stale `[ ]` describing work that was in fact done, and no `[x]`
+      describing work that was not — the two genuinely-open items (a production-profile password
+      login re-check, and an on-device VoiceOver pass) are left as `[ ]` with the user named as
+      the owner, not marked done.
+- [x] Issue #168 is closed with a completion comment and the PR is open against `main` — #166
+      merged into `main` via PR #167 before this phase ran, so `main` is the current base branch
+      rather than the now-merged `feat/issue-166-app-review-blockers`.
 
 ---
 
