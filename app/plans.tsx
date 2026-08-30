@@ -16,11 +16,12 @@ import {
   formatUSD,
   type PlanConfig,
 } from '@/lib/entitlements';
-import { startCheckout, requestSubscriptionSync } from '@/lib/billing';
+import { startCheckout, requestSubscriptionSync, isBillingConfigured } from '@/lib/billing';
 import { canSubscribe } from '@/lib/planGate';
 import { evaluateDowngradeRetention } from '@/lib/retention';
 import { tablesDB, DATABASE_ID } from '@/lib/appwrite';
 import { createLogger } from '@/lib/logger';
+import { SUPPORT_EMAIL } from '@/lib/linking';
 import { formatDate } from '@/lib/i18n/format';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -179,14 +180,28 @@ export default function Plans() {
       try {
         const result = await startCheckout(target, profile.userID);
         if (result.status === 'unavailable') {
-          Alert.alert(
-            t('checkoutNotConfiguredTitle'),
-            t('checkoutNotConfiguredBody', { plan: getPlanConfig(target).displayName }),
-            [
-              { text: t('cancel'), style: 'cancel' },
-              { text: t('simulatePayment'), onPress: () => applyChange(target) },
-            ]
-          );
+          // 'unavailable' collapses several distinct causes (missing env var,
+          // missing userId, n8n returning no url, Linking.canOpenURL failing,
+          // or a thrown network error) into one status. Only the "billing
+          // genuinely isn't configured in this build" case should ever offer
+          // the local-grant simulate path, and only in __DEV__ — otherwise a
+          // plain network failure in production would show a reviewer a
+          // working "grant this plan for free" button (Guideline 2.3.1).
+          if (__DEV__ && !isBillingConfigured()) {
+            Alert.alert(
+              t('checkoutNotConfiguredTitle'),
+              t('checkoutNotConfiguredBody', { plan: getPlanConfig(target).displayName }),
+              [
+                { text: t('cancel'), style: 'cancel' },
+                { text: t('simulatePayment'), onPress: () => applyChange(target) },
+              ]
+            );
+          } else {
+            Alert.alert(
+              t('checkoutFailedTitle'),
+              t('checkoutFailedBody', { email: SUPPORT_EMAIL })
+            );
+          }
         }
         // 'completed' → browser opened; wait for the checkout=success return.
         // 'canceled' → do nothing.

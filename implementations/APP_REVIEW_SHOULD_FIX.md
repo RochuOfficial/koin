@@ -115,20 +115,20 @@ so the simulate branch cannot exist in a shipped binary.
 
 ### Work
 
-- [ ] `app/plans.tsx` — import `isBillingConfigured` from `@/lib/billing`; restructure the
+- [x] `app/plans.tsx` — import `isBillingConfigured` from `@/lib/billing`; restructure the
       `result.status === 'unavailable'` branch per the split above.
-- [ ] `app/(tabs)/coach.tsx` — same restructure in `buyMore()` for the add-on purchase.
-- [ ] Add production-path copy. Follow the wording already approved for
-      `planGate.locked.checkoutFailed` and interpolate `SUPPORT_EMAIL` from
+- [x] `app/(tabs)/coach.tsx` — same restructure in `buyMore()` for the add-on purchase.
+- [x] Add production-path copy. Followed the wording already approved for
+      `planGate.locked.checkoutFailed` verbatim and interpolate `SUPPORT_EMAIL` from
       [src/lib/linking.ts:9](../src/lib/linking.ts):
       - `plans.json` → `checkoutFailedTitle`, `checkoutFailedBody`
       - `coach.json` → `checkoutFailedTitle`, `checkoutFailedBody`
-- [ ] Keep `checkoutNotConfigured*` / `simulatePayment` / `simulatePurchase` keys in place —
+- [x] Kept `checkoutNotConfigured*` / `simulatePayment` / `simulatePurchase` keys in place —
       they are still reached in dev, and deleting them would break `locales.test.ts` parity
       for no gain.
-- [ ] Confirm no test imports either screen (verified: the 19 test files are all under
-      `src/lib/**`; only `contentParity.test.ts` reads `app/` — and only as *string lists*,
-      not by importing the modules), so `__DEV__` being undefined under vitest cannot bite.
+- [x] Confirmed no test imports either screen (all 19 test files are under `src/lib/**`; only
+      `contentParity.test.ts` reads `app/` — and only as *string lists*, not by importing the
+      modules), so `__DEV__` being undefined under vitest cannot bite.
 
 **Files to modify**
 
@@ -140,13 +140,14 @@ so the simulate branch cannot exist in a shipped binary.
 | [src/lib/i18n/locales/{en,pl,hu,de}/coach.json](../src/lib/i18n/locales/en/coach.json) | +2 keys × 4 locales |
 
 **Phase complete when:**
-- [ ] `grep -n "simulatePayment\|simulatePurchase" app/` shows every remaining occurrence inside
-      a `__DEV__` guard.
-- [ ] Reading the diff confirms a release bundle (`__DEV__ === false`) can reach only the
+- [x] `grep -n "simulatePayment\|simulatePurchase" app/` shows every remaining occurrence inside
+      a `__DEV__` guard (confirmed: `plans.tsx:196` and `coach.tsx:195` are both inside the
+      `if (__DEV__ && !isBillingConfigured())` block).
+- [x] Reading the diff confirms a release bundle (`__DEV__ === false`) can reach only the
       `checkoutFailed*` path, never `applyChange()` / `setAddonMessageBalance()` from an alert.
-- [ ] All four locales have identical key sets for `plans` and `coach`
-      (`locales.test.ts` proves this).
-- [ ] `npm run typecheck` clean; `npm run test` — 394/394.
+- [x] All four locales have identical key sets for `plans` and `coach`
+      (`locales.test.ts` proves this — still 394/394 green).
+- [x] `npm run typecheck` clean; `npm run test` — 394/394.
 
 ---
 

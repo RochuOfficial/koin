@@ -33,10 +33,11 @@ import { ScreenTransition } from '@/components/ScreenTransition';
 import { PressableScale } from '@/components/animation/PressableScale';
 import { SkiaConfetti } from '@/components/animation/SkiaConfetti';
 import { useCelebrate } from '@/components/animation/useCelebrate';
-import { startAddonCheckout, requestSubscriptionSync } from '@/lib/billing';
+import { startAddonCheckout, requestSubscriptionSync, isBillingConfigured } from '@/lib/billing';
 import { fetchEntitlementsSync } from '@/lib/entitlementsSync';
 import { tablesDB, DATABASE_ID } from '@/lib/appwrite';
 import { createLogger } from '@/lib/logger';
+import { SUPPORT_EMAIL } from '@/lib/linking';
 import { formatDate } from '@/lib/i18n/format';
 import type { SupportedLanguage } from '@/lib/i18n/detect';
 
@@ -180,17 +181,25 @@ export default function AICoach() {
     setGate(null);
     const result = await startAddonCheckout(userID);
     if (result.status === 'unavailable') {
-      Alert.alert(
-        t('checkoutNotConfiguredTitle'),
-        t('checkoutNotConfiguredBody'),
-        [
-          { text: t('cancel'), style: 'cancel' },
-          {
-            text: t('simulatePurchase'),
-            onPress: () => setAddonMessageBalance(useStore.getState().addonMessageBalance + 1),
-          },
-        ]
-      );
+      // Same collapse-of-causes as plans.tsx's startCheckout: only offer the
+      // local-grant simulate path when billing is genuinely unconfigured in
+      // this (dev) build — never on a plain network failure in production
+      // (Guideline 2.3.1).
+      if (__DEV__ && !isBillingConfigured()) {
+        Alert.alert(
+          t('checkoutNotConfiguredTitle'),
+          t('checkoutNotConfiguredBody'),
+          [
+            { text: t('cancel'), style: 'cancel' },
+            {
+              text: t('simulatePurchase'),
+              onPress: () => setAddonMessageBalance(useStore.getState().addonMessageBalance + 1),
+            },
+          ]
+        );
+      } else {
+        Alert.alert(t('checkoutFailedTitle'), t('checkoutFailedBody', { email: SUPPORT_EMAIL }));
+      }
     }
   };
 

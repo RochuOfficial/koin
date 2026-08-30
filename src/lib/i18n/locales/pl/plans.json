@@ -50,6 +50,8 @@
   "checkoutNotConfiguredBody": "Stripe Checkout nie jest skonfigurowany w tej wersji aplikacji. Zasymulować udaną płatność za {{plan}}?",
   "cancel": "Anuluj",
   "simulatePayment": "Zasymuluj płatność",
+  "checkoutFailedTitle": "Nie udało się otworzyć płatności",
+  "checkoutFailedBody": "Nie udało się otworzyć płatności. Sprawdź połączenie i spróbuj ponownie albo napisz do nas na {{email}}.",
   "switchToTitle": "Przełączyć na {{plan}}?",
   "switchToBody": "To wejdzie w życie {{date}}. Nic nigdy nie jest usuwane — jeśli ten plan obsługuje mniej celów niż masz obecnie, wybierzesz, które mają pozostać aktywne.",
   "keepCurrentPlan": "Zachowaj obecny plan",
