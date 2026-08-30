@@ -262,7 +262,13 @@ export default function Settings() {
     <ScreenTransition>
       <SafeAreaView className="flex-1 bg-surface" edges={['top', 'left', 'right']}>
         <View className="flex-row items-center px-6 pt-6 pb-5">
-          <TouchableOpacity onPress={() => router.back()} className="p-[5px] -ml-[5px]" hitSlop={14}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="p-[5px] -ml-[5px]"
+            hitSlop={14}
+            accessibilityRole="button"
+            accessibilityLabel={t('common:a11y.back')}
+          >
             <ChevronLeft size={25} color="#0F172A" />
           </TouchableOpacity>
           <Text className="ml-[10px] text-[23px] font-black text-on-surface">{t('title')}</Text>
@@ -490,6 +496,8 @@ export default function Settings() {
           onPress={() => router.back()}
           className="absolute right-5 z-40 h-14 w-14 items-center justify-center rounded-2xl bg-primary"
           style={{ ...CARD_SHADOW, shadowOpacity: 0.2, bottom: 104 }}
+          accessibilityRole="button"
+          accessibilityLabel={t('common:a11y.close')}
         >
           <X size={22} color="#FFFFFF" />
         </TouchableOpacity>

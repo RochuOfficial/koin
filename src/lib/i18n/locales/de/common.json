@@ -49,6 +49,13 @@
     "unlockWithFaceId": "Mit Face ID entsperren",
     "unlockWithFingerprint": "Mit Fingerabdruck entsperren",
     "pinProgress": "{{filled}} von {{length}} Ziffern eingegeben",
-    "goalProgress": "{{percent}} Prozent des Ziels erreicht"
+    "goalProgress": "{{percent}} Prozent des Ziels erreicht",
+    "close": "Schließen",
+    "back": "Zurück",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "addGoal": "Ziel hinzufügen",
+    "openSettings": "Einstellungen öffnen",
+    "sendMessage": "Nachricht senden"
   }
 }

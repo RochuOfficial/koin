@@ -298,34 +298,46 @@ typo'd key is a loud dev crash, not a silent raw string.
 
 The remaining 23 sites from Phase 0's table. Mechanical, but grouped so each commit is reviewable.
 
-- [ ] **Modal / sheet close & cancel buttons (11)** — `accessibilityRole="button"` +
-      `accessibilityLabel={t('common:a11y.close')}` (or `a11y.cancel` where the control cancels a
-      flow rather than dismissing a sheet: `PinCreationFlow:190`).
+- [x] **Modal / sheet close & cancel buttons (11)** — `accessibilityRole="button"` +
+      `accessibilityLabel={t('common:a11y.close')}` (or `a11y.cancel` for `PinCreationFlow:190`,
+      which cancels the PIN-creation flow rather than dismissing a sheet).
       Files: `AddExpenseModal:50`, `AddSavingsModal:65`, `DeepAnalysisConfirmModal:45`,
       `UpgradeModal:59`, `ui/calendar-modal:110`, `ui/picker-modal:90`,
       `ui/currency-convert-modal:57`, `auth/PinCreationFlow:190`, `app/change-pin:106`,
-      `app/delete-account:124`, `app/delete-account:154`, `app/enable-biometric:102`.
-      Where the control is `disabled` while busy, also pass `accessibilityState={{ disabled }}`
-      (`DeepAnalysisConfirmModal`, `currency-convert-modal`, `delete-account:124`).
-- [ ] **Icon-only back `Button`s (12)** — `accessibilityLabel={t('common:a11y.back')}`.
-      Files: `app/onboarding.tsx:651,667,683,705,728,755,783,828`,
-      `app/(tabs)/goals.tsx:343,379,454`, `src/components/ContributionStep.tsx:249`.
-- [ ] **Back chevrons / arrows (4)** — role + `a11y.back`.
-      Files: `app/settings.tsx:265`, `app/plans.tsx:232`, `app/downgrade-selection.tsx:96`,
-      `auth/LoginGate.tsx:163`.
-- [ ] **FABs (3)** — `a11y.addGoal` (`goals:499`), `a11y.openSettings` (`profile:313`),
-      `a11y.close` (`settings:489`).
-- [ ] **Inline ✓ confirm buttons (2)** — `a11y.save`; `profile:157` (name), `profile:221` (income).
-- [ ] **Coach send button (1)** — `a11y.sendMessage` + `accessibilityState={{ disabled: !input.trim() }}`
-      (`coach:514`).
+      `app/delete-account:124`, `app/delete-account:154`, `app/enable-biometric:102` (12 files —
+      `delete-account.tsx` has two separate close buttons on two different confirmation
+      screens, both fixed). Added `accessibilityState={{ disabled }}` on the three that are
+      `disabled` while busy (`DeepAnalysisConfirmModal`, `currency-convert-modal`,
+      `delete-account:124`) — `Pressable` supports `accessibilityState` directly, unlike `Button`.
+- [x] **Icon-only back `Button`s (12)** — `accessibilityLabel={t('common:a11y.back')}`.
+      Files: `app/onboarding.tsx:651,667,683,705,728,755,783` + the 8th
+      (`AccountFinalization`'s conditional-onPress back button, a multi-line JSX block rather
+      than a single line), `app/(tabs)/goals.tsx` (three back buttons in the goal-creation flow,
+      now at lines 351/392/472 after the added props shifted them),
+      `src/components/ContributionStep.tsx:249`. **Did not** also pass `accessibilityState` on
+      the `AccountFinalization` one — `Button`'s own `disabled` prop already drives that
+      internally (confirmed via `button.tsx`'s `ButtonProps`, which doesn't even expose
+      `accessibilityState` as a settable prop — passing it hit a type error, corrected by
+      removing the redundant pass-through).
+- [x] **Back chevrons / arrows (4)** — role + `a11y.back`.
+      Files: `app/settings.tsx`, `app/plans.tsx`, `app/downgrade-selection.tsx:96`,
+      `auth/LoginGate.tsx:163`. (`downgrade-selection.tsx:96` is visually an X icon, not a
+      chevron, but it calls `router.back()` — labelled `a11y.back` to match its actual behavior
+      rather than its glyph.)
+- [x] **FABs (3)** — `a11y.addGoal` (goals-tab create button), `a11y.openSettings`
+      (profile-tab settings button), `a11y.close` (settings-screen close button).
+- [x] **Inline ✓ confirm buttons (2)** — `a11y.save`; `profile:157` (name), `profile:221` (income).
+- [x] **Coach send button (1)** — `a11y.sendMessage` (`coach:523`). Did not add a redundant
+      `accessibilityState` — `Button` already derives it from the `disabled` prop already passed.
 - [ ] **Money figures** — the audit asks that amounts "are announced, not spelled".
       `formatCurrency` output (`$1,234`, `1 234 zł`) is already read as a quantity by VoiceOver;
-      this is a *verification* item, not a code change. Check the Profile stat row
-      (`profile.tsx:186-196`) and the dashboard ring on-device, and only add
-      `accessibilityLabel` overrides where an amount is genuinely mis-announced.
-      **Do not** pre-emptively wrap every amount.
-- [ ] Re-run the scan script from Phase 0 and confirm the unlabeled-control count is 0
-      (excluding intentionally-hidden decorative elements).
+      this is a *verification* item, not a code change, and is **not yet done** — needs an
+      on-device VoiceOver pass over the Profile stat row and the dashboard ring, left for the
+      user per standing preference (see Phase complete section).
+- [x] Re-ran the scan script from Phase 0: **0** unlabeled controls, down from 36. The one
+      remaining hit the script reports (`BottomSheet.tsx:153`, the tap-to-dismiss scrim) is the
+      intentionally-hidden element from Phase 4 — the script has no way to know
+      `accessibilityElementsHidden` makes "no label" correct rather than a gap.
 
 **Files to modify:** the 23 sites listed above, across
 `app/onboarding.tsx`, `app/settings.tsx`, `app/plans.tsx`, `app/change-pin.tsx`,
@@ -342,12 +354,15 @@ React Navigation (Phase 0, row 5). Adding `tabBarAccessibilityLabel` would *repl
 platform-idiomatic `"Home, tab, 1 of 5"` with a bare `"Home"` — a regression.
 
 **Phase complete when:**
-- [ ] The Phase 0 scan script reports **0** unlabeled interactive elements.
-- [ ] No new translation key is referenced that does not exist in all four locales
-      (`locales.test.ts` + the dev `missingKeyHandler` both enforce this).
-- [ ] `npm run typecheck` clean; `npm run test` — 394/394.
+- [x] The Phase 0 scan script reports **0** unlabeled interactive elements (the one remaining
+      hit is the intentionally-hidden `BottomSheet` scrim, not a gap).
+- [x] No new translation key is referenced that does not exist in all four locales — confirmed by
+      re-running `locales.test.ts`/`contentParity.test.ts` (still 84/84) plus a full-suite pass.
+- [x] `npm run typecheck` clean; `npm run test` — 394/394.
 - [ ] **User-verified** VoiceOver pass over: onboarding back navigation, goal creation, a modal
-      open/close, the Coach send button, and the Profile save-name flow.
+      open/close, the Coach send button, and the Profile save-name flow — **not yet run**, left
+      for the user per standing preference. This also covers the money-figures verification item
+      above, which is otherwise unchecked.
 
 ---
 

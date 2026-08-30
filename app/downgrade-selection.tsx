@@ -93,7 +93,13 @@ export default function DowngradeSelection() {
     <SafeAreaView className="flex-1 bg-surface">
       <View className="flex-row items-center justify-between px-5 pt-4 pb-2">
         <Text className="text-2xl font-black text-on-surface">{t('downgradeSelection.chooseWhatToKeep')}</Text>
-        <Pressable onPress={() => router.back()} hitSlop={12} className="p-2 -mr-2">
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={12}
+          className="p-2 -mr-2"
+          accessibilityRole="button"
+          accessibilityLabel={t('common:a11y.back')}
+        >
           <X size={22} color="#6b7280" />
         </Pressable>
       </View>

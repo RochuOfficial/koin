@@ -248,6 +248,8 @@ export default function Plans() {
             onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)'))}
             hitSlop={4}
             className="h-10 w-10 items-center justify-center rounded-full bg-surface-container-low"
+            accessibilityRole="button"
+            accessibilityLabel={t('common:a11y.back')}
           >
             <ArrowLeft size={18} color="#64748B" />
           </TouchableOpacity>

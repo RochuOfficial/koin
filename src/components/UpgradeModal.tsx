@@ -60,6 +60,8 @@ export function UpgradeModal({
             onPress={handleClose}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center rounded-full bg-surface-container"
+            accessibilityRole="button"
+            accessibilityLabel={t('common:a11y.close')}
           >
             <X size={18} color="#64748B" />
           </Pressable>

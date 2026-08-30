@@ -525,6 +525,7 @@ export default function AICoach() {
                 if (input.trim()) send(input.trim());
               }}
               disabled={!input.trim()}
+              accessibilityLabel={t('common:a11y.sendMessage')}
               className="h-14 w-14 items-center justify-center p-0"
             >
               <Send size={22} color={!input.trim() ? '#64748B' : '#ffffff'} />

@@ -62,7 +62,13 @@ export function AddSavingsModal({ open, onClose, goals, defaultGoalId, onSaved }
       <View className="p-6 pt-2">
         <View className="flex-row justify-between items-center mb-6">
           <Text className="text-2xl font-bold text-on-surface">{t('addSavings.title')}</Text>
-          <TouchableOpacity onPress={onClose} hitSlop={6} className="p-2 bg-surface-container-low rounded-full">
+          <TouchableOpacity
+            onPress={onClose}
+            hitSlop={6}
+            className="p-2 bg-surface-container-low rounded-full"
+            accessibilityRole="button"
+            accessibilityLabel={t('common:a11y.close')}
+          >
             <X size={20} color="#64748B" />
           </TouchableOpacity>
         </View>

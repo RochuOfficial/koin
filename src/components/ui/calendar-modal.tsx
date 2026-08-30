@@ -111,6 +111,8 @@ export const CalendarModal = ({ isVisible, onClose, onConfirm, initialDate }: Ca
           onPress={handleClose}
           hitSlop={4}
           className="h-10 w-10 items-center justify-center rounded-full bg-surface-container-high active:bg-surface-container-highest"
+          accessibilityRole="button"
+          accessibilityLabel={t('a11y.close')}
         >
           <X size={20} color="#475569" />
         </Pressable>

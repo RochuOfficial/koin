@@ -49,6 +49,13 @@
     "unlockWithFaceId": "Odblokuj Face ID",
     "unlockWithFingerprint": "Odblokuj odciskiem palca",
     "pinProgress": "Wprowadzono {{filled}} z {{length}} cyfr",
-    "goalProgress": "Cel osiągnięty w {{percent}} procentach"
+    "goalProgress": "Cel osiągnięty w {{percent}} procentach",
+    "close": "Zamknij",
+    "back": "Wstecz",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "addGoal": "Dodaj cel",
+    "openSettings": "Otwórz ustawienia",
+    "sendMessage": "Wyślij wiadomość"
   }
 }

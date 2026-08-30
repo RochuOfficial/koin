@@ -49,6 +49,13 @@
     "unlockWithFaceId": "Feloldás Face ID-vel",
     "unlockWithFingerprint": "Feloldás ujjlenyomattal",
     "pinProgress": "{{filled}} / {{length}} számjegy megadva",
-    "goalProgress": "A cél {{percent}} százaléka teljesült"
+    "goalProgress": "A cél {{percent}} százaléka teljesült",
+    "close": "Bezárás",
+    "back": "Vissza",
+    "cancel": "Mégse",
+    "save": "Mentés",
+    "addGoal": "Cél hozzáadása",
+    "openSettings": "Beállítások megnyitása",
+    "sendMessage": "Üzenet küldése"
   }
 }

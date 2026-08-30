@@ -49,6 +49,13 @@
     "unlockWithFaceId": "Unlock with Face ID",
     "unlockWithFingerprint": "Unlock with fingerprint",
     "pinProgress": "{{filled}} of {{length}} digits entered",
-    "goalProgress": "{{percent}} percent of goal reached"
+    "goalProgress": "{{percent}} percent of goal reached",
+    "close": "Close",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "addGoal": "Add goal",
+    "openSettings": "Open settings",
+    "sendMessage": "Send message"
   }
 }

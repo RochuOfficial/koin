@@ -345,7 +345,12 @@ export default function Goals() {
                 {goalNameError ? <Text className="mt-2 text-xs text-destructive">{goalNameError}</Text> : null}
 
                 <View className="mt-8 flex-row gap-3">
-                  <Button variant="outline" onPress={() => setCreating(false)} className="w-14 items-center justify-center">
+                  <Button
+                    variant="outline"
+                    onPress={() => setCreating(false)}
+                    accessibilityLabel={t('common:a11y.back')}
+                    className="w-14 items-center justify-center"
+                  >
                     <ArrowLeft size={16} color="#1D4ED8" />
                   </Button>
                   <Button
@@ -381,7 +386,12 @@ export default function Goals() {
                 {targetAmountError ? <Text className="mt-2 text-xs text-destructive">{targetAmountError}</Text> : null}
 
                 <View className="mt-8 flex-row gap-3">
-                  <Button variant="outline" onPress={() => setCreateStep(CreateStep.GoalDeclaration)} className="w-14 items-center justify-center">
+                  <Button
+                    variant="outline"
+                    onPress={() => setCreateStep(CreateStep.GoalDeclaration)}
+                    accessibilityLabel={t('common:a11y.back')}
+                    className="w-14 items-center justify-center"
+                  >
                     <ArrowLeft size={16} color="#1D4ED8" />
                   </Button>
                   <Button
@@ -456,7 +466,12 @@ export default function Goals() {
                 )}
 
                 <View className="flex-row gap-3">
-                  <Button variant="outline" onPress={() => setCreateStep(CreateStep.Contribution)} className="w-14 items-center justify-center">
+                  <Button
+                    variant="outline"
+                    onPress={() => setCreateStep(CreateStep.Contribution)}
+                    accessibilityLabel={t('common:a11y.back')}
+                    className="w-14 items-center justify-center"
+                  >
                     <ArrowLeft size={16} color="#1D4ED8" />
                   </Button>
                   <Button onPress={finishCreate} className="flex-1 items-center justify-center flex-row gap-2 h-14">
@@ -505,6 +520,8 @@ export default function Goals() {
             onPress={startCreate}
             className="absolute bottom-6 right-5 z-40 h-14 w-14 items-center justify-center rounded-2xl bg-primary"
             style={{ ...CARD_SHADOW, shadowOpacity: 0.2 }}
+            accessibilityRole="button"
+            accessibilityLabel={t('common:a11y.addGoal')}
           >
             <Plus size={24} color="#FFFFFF" />
           </TouchableOpacity>
