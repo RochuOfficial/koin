@@ -570,7 +570,12 @@ const GoalCarouselItem = memo(function GoalCarouselItem({
   const days = Math.max(0, Math.ceil((new Date(goal.deadline).getTime() - Date.now()) / 86400000));
   return (
     <View style={{ width: screenWidth }} className="items-center px-5">
-      <ProgressRing progress={pct} size={200} strokeWidth={16}>
+      <ProgressRing
+        progress={pct}
+        size={200}
+        strokeWidth={16}
+        accessibilityLabel={t('common:a11y.goalProgress', { percent: pct })}
+      >
         <View className="mb-1">
           <Icon name={goal.icon} size={36} />
         </View>

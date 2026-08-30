@@ -146,7 +146,16 @@ export function BottomSheet({ visible, onClose, children, maxHeight }: BottomShe
       <GestureHandlerRootView style={StyleSheet.absoluteFill}>
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
           <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}>
-            <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+            {/* Tap-to-dismiss scrim, not a labelled control — every sheet's own
+                content provides an accessible close affordance, so this must be
+                hidden rather than named or VoiceOver offers a full-screen
+                nameless button above the sheet's real content. */}
+            <Pressable
+              style={StyleSheet.absoluteFill}
+              onPress={onClose}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+            />
           </Animated.View>
 
           <Animated.View

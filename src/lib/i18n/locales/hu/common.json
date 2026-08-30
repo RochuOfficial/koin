@@ -42,5 +42,13 @@
     "allow": "Engedélyezem",
     "allowHint": "Lehetővé teszi, hogy az Edző és a Mélyelemzés elküldje adataidat AI-szolgáltatóinknak.",
     "notNowHint": "Egyelőre elutasítja az AI-funkciókat. Ezt később a Beállításokban bekapcsolhatod."
+  },
+  "a11y": {
+    "digit": "{{digit}}",
+    "deleteDigit": "Számjegy törlése",
+    "unlockWithFaceId": "Feloldás Face ID-vel",
+    "unlockWithFingerprint": "Feloldás ujjlenyomattal",
+    "pinProgress": "{{filled}} / {{length}} számjegy megadva",
+    "goalProgress": "A cél {{percent}} százaléka teljesült"
   }
 }

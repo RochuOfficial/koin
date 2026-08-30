@@ -42,5 +42,13 @@
     "allow": "Zezwól",
     "allowHint": "Umożliwia Trenerowi i Szczegółowej analizie wysyłanie Twoich danych do naszych dostawców AI.",
     "notNowHint": "Na razie odmawia korzystania z funkcji AI. Możesz to później włączyć w Ustawieniach."
+  },
+  "a11y": {
+    "digit": "{{digit}}",
+    "deleteDigit": "Usuń cyfrę",
+    "unlockWithFaceId": "Odblokuj Face ID",
+    "unlockWithFingerprint": "Odblokuj odciskiem palca",
+    "pinProgress": "Wprowadzono {{filled}} z {{length}} cyfr",
+    "goalProgress": "Cel osiągnięty w {{percent}} procentach"
   }
 }

@@ -218,7 +218,12 @@ export default function Goals() {
                 </TouchableOpacity>
 
                 <View className="items-center mb-6">
-                  <ProgressRing progress={pct} size={180} strokeWidth={16}>
+                  <ProgressRing
+                    progress={pct}
+                    size={180}
+                    strokeWidth={16}
+                    accessibilityLabel={t('common:a11y.goalProgress', { percent: pct })}
+                  >
                     <Icon name={g.icon} size={44} />
                     <Text className="mt-1 text-4xl font-black text-on-surface">{pct}%</Text>
                   </ProgressRing>

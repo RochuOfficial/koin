@@ -225,40 +225,50 @@ One new `a11y` block in the **`common`** namespace, referenced cross-namespace a
 without changing its `useTranslation(...)` call. `missingKeyHandler` throws in `__DEV__`, so a
 typo'd key is a loud dev crash, not a silent raw string.
 
-- [ ] Add to `common.json` (× 4 locales, identical key sets):
-      `a11y.close`, `a11y.back`, `a11y.cancel`, `a11y.save`, `a11y.addGoal`, `a11y.openSettings`,
-      `a11y.sendMessage`, `a11y.digit` (`"{{digit}}"`), `a11y.deleteDigit`,
-      `a11y.unlockWithFaceId`, `a11y.unlockWithFingerprint`, `a11y.pinProgress`
-      (`"{{filled}} of {{length}} digits entered"`), `a11y.goalProgress`
-      (`"{{percent}} percent of goal reached"`).
-      Exact key list to be finalised while implementing; every key added must be added to all
-      four files in the same commit or `locales.test.ts` fails.
+- [x] Added the Phase-4 subset of `a11y` to `common.json` (× 4 locales, identical key sets):
+      `a11y.digit` (`"{{digit}}"`), `a11y.deleteDigit`, `a11y.unlockWithFaceId`,
+      `a11y.unlockWithFingerprint`, `a11y.pinProgress` (`"{{filled}} of {{length}} digits
+      entered"`), `a11y.goalProgress` (`"{{percent}} percent of goal reached"`).
+      **Scope decision:** only the six keys Phase 4 actually references were added now;
+      `a11y.close`/`back`/`cancel`/`save`/`addGoal`/`openSettings`/`sendMessage` are deferred to
+      Phase 5, added in the same commit as the code that uses them — avoids unused keys sitting
+      in the tree between phases. `locales.test.ts` parity holds either way since all four
+      locales gained the same six keys together.
 
 ### Shared primitives
 
-- [ ] **`PinPad`** — the highest-value fix; a keypad VoiceOver cannot read is a real lockout.
-      Add `useTranslation('common')`; give `Key` an `accessibilityRole="button"` and an
-      `accessibilityLabel` prop; pass `t('a11y.digit', { digit: k })` for the ten digit keys,
-      `t('a11y.deleteDigit')` for backspace, and the Face ID / fingerprint label for the
-      biometric key (branch on `biometricKind`). Add `accessibilityState={{ disabled }}`.
-- [ ] **`PinDots`** — currently a row of anonymous `View`s. Wrap with `accessible`,
-      `accessibilityRole="progressbar"`, `accessibilityLabel={t('a11y.pinProgress', …)}` so
-      entry progress is announced. (Needs `useTranslation` in the same file.)
-- [ ] **`Button`** — add a dev-only guard: when neither `label` nor `accessibilityLabel` is
-      given, `__DEV__ && console.warn(...)` naming the component, so future icon-only buttons
-      cannot silently regress. No runtime behaviour change in release.
-- [ ] **`BottomSheet`** scrim (`:149`) — this must be **hidden**, not labelled:
-      `importantForAccessibility="no"` + `accessibilityElementsHidden` so VoiceOver does not
-      offer a full-screen unnamed button above the sheet's own content.
-- [ ] **`ProgressRing`** — accept an optional `accessibilityLabel`; when present, set
-      `accessible` + `accessibilityRole="progressbar"` +
-      `accessibilityValue={{ min: 0, max: 100, now: progress }}` on the outer `View` and mark
-      the `Svg` wrapper `accessibilityElementsHidden`. Wire the two call sites
-      (`app/(tabs)/index.tsx:573`, `app/(tabs)/goals.tsx:221`) with
-      `t('common:a11y.goalProgress', { percent: Math.round(pct) })`.
-      **Care:** setting `accessible` collapses children into one node — check on-device that the
-      amount/label rendered inside the ring is still announced, and if it is not, prefer
-      labelling a sibling wrapper over hiding the children.
+- [x] **`PinPad`** — the highest-value fix; a keypad VoiceOver cannot read is a real lockout.
+      Added `useTranslation('common')`; `Key` now takes a required `accessibilityLabel` prop
+      plus `accessibilityRole="button"` and `accessibilityState={{ disabled }}`. Digit keys get
+      `t('a11y.digit', { digit: k })`, backspace gets `t('a11y.deleteDigit')`, and the biometric
+      key branches on `biometricKind` (`'face'` → `a11y.unlockWithFaceId`, everything else →
+      `a11y.unlockWithFingerprint` — mirrors the existing icon logic, which already collapses
+      `fingerprint`/`iris` to the same glyph).
+- [x] **`PinDots`** — was a row of anonymous `View`s. Now wrapped with `accessible`,
+      `accessibilityRole="progressbar"`, `accessibilityLabel={t('a11y.pinProgress', { filled,
+      length })}` so entry progress is announced as one element instead of `length` silent dots.
+- [x] **`Button`** — added the dev-only guard: `if (__DEV__ && !label && !accessibilityLabel)
+      console.warn(...)`. Render-time (not a `useEffect`) since it's a pure diagnostic with no
+      side effect on app state — same class of thing as React's own dev warnings.
+- [x] **`BottomSheet`** scrim (`:149`) — hidden via `accessibilityElementsHidden` +
+      `importantForAccessibility="no-hide-descendants"` (iOS honors the former, Android the
+      latter). Confirmed safe: every current `BottomSheet` caller renders its own accessible
+      close control inside the sheet (the Phase 5 worklist), so nothing becomes unreachable.
+- [x] **`ProgressRing`** — accepts an optional `accessibilityLabel`. **Changed from the plan's
+      original approach:** rather than setting `accessible` on the *outer* `View` (which also
+      wraps `children` — the on-screen amount/icon — and would have collapsed them into one
+      opaque "72 percent" node, discarding the actual figure), the accessibility props
+      (`accessible`, `accessibilityRole="progressbar"`, `accessibilityLabel`,
+      `accessibilityValue={{ min: 0, max: 100, now: Math.round(progress) }}`) are set on the
+      inner SVG-only wrapper `View` instead. That `View` has no text children, so it becomes its
+      own silent progressbar element while `children` (the amount) is announced separately and
+      unmodified — this directly satisfies the plan's own fallback instruction ("prefer labelling
+      a sibling wrapper over hiding the children") by construction, without needing an on-device
+      check to discover the collapse problem first.
+      Wired both call sites: [app/(tabs)/index.tsx:573](../app/(tabs)/index.tsx) and
+      [app/(tabs)/goals.tsx:221](../app/(tabs)/goals.tsx), both with
+      `t('common:a11y.goalProgress', { percent: pct })` (`pct` was already `Math.round`ed at
+      both sites, so no extra rounding needed there).
 
 **Files to modify**
 
@@ -273,13 +283,14 @@ typo'd key is a loud dev crash, not a silent raw string.
 | [app/(tabs)/goals.tsx](../app/(tabs)/goals.tsx):221 | pass ring label |
 
 **Phase complete when:**
-- [ ] Every one of the twelve `PinPad` keys has a role and a translated name; the biometric key's
+- [x] Every one of the twelve `PinPad` keys has a role and a translated name; the biometric key's
       name matches the icon actually shown (Face ID vs. fingerprint).
-- [ ] `locales.test.ts` passes — all four `common.json` files have identical key sets.
-- [ ] `npm run typecheck` clean; `npm run test` — 394/394.
+- [x] `locales.test.ts` passes — all four `common.json` files have identical key sets (84/84 in
+      `locales.test.ts` + `contentParity.test.ts` combined).
+- [x] `npm run typecheck` clean; `npm run test` — 394/394.
 - [ ] Manual iOS Simulator pass with VoiceOver on the lock screen: every key announces, and the
-      dots announce progress. **User-verified** — per standing preference, visual/interaction
-      checks are the user's, not simulator-driven by me.
+      dots announce progress. **Deferred to the user** — per standing preference, visual/
+      interaction checks are the user's to run, not simulator-driven by me.
 
 ---
 
