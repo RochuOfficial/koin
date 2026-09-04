@@ -412,6 +412,69 @@ multi-colour art and cannot be tinted). Names used in this flow: `padlock`, `bel
 The canonical tap primitive for chips/rows: `scale 1 → 0.96` on `springPresets.press`
 plus a selection haptic. Used for the goal chips.
 
+### 4.12 `AnimatedProgressBar`
+
+The app's general-purpose continuous progress bar. **Onboarding imports it but does not
+render it** — the step header uses the segmented `ProgressSegment` instead (§5). It is
+documented here because it is the component a porter will otherwise reach for when
+building anything progress-shaped in this design language, and because it is the shape
+every *other* progress bar in the app takes (dashboard XP bar, goal completion bars,
+mission progress).
+
+```ts
+interface AnimatedProgressBarProps {
+  progress: number;               // 0–1
+  height?: number;                // default 8
+  color?: string;                 // default '#22C55E'
+  trackStyle?: StyleProp<ViewStyle>;
+  duration?: number;              // default 500 (ms)
+}
+```
+
+**Structure** — a track with a full-width fill inside it, scaled horizontally:
+
+| Layer | Style |
+| :--- | :--- |
+| Track | `width: 100%`, `height`, `borderRadius: height / 2`, `overflow: hidden`, `backgroundColor: rgba(0,0,0,0.08)` (overridable via `trackStyle`) |
+| Fill | `width: 100%`, `height`, `borderRadius: height / 2`, `backgroundColor: color`, `transformOrigin: 'left'`, `transform: [{ scaleX: progress }]` |
+
+**Animation.** `withTiming(progress, { duration, easing: Easing.out(Easing.cubic) })` —
+timing, not a spring, because this is non-interruptible decorative motion rather than
+gesture handoff.
+
+**Two details that matter if you reimplement it:**
+
+- The fill is a **full-width element scaled by `scaleX`**, never an animated `width`.
+  Animating `width` forces a layout re-measure every frame; `transform` does not. Web CSS
+  has the same property: use `transform: scaleX()` with `transform-origin: left`, not an
+  animated `width`.
+- `scaleX` is floored at `0.0001`, never `0`. A true zero scale collapses the node and can
+  render as an artefact rather than as an empty bar.
+
+**Web equivalent**
+
+```css
+.track { width: 100%; height: 8px; border-radius: 4px;
+         overflow: hidden; background: rgba(0,0,0,0.08); }
+.fill  { width: 100%; height: 100%; border-radius: 4px; background: #22C55E;
+         transform-origin: left; transform: scaleX(var(--progress));
+         transition: transform 500ms cubic-bezier(0.33, 1, 0.68, 1); }
+```
+
+**How it differs from onboarding's `ProgressSegment`:**
+
+| | `AnimatedProgressBar` | `ProgressSegment` (onboarding header) |
+| :--- | :--- | :--- |
+| Shape | One continuous bar | 10 discrete segments, `flex-1`, `gap-1` |
+| Value | Fractional `0–1` | Binary per segment (`i <= step`) |
+| Motion | `withTiming`, 500 ms, ease-out cubic | `withSpring`, `springPresets.press` |
+| Height | 8px default | `h-2.5` (10px) |
+| Colors | Fill `#22C55E`, track `rgba(0,0,0,0.08)` | Fill `bg-primary`, track `bg-surface-container` |
+| Technique | Identical — `scaleX` from a left origin | Identical — `scaleX` from a left origin |
+
+Both solve the same problem the same way; onboarding wants a stepper, so it uses ten
+binary bars rather than one fractional one.
+
 ---
 
 ## 5. The onboarding shell (chrome shared by every step)
@@ -436,6 +499,11 @@ overflow-hidden` with a `bg-primary` fill inside. The fill animates
 `scaleX 0 → 1` with `transformOrigin: 'left'` on `springPresets.press` whenever
 `index <= currentStep` flips. So the current step's own segment is *filled*, not
 partially filled — at step 0, one of ten segments is full.
+
+> This is **not** the app's shared `AnimatedProgressBar` (§4.12), which is a single
+> continuous bar. Onboarding's header is ten independent binary segments, defined
+> locally in `app/onboarding.tsx`. The file does import `AnimatedProgressBar`, but that
+> import is unused — see the note in §4.12.
 
 **Resume banner.** Shown once when a draft was restored to any step past `Name`, and the
 user was not age-blocked. `rounded-2xl bg-surface-container px-4 py-3`, text
