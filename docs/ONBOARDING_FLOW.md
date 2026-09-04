@@ -1499,6 +1499,71 @@ In order:
 The distinction between the last three rows is the whole point of the design: a user
 must never be told their code was wrong when the code was fine and the backend was not.
 
+### 9.5 What the backend does with it — context only
+
+> This section is orientation, not a specification. The app treats the backend as a
+> black box behind the two endpoints below; if you are rebuilding the front end, §9.1–9.4
+> is all you strictly need. This is here so you understand *why* those calls exist and
+> what state they leave behind.
+
+**The shape of it.** There is no custom API server. The backend is a set of **n8n**
+workflows (a visual automation tool) sitting in front of an **Appwrite** database.
+Appwrite also handles identity — it is what emails the 6-digit code and owns the session.
+Everything else the app needs goes through n8n webhooks over plain HTTP. The workflows are
+named `CLAUDE_*` by convention.
+
+**Two workflows matter to onboarding:**
+
+| Workflow | Endpoint | Called | Does |
+| :--- | :--- | :--- | :--- |
+| `CLAUDE_onboarding` | `POST /webhook/claude-onboarding` | Once, at the end of Step 9 | Writes the user's profile and goal rows, and grants the trial |
+| `CLAUDE_entitlements_get` | `GET /webhook/claude-plan?user_id=` | Immediately after, then hourly | Reports what the user is currently entitled to |
+
+**The trial grant.** `CLAUDE_onboarding` ends by seeding an `entitlements` row:
+
+```
+status:           trialing
+effective_plan_id: family        ← the TOP tier, deliberately
+trial_started_at:  now
+trial_ends_at:     now + 14 days
+quotas + features: Family's
+```
+
+Two things are worth knowing about this. First, the trial grants the *best* tier, not the
+cheapest — the first two weeks show the product at its best, and the drop at day 15 is the
+conversion argument. Second, it is **not a transaction**: no store product, no checkout,
+no receipt, no payment provider. It is an entitlement the backend grants itself and lets
+lapse on a timer, which is why the trial shipped before the payment rail existed and why
+the onboarding copy can honestly say "we didn't ask for a card, so there's nothing to
+cancel."
+
+**How the trial ends — there is no cron.** Expiry is lazy: a `trialing` row whose
+`trial_ends_at` has passed is reported as `expired` + `locked` on the *next read*, and
+that read also writes the lapse back to the database so other consumers don't keep seeing
+a stale `trialing` row.
+
+**What the app gets back** from `CLAUDE_entitlements_get`:
+
+```jsonc
+{ "plan": "family", "status": "trialing", "locked": false,
+  "trialEndsAt": "2026-09-18T…", "quotaAiMessages": 500, "aiMessagesUsed": 0 }
+```
+
+The app reads this best-effort and never blocks on it (§9.3 step 5): if it fails, onboarding
+still completes and the hourly sync corrects things later. `plan` is normalised on the way
+in — the webhook still maps `beginner` → `free` on the way out, a leftover from an old
+naming, and the client accepts both.
+
+**Everything else** — Stripe checkout, subscription sync, the AI coach, account deletion —
+lives in separate `CLAUDE_*` workflows that onboarding never touches. Authoritative
+billing state flows **Stripe → n8n → Appwrite**, and the app only ever reads it.
+
+**Trust model, stated plainly:** these webhooks trust the client-supplied `userId` with no
+additional server-side session check. If you are porting this to the web, do not copy that
+part — a browser is a more exposed client than a signed app binary.
+
+Full backend documentation lives in [`n8n/README.md`](../n8n/README.md).
+
 ---
 
 ## 10. Post-onboarding handoff
