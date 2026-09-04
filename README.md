@@ -2,6 +2,14 @@
 
 A modern personal finance tracker and savings motivator.
 
+## Documentation
+
+- [docs/ONBOARDING_FLOW.md](docs/ONBOARDING_FLOW.md) — complete reference for the first-run
+  onboarding flow: every screen in order, with exact copy, layout, validation, state
+  transitions, formulas, and the backend contract. Written to be self-contained enough to
+  reproduce the flow on another platform (e.g. the marketing site) without this codebase.
+- [THEME.md](THEME.md) — the app's visual language (tokens, typography, shape, motion).
+
 ## Internationalization
 
 The app ships in English and Polish (`en`/`pl`), detected from the device during onboarding and
