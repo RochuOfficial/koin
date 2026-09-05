@@ -11,7 +11,7 @@ via `src/lib/billing.ts`; authoritative state flows **Stripe → n8n → Appwrit
 
 ## Workflows
 
-### 1. `billing-checkout` (client → checkout URL)
+### 1. `billing-checkout` (web → checkout URL)
 
 **Corrected here 2026-08-22** — this section previously described creating/
 reusing a Stripe Customer and picking a price by country currency
@@ -19,6 +19,14 @@ reusing a Stripe Customer and picking a price by country currency
 Customer object at all — each checkout is a bare Session — and `plans` has
 exactly one `stripe_price_id` per plan, no per-currency variants; `country` is
 read from the request and uppercased but never used to select a different price.
+
+**Caller changed 2026-09-05 ([#173](https://github.com/Koin-App-Official/pignify/issues/173))**
+— the app no longer has an in-app purchase path (App Review Guideline 3.1.1).
+This webhook is now called from the website (`piggnify.com/account`), not the
+mobile client, and `Pick Price`'s `success_url`/`cancel_url` return the browser
+to `https://piggnify.com/account/?checkout=success|canceled` instead of the old
+`piggy://plans?checkout=…` deep link, which nothing in the app listens for
+anymore.
 
 HTTP webhook `POST /billing-checkout` `{ userId, plan, country }`
 1. **Appwrite GET** `plans` (list) → find `price_id` for `plan`.
@@ -36,11 +44,19 @@ HTTP webhook `POST /billing-checkout` `{ userId, plan, country }`
    `client_reference_id`, `customer_email` if resolved, success/cancel URLs).
 5. **Respond** `{ url }`.
 
-### 2. `billing-addon` (client → hosted Checkout for extra AI messages)
+### 2. `billing-addon` (web → hosted Checkout for extra AI messages)
 **Superseded design, corrected here 2026-08-22** — this section used to describe
 a PaymentIntent + in-app PaymentSheet flow that was never how the live workflow
 actually works; see [implementations/ADDONS.md](../implementations/ADDONS.md) for
 the full pivot history.
+
+**Caller changed 2026-09-05 ([#173](https://github.com/Koin-App-Official/pignify/issues/173))**
+— same move as `billing-checkout` above: called from the website now, and
+`success_url`/`cancel_url` return to `https://piggnify.com/account/?addon=success|canceled`
+instead of the old `piggy://coach?addon=…` deep link. The app still reads the
+resulting `addon_balance` — via `CLAUDE_entitlements_get`'s `addonBalance` field
+(§entitlements below), not this table directly — and still spends it in the
+Coach; it just can no longer buy more from inside the app.
 
 HTTP webhook `POST /billing-addon` `{ userId }`
 1. **Code**: fixed price `price_1ThcgbDzaXFFTsX5awf5NooM` ($2.99, one-time) — the
@@ -103,10 +119,16 @@ No `renewal`/`addon_succeeded`/`addon_failed`/unified-`clawback` branches exist 
 those were the original design; what's actually live is simpler, see above and
 the events section below for exactly why.
 
-### 4. `billing-sync` (client/cron → recompute) — recovery
+### 4. `billing-sync` (cron / web → recompute) — recovery
 HTTP webhook `POST /billing-sync` `{ userId }`: refetch the user's Stripe
 subscription → same mirror+resolve as the `subscription` branch. Backstop for
 lost/delayed webhooks.
+
+**Caller changed 2026-09-05 ([#173](https://github.com/Koin-App-Official/pignify/issues/173))**
+— the app no longer calls this webhook (it had no reason to once it stopped
+starting checkout itself). The **hourly cron below is now the sole backstop**
+for the app; the webhook path stays live for the website to call after a
+checkout return, same pattern as before.
 
 **Hourly cron ([#137](https://github.com/Koin-App-Official/pignify/issues/137),
 live 2026-08-22):** a second trigger, `Hourly Sync Trigger` (Schedule, every hour),
@@ -198,10 +220,22 @@ to `neverError`, so a failed reconcile degrades to a stale row rather than 500in
 a plan read the app depends on.
 
 **Response shape** (`GET /webhook/claude-plan?user_id=`):
-`{ plan, quotaAiMessages, aiMessagesUsed, status, locked, trialEndsAt }`. The
-first three are unchanged; the last three are additive, so older clients keep
-working. `plan` still maps `beginner` → `free` for the app — that rename is
-Onboarding v2 issue F.
+`{ plan, quotaAiMessages, aiMessagesUsed, status, locked, trialEndsAt, addonBalance }`.
+The first three are unchanged; `status`/`locked`/`trialEndsAt` are additive, so
+older clients keep working. `plan` still maps `beginner` → `free` for the app —
+that rename is Onboarding v2 issue F.
+
+**`addonBalance` — added 2026-09-05 ([#173](https://github.com/Koin-App-Official/pignify/issues/173)).**
+A new **`Get Subscription`** node (`subscriptions` lookup by `user_id`,
+`neverError` — no row is normal for a trial-only user) sits between `Get
+Entitlements` and `Map Plan to App`. `addonBalance` mirrors
+`subscriptions.addon_balance` (0 when locked, 0 when no row exists) and is what
+the app now reads instead of querying the `subscriptions` table directly for
+the Coach's purchased-message balance. This is **not** added on top of
+`quotaAiMessages` — `quota_ai_messages` on the `entitlements` row already has
+any confirmed add-on allowance folded in by `resolve-entitlements.js` (see
+[#141](https://github.com/Koin-App-Official/pignify/issues/141)); `addonBalance`
+is a separate figure the client uses only to track its own rollover spend-down.
 
 **Schema added to `entitlements`** (2026-08-16): `trial_started_at` (datetime,
 optional), `trial_ends_at` (datetime, optional), and `expired` appended to the

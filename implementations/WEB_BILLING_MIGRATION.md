@@ -152,48 +152,71 @@ change was observed landing in Appwrite `entitlements`, and the canonical URL is
 The two checkout workflows currently send the browser back to `piggy://…`, which only makes sense
 when the app started the session. Once the website starts them, those redirects strand the user.
 
-**Workflow: `CLAUDE_billing_checkout`** (id `Hss4ze1RGtT0PuJ6`)
+**Workflow: `CLAUDE_billing_checkout`** (id `Hss4ze1RGtT0PuJ6`) — done 2026-09-05
 
-- [ ] Node **`Pick Price`** (Code) — last two `pairs.push(...)` lines:
+- [x] Node **`Pick Price`** (Code) — last two `pairs.push(...)` lines:
   - `success_url`: `piggy://plans?checkout=success` → `https://piggnify.com/account/?checkout=success`
   - `cancel_url`: `piggy://plans?checkout=canceled` → `https://piggnify.com/account/?checkout=canceled`
-- [ ] Update the workflow description to say the caller is the website, not the app.
+- [x] Update the workflow description to say the caller is the website, not the app.
 
-**Workflow: `CLAUDE_billing_addon`** (id `r34lKDZcHITmbRLg`)
+**Workflow: `CLAUDE_billing_addon`** (id `r34lKDZcHITmbRLg`) — done 2026-09-05
 
-- [ ] Node **`Stripe Create Checkout Session`** (HTTP Request) — `bodyParameters`:
+- [x] Node **`Stripe Create Checkout Session`** (HTTP Request) — `bodyParameters`:
   - `success_url`: `piggy://coach?addon=success` → `https://piggnify.com/account/?addon=success`
   - `cancel_url`: `piggy://coach?addon=canceled` → `https://piggnify.com/account/?addon=canceled`
-- [ ] Update the workflow description likewise.
+- [x] Update the workflow description likewise.
 
-**Workflow: `CLAUDE_entitlements_get`** (id `z63gGIWFASF3ggtP`) — additive only
+**Workflow: `CLAUDE_entitlements_get`** (id `z63gGIWFASF3ggtP`) — additive only, done 2026-09-05
 
-- [ ] Add `addonBalance` to the JSON response, sourced from `subscriptions.addon_balance` for that
-      user (0 when there is no subscriptions row). This is what replaces the app's direct
-      `subscriptions` table read in `coach.tsx`. Additive, so older clients are unaffected.
-- [ ] While in there, establish whether `entitlements.quota_ai_messages` **already includes**
-      `addon_balance` (issue [#141](https://github.com/Koin-App-Official/pignify/issues/141) says the
-      `subscription` branch adds it in). If it does, the app must not add the balance on top of the
-      server quota a second time — record the answer here and honour it in Phase 5:
+- [x] Added `addonBalance` to the JSON response. Implemented as a new **`Get Subscription`** node
+      (HTTP GET `subscriptions` by `user_id`, `neverError`) inserted between `Get Entitlements` and
+      `Map Plan to App`, reading `addon_balance` from it (0 when no row, 0 when locked). This is what
+      replaces the app's direct `subscriptions` table read in `coach.tsx`. Additive, so older clients
+      are unaffected.
+- [x] Established whether `entitlements.quota_ai_messages` **already includes** `addon_balance` —
+      confirmed by reading `n8n/code-nodes/resolve-entitlements.js`: `aiQuota = plan.quota_ai_messages
+      + allowance` where `allowance` is the addon balance. **Yes, it's already included.**
+      `addonBalance` in the new response is a separate, additive figure for the client's own
+      rollover spend-down tracking — honour this in Phase 5 (do not add it to `quotaAiMessages` again).
 
-  > `quota_ai_messages` includes `addon_balance`: ☐ yes ☐ no — verified by `______`
+  > `quota_ai_messages` includes `addon_balance`: ☑ yes ☐ no — verified by Claude, reading
+  > `n8n/code-nodes/resolve-entitlements.js` line `aiQuota = plan.quota_ai_messages + allowance`
 
 **Left untouched, on purpose:** `CLAUDE_stripe_webhook` (`CH8BNqTucylUhHBC`), `CLAUDE_billing_sync`
-(`XTlWxBQB0LwkeAKK` — its hourly cron becomes the *only* reconciler once the app stops calling
-`/billing-sync`; its webhook trigger stays for the website), `CLAUDE_account_delete`
-(`NejmQWYGvpJDsSaZ`), `CLAUDE_onboarding` (`FiA67LUzb5BF6csa`, still grants the 14-day trial),
-`CLAUDE_coach_reply` (`2ZLK31SPSSrplvlO`).
+(`XTlWxBQB0LwkeAKK` — see the ⚠️ finding below), `CLAUDE_account_delete` (`NejmQWYGvpJDsSaZ`),
+`CLAUDE_onboarding` (`FiA67LUzb5BF6csa`, still grants the 14-day trial), `CLAUDE_coach_reply`
+(`2ZLK31SPSSrplvlO`).
 
-- [ ] Run `test_workflow` on both checkout workflows and inspect the **created Stripe Session
-      object**, not just the n8n output — confirm `success_url`/`cancel_url` are the https ones.
-- [ ] Publish both workflows.
-- [ ] Confirm `CLAUDE_billing_sync`'s hourly cron has run at least once since the change and still
-      writes `subscriptions` + `entitlements` (it is now the sole backstop).
+- [x] Ran `test_workflow` on `CLAUDE_entitlements_get` (3 scenarios: active with balance, locked,
+      trial-only/no-subscriptions-row — all correct) and inspected `CLAUDE_billing_checkout`'s real
+      `Pick Price` output (`test_workflow` with the Stripe node pinned): `success_url` decoded to
+      `https://piggnify.com/account/?checkout=success`. `CLAUDE_billing_addon`'s Stripe node has no
+      Code node computing its URL — confirmed directly on the saved node parameters instead.
+- [x] Published all three workflows.
+- [ ] ~~Confirm `CLAUDE_billing_sync`'s hourly cron has run at least once since the change~~ —
+      **could not check this box.** See finding below.
+
+> **⚠️ Finding, not caused by this migration:** `CLAUDE_billing_sync`'s hourly cron
+> (`Hourly Sync Trigger` → `List Subscriptions To Sync`) has **never succeeded** —
+> `search_workflow_executions` shows 334/334 recorded runs at `status: "error"`, zero successes,
+> all failing identically: `400` from Appwrite, `"Invalid \`queries\` param..."`, because the node
+> sends two query-string parameters both named `queries[]` (one `equal` filter, one `limit`) via
+> n8n's HTTP node "keypair" query mode, which Appwrite's REST API rejects. The **webhook path**
+> (`POST /billing-sync {userId}`, single-user sync) is a separate node chain and is not affected.
+> This directly undermines this phase's own premise — the plan calls the hourly cron "the sole
+> backstop" once the app stops calling `/billing-sync` in Phase 2, but that backstop has been down
+> since it shipped. **Not fixed here** — it's a pre-existing, unrelated bug in a workflow this
+> migration doesn't otherwise touch, and deserves its own dedicated fix/test rather than a bolt-on.
+> Flagged as a follow-up task. **Before relying on the cron as a backstop (i.e. before finishing
+> Phase 2), this must be fixed and re-verified**, or the "sole backstop" framing in this document's
+> architecture diagram (§3) and Phase 2 no longer holds.
 
 **Phase complete when:** a Checkout Session created by each workflow returns a user to
 `piggnify.com/account/` rather than a `piggy://` deep link, verified on the real Stripe session
 object; `CLAUDE_entitlements_get` returns `addonBalance`; and the `quota_ai_messages` question above
-is answered in writing.
+is answered in writing. **All met except the billing-sync cron health check, which surfaced a
+pre-existing outage instead — tracked separately, and a hard blocker for Phase 2's "sole backstop"
+assumption.**
 
 ---
 
@@ -413,12 +436,13 @@ land in all four files or the suite fails. Full delta in [Appendix B](#appendix-
 
 ### 8.3 Documentation
 
-- [ ] [n8n/README.md](../n8n/README.md): §1 and §2 must state the **website** is the caller and the
-      return URLs are https; §4 must state `billing-sync`'s webhook is no longer called by the app
-      (cron + website only); the "App config" section must drop the removed env vars. Add a dated
-      note pointing at this file, matching the file's existing "corrected here YYYY-MM-DD" style.
-- [ ] [n8n/workflows/billing-checkout.template.json](../n8n/workflows/billing-checkout.template.json):
-      update the return URLs so the template matches live.
+- [x] [n8n/README.md](../n8n/README.md): §1, §2, §4, and the entitlements response-shape section
+      updated 2026-09-05 with dated notes matching the file's existing "corrected here" style
+      (caller is now the website; `addonBalance` documented). **Still open:** the "App config"
+      section still lists `EXPO_PUBLIC_N8N_BILLING_URL`/etc — those are app-side env vars renamed in
+      Phase 8.2, not a Phase 1 (n8n-only) change; update this section together with 8.2.
+- [x] [n8n/workflows/billing-checkout.template.json](../n8n/workflows/billing-checkout.template.json):
+      return URLs updated to match live, 2026-09-05.
 - [ ] [implementations/APP_REVIEW_BLOCKERS.md](APP_REVIEW_BLOCKERS.md): record that Blocker 1 is
       resolved via Option 3 and link here.
 - [ ] [implementations/ADDONS.md](ADDONS.md): add a closing note — the add-on rail survives on the
