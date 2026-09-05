@@ -580,12 +580,23 @@ wrong trade.
 
 ## Phase 9 — Verification
 
-### 9.1 Automated
+### 9.1 Automated — all four pass, 2026-09-05
 
-- [ ] `npx tsc --noEmit`
-- [ ] `npm test` — the full suite (385 tests / 18 files at audit time) green
-- [ ] `npm run check:bundle-size`
-- [ ] `grep -rniE "stripe|startCheckout|billing\.ts" app/ src/` → no functional matches
+- [x] `npx tsc --noEmit` — clean.
+- [x] `npm test` — **390 passed / 19 files**. (The plan said 385/18 at audit time: +9 from the AI
+      consent work that landed in between, −4 from `canSubscribe`'s tests removed in Phase 5.)
+- [x] `npm run check:bundle-size` — **6.38 MB / 7.63 MB budget, within budget.** The reported
+      "+0.60 MB vs baseline" is drift from the 2026-08-05 baseline, **not** from this branch: `main`
+      measures 6.39 MB (+0.61) at `adb5a7f`, so this work is ~0.01 MB *smaller* than what it
+      branched from. Checked by actually building both rather than assuming, since a deletion-heavy
+      branch reporting +0.60 MB looks alarming until you know where the baseline sits.
+      Worth ratcheting the baseline separately — that drift is someone else's to explain.
+- [x] `grep -rniE "stripe|startCheckout|billing\.ts" app/ src/` → **4 matches, all comments, zero
+      functional**: `plans.tsx`'s header (what the screen used to be), `account.ts`'s provenance
+      note (split out of the old `billing.ts`), and two in `subscription.ts`/`store.ts` describing
+      the *server* rail, which is still Stripe and still accurate.
+- Also confirmed incidentally: the Metro build logs `env: export … EXPO_PUBLIC_N8N_ACCOUNT_URL`,
+  so the Phase 8.2 rename resolves correctly through the real bundler pipeline, not just in tsc.
 
 ### 9.2 Manual, on a **production-profile** build (both platforms — Google Play polices external
 purchase links too, and this change ships to Android as well)
