@@ -28,9 +28,8 @@
     "trialing": "Ingyenes próbaidőszak",
     "pastDue": "Sikertelen fizetés — frissítsd a kártyádat",
     "switchingTo": "Váltás {{plan}} csomagra a következő ciklusban",
-    "priceMonthly": "{{price}}/hó"
+    "active": "Aktív"
   },
-  "manage": "Kezelés",
   "changePin": "PIN-kód módosítása",
   "cancel": "Mégse",
   "biometric": {
@@ -76,5 +75,8 @@
   "versionLabel": "Piggy v{{version}}",
   "aiFeatures": {
     "toggleLabel": "AI-funkciók"
-  }
+  },
+  "viewDetails": "Megtekintés",
+  "manageOnWeb": "Előfizetés kezelése a weben",
+  "manageOnWebError": "Nem sikerült megnyitni a fiókoldalt. Látogass el a piggnify.com/account oldalra a böngésződben."
 }

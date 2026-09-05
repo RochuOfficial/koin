@@ -467,21 +467,39 @@ Three properties worth keeping in mind if this is touched again:
 
 ## Phase 7 — Settings: the one link (D3)
 
-- [ ] [app/settings.tsx:280-313](../app/settings.tsx#L280): the Subscription card keeps its plan name
+- [x] [app/settings.tsx:280-313](../app/settings.tsx#L280): the Subscription card keeps its plan name
       and status line but **drops the price fallback** (`planStatus.priceMonthly`, line 304) — replace
       with a neutral status (e.g. "Active") so no currency renders in Settings.
-- [ ] Split the card into two rows:
+- [x] Split the card into two rows:
   1. **Subscription** → `router.push('/plans')` (read-only detail) — unchanged behaviour.
   2. **Manage subscription** → `safeOpenURL(ACCOUNT_URL, …)`, which already routes https through
      `expo-web-browser` ([src/lib/linking.ts:27-30](../src/lib/linking.ts#L27)) so it opens in-app
      rather than switching to Safari. This is the **only** tappable billing link in the product.
-- [ ] Give it `accessibilityRole="link"` and a translated `accessibilityLabel` (consistent with
+- [x] Give it `accessibilityRole="link"` and a translated `accessibilityLabel` (consistent with
       `BillingTerms`, and it costs nothing toward the audit's VoiceOver item).
-- [ ] On return from that browser session, call `syncEntitlements({ force: true })` so a change made
+- [x] On return from that browser session, call `syncEntitlements({ force: true })` so a change made
       on the web is reflected immediately rather than up to an hour later.
 
 **Phase complete when:** tapping "Manage subscription" opens `piggnify.com/account/` in the in-app
 browser, and a plan change made there is visible in the app within seconds of dismissing it.
+**Met** (done 2026-09-05) — `tsc` clean, 390/390 green.
+
+**Shape as built:** the Subscription card (plan name + status, tap → read-only `/plans`) with a
+separate **Manage subscription on the web** row beneath it. `grep -rn "ACCOUNT_URL" app/ src/`
+confirms `safeOpenURL(ACCOUNT_URL, …)` appears exactly **once** in the whole app — decision D3 holds
+mechanically, not just by intent. `PlanGate` references the constant only for the `lockoutEnforced`
+check and renders `ACCOUNT_URL_DISPLAY` as unlinked text.
+
+`openWebBilling` awaits `safeOpenURL` — which routes https through `expo-web-browser`, so it
+resolves on dismissal — then calls `syncEntitlements({ force: true })`. That dismissal is the exact
+moment a change made on the web should appear, and the forced read is what stops the hourly throttle
+sitting on it.
+
+**Also done here:** `Row` gained optional `accessibilityRole`/`accessibilityLabel` (the web row is a
+`link`, everything else stays a `button`), and **`formatUSD` was deleted** from `entitlements.ts` —
+its only job was rendering a plan price, so it died with the last paywall. `priceUSD` stays as
+catalogue data mirroring the `plans` table, but nothing renders it; **that is now dead data worth a
+decision in Phase 8** rather than something to delete silently.
 
 ---
 

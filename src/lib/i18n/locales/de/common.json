@@ -56,6 +56,7 @@
     "save": "Speichern",
     "addGoal": "Ziel hinzufügen",
     "openSettings": "Einstellungen öffnen",
-    "sendMessage": "Nachricht senden"
+    "sendMessage": "Nachricht senden",
+    "manageSubscription": "Verwalte dein Abo im Web — öffnet piggnify.com/account"
   }
 }

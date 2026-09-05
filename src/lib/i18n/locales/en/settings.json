@@ -28,9 +28,8 @@
     "trialing": "Free trial",
     "pastDue": "Payment failed — update your card",
     "switchingTo": "Switching to {{plan}} next cycle",
-    "priceMonthly": "{{price}}/mo"
+    "active": "Active"
   },
-  "manage": "Manage",
   "changePin": "Change PIN",
   "cancel": "Cancel",
   "biometric": {
@@ -76,5 +75,8 @@
   "versionLabel": "Piggy v{{version}}",
   "aiFeatures": {
     "toggleLabel": "AI features"
-  }
+  },
+  "viewDetails": "View",
+  "manageOnWeb": "Manage subscription on the web",
+  "manageOnWebError": "Couldn't open the account page. Visit piggnify.com/account in your browser."
 }
