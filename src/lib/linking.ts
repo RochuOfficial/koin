@@ -15,6 +15,18 @@ export const TERMS_URL = 'https://piggnify.com/terms-of-service';
 /** Single source of truth for the AI Transparency page — referenced by the
  * onboarding legal links and by AiConsentModal (App Review 5.1.2(i)). */
 export const AI_TRANSPARENCY_URL = 'https://piggnify.com/ai-transparency';
+/**
+ * Web billing / account management (#173). The app has no purchase path of its
+ * own — subscribing, changing plan, cancelling and buying extra AI messages all
+ * happen here. Deliberately a plain constant like the three URLs above rather
+ * than an env var: an env var that can go missing is exactly how the lockout
+ * trap documented in planGate.ts came about, and this one is the only way a
+ * locked-out user can get their subscription back.
+ */
+export const ACCOUNT_URL = 'https://piggnify.com/account/';
+/** `ACCOUNT_URL` as something a user can read off the screen and type — used
+ * where the address has to be shown rather than linked (the locked plan gate). */
+export const ACCOUNT_URL_DISPLAY = ACCOUNT_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
 export async function safeOpenURL(url: string, notAvailableMessage: string, notAvailableTitle: string) {
   try {

@@ -49,7 +49,7 @@
   "switchToBody": "Ez ekkor lép életbe: {{date}}. Semmi sem törlődik — ha ez a csomag kevesebb célt támogat, mint amennyid van, kiválaszthatod, melyek maradjanak aktívak.",
   "keepCurrentPlan": "Jelenlegi csomag megtartása",
   "continue": "Tovább",
-  "header": "Válaszd ki a csomagodat",
+  "header": "Az előfizetésed",
   "confirmingPurchase": "Vásárlás megerősítése…",
   "pendingBanner": "Ütemezett váltás: a csomagod {{date}} napon átvált erre: {{plan}}. Válaszd ki újra a jelenlegi csomagodat lent ennek visszavonásához.",
   "perMonth": "/hó",
@@ -114,7 +114,8 @@
     "upgradeToHigherPlan": "Frissítés magasabb csomagra",
     "onTopPlan": "Már a legmagasabb csomagon vagy",
     "maybeLater": "Talán később",
-    "perMonth": "/hó"
+    "perMonth": "/hó",
+    "seePlanDetails": "Csomag részletei"
   },
   "downgradeSelection": {
     "nothingToChoose": "Itt nincs mit választani — lépj vissza, és próbáld újra.",
@@ -156,7 +157,8 @@
       "deleteAccountBody": "Ez véglegesen törli a fiókodat és minden adatodat a szervereinkről. Ez nem vonható vissza.",
       "deleteAction": "Törlés",
       "somethingWrongTitle": "Valami hiba történt",
-      "somethingWrongBody": "Nem sikerült törölni a fiókodat. Próbáld újra."
+      "somethingWrongBody": "Nem sikerült törölni a fiókodat. Próbáld újra.",
+      "managedOnWeb": "Az előfizetésedet a weben kezelheted:"
     },
     "trialIntro": {
       "title": "{{days}} nap {{plan}}\na mi költségünkön",
@@ -169,10 +171,12 @@
   },
   "terms": {
     "billing": "Az előfizetések minden hónapban automatikusan megújulnak a kiválasztott pénznemben, amíg le nem mondod őket.",
-    "cancel": "Bármikor lemondhatod a Beállításokban — a hozzáférésed a jelenlegi számlázási időszak végéig megmarad.",
+    "cancel": "Bármikor lemondhatod a piggnify.com/account oldalon — a hozzáférésed a jelenlegi számlázási időszak végéig megmarad.",
     "planMechanics": "A frissítések azonnal életbe lépnek. A visszaminősítések a jelenlegi számlázási időszak végén lépnek életbe, az adataid pedig mindig biztonságban vannak.",
     "termsOfUse": "Felhasználási feltételek",
     "privacyPolicy": "Adatvédelmi irányelvek",
     "linkError": "Nem sikerült megnyitni ezt a hivatkozást."
-  }
+  },
+  "currentPlanChip": "Jelenlegi",
+  "managedOnWeb": "Az előfizetésedet a weben kezelheted: piggnify.com/account."
 }

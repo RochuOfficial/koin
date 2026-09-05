@@ -22,19 +22,22 @@ export const LOCKOUT_INTENDED = true;
 /**
  * Whether a lapsed trial actually blocks the app, right now, on this build.
  *
- * Enforcement is deliberately conditional on checkout being reachable. A total
- * lockout (D12) leaves no escape hatch, so if `EXPO_PUBLIC_N8N_BILLING_URL` is
- * missing — as it is in any build that forgot it — every Subscribe tap returns
- * `unavailable` and the user is stuck on a screen whose only action is broken,
- * with no way back into an app they were happily using minutes earlier.
+ * Enforcement is deliberately conditional on the user having somewhere to go. A
+ * total lockout (D12) leaves no escape hatch, so if the way back in is missing,
+ * the user is stuck on a screen whose only action is broken, with no way back
+ * into an app they were happily using minutes earlier.
  *
- * Making this structural rather than a second flag someone has to remember to
- * flip means the trap cannot be shipped by omission. The failure direction is
- * chosen on purpose: a misconfigured build lets lapsed users through, which
- * costs revenue, rather than bricking them, which costs the user.
+ * The caller passes what that escape hatch currently is. It used to be
+ * "checkout is configured" (an env var, missing in any build that forgot it);
+ * since #173 it's `ACCOUNT_URL`, a constant, so this is true in every build.
+ * The check stays because the guarantee is structural rather than a flag
+ * someone has to remember to flip — that's what stops the trap being re-created
+ * by omission. The failure direction is chosen on purpose: a misconfigured
+ * build lets lapsed users through, which costs revenue, rather than bricking
+ * them, which costs the user.
  */
-export function lockoutEnforced(billingConfigured: boolean): boolean {
-  return LOCKOUT_INTENDED && billingConfigured;
+export function lockoutEnforced(recoveryPathAvailable: boolean): boolean {
+  return LOCKOUT_INTENDED && recoveryPathAvailable;
 }
 
 export interface PlanGateInput {
@@ -55,23 +58,6 @@ export function planGateReason(input: PlanGateInput): PlanGateReason | null {
   if (input.planStatus === 'expired' || input.planStatus === 'canceled') return 'locked';
   if (input.planStatus === 'trialing' && !input.trialIntroSeen) return 'trial_intro';
   return null;
-}
-
-/**
- * Whether picking `target` should go through checkout, independent of tier
- * ranking. A trialing user is provisioned onto Family — the top tier —
- * regardless of what they'll actually pay for, so ranking `target` against
- * `current` makes every other tier read as a downgrade and hides checkout
- * entirely: the exact bug this exists to prevent. Same reasoning for
- * `expired` — there's no real subscription left to rank against. `active`
- * and `canceled` users have a real paid tier, so ranking still applies:
- * `isUpgradeTarget` is left to the caller (entitlements.ts's `isUpgrade`),
- * since this module stays free of `store.ts`'s value exports so it keeps
- * loading under vitest.
- */
-export function canSubscribe(planStatus: PlanStatus, isUpgradeTarget: boolean): boolean {
-  if (planStatus === 'trialing' || planStatus === 'expired') return true;
-  return isUpgradeTarget;
 }
 
 /**

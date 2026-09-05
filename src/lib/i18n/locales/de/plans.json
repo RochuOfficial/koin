@@ -49,7 +49,7 @@
   "switchToBody": "Dies tritt am {{date}} in Kraft. Es wird nie etwas gelöscht — wenn dieser Plan weniger Ziele bietet als du hast, wählst du selbst aus, welche zuerst aktiv bleiben.",
   "keepCurrentPlan": "Aktuellen Plan behalten",
   "continue": "Weiter",
-  "header": "Wähle deinen Plan",
+  "header": "Dein Abo",
   "confirmingPurchase": "Dein Kauf wird bestätigt…",
   "pendingBanner": "Geplante Änderung: Dein Plan wechselt am {{date}} zu {{plan}}. Wähle deinen aktuellen Plan unten erneut aus, um dies abzubrechen.",
   "perMonth": "/Monat",
@@ -114,7 +114,8 @@
     "upgradeToHigherPlan": "Auf einen höheren Plan upgraden",
     "onTopPlan": "Du bist im höchsten Plan",
     "maybeLater": "Vielleicht später",
-    "perMonth": "/Monat"
+    "perMonth": "/Monat",
+    "seePlanDetails": "Plandetails ansehen"
   },
   "downgradeSelection": {
     "nothingToChoose": "Hier gibt es nichts auszuwählen — geh zurück und versuche es erneut.",
@@ -156,7 +157,8 @@
       "deleteAccountBody": "Dies löscht dauerhaft dein Konto und alle Daten von unseren Servern. Dies kann nicht rückgängig gemacht werden.",
       "deleteAction": "Löschen",
       "somethingWrongTitle": "Etwas ist schiefgelaufen",
-      "somethingWrongBody": "Wir konnten dein Konto nicht löschen. Bitte versuche es erneut."
+      "somethingWrongBody": "Wir konnten dein Konto nicht löschen. Bitte versuche es erneut.",
+      "managedOnWeb": "Dein Abo verwaltest du im Web:"
     },
     "trialIntro": {
       "title": "{{days}} Tage {{plan}}\nauf uns",
@@ -169,10 +171,12 @@
   },
   "terms": {
     "billing": "Abos verlängern sich automatisch jeden Monat in deiner gewählten Währung, bis du kündigst.",
-    "cancel": "Du kannst jederzeit in den Einstellungen kündigen — dein Zugang bleibt bis zum Ende des aktuellen Abrechnungszeitraums bestehen.",
+    "cancel": "Du kannst jederzeit auf piggnify.com/account kündigen — dein Zugang bleibt bis zum Ende des aktuellen Abrechnungszeitraums bestehen.",
     "planMechanics": "Upgrades gelten sofort. Downgrades treten am Ende deines aktuellen Abrechnungszeitraums in Kraft, und deine Daten sind immer sicher.",
     "termsOfUse": "Nutzungsbedingungen",
     "privacyPolicy": "Datenschutzerklärung",
     "linkError": "Dieser Link konnte nicht geöffnet werden."
-  }
+  },
+  "currentPlanChip": "Aktuell",
+  "managedOnWeb": "Dein Abo verwaltest du im Web unter piggnify.com/account."
 }

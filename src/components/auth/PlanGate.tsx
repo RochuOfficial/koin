@@ -9,14 +9,15 @@
  * fact that nothing was deleted — constraint C4 — because that's the first
  * thing a user in this state actually worries about.
  *
- * Subscribing goes through hosted Stripe Checkout in the external browser, the
- * same rail `plans.tsx` already uses. The plan is never applied on the browser
- * merely opening — only after the entitlements read confirms it, which is also
- * what clears this gate.
+ * There is no way to subscribe from here (#173): the app carries no purchase
+ * path, and under decision D3 the single tappable link to web billing lives in
+ * Settings — which a locked user can't reach, since this gate replaces the whole
+ * navigation stack. So this screen names the web address as plain text and
+ * leans on the refresh below to notice when the subscription comes back.
  *
- * With `LOCKOUT_ENFORCED` on there is no escape hatch, so every failure path
- * here has to stay visible: a checkout that can't start says so rather than
- * doing nothing, which would be indistinguishable from a dead button.
+ * A user who subscribes on the web is unlocked by the entitlements read, never
+ * by their own say-so: the AppState listener re-reads on every return from the
+ * background, and "I've already subscribed" is the manual fallback.
  */
 import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, Alert, AppState } from 'react-native';
@@ -29,12 +30,11 @@ import { Mascot } from '@/components/Mascot';
 import { Icon } from '@/components/icons/Icon';
 import { useStore } from '@/lib/store';
 import { useAuthLock } from '@/lib/authLock';
-import { getPlanConfig, PLAN_ORDER, formatUSD } from '@/lib/entitlements';
+import { getPlanConfig } from '@/lib/entitlements';
 import { planGateReason, trialDaysRemaining, lockoutEnforced } from '@/lib/planGate';
-import { startCheckout, requestSubscriptionSync, isBillingConfigured, requestAccountDeletion } from '@/lib/billing';
-import { fetchEntitlementsSync } from '@/lib/entitlementsSync';
-import { safeOpenURL, SUPPORT_EMAIL } from '@/lib/linking';
-import type { UserPlan } from '@/lib/store';
+import { requestAccountDeletion } from '@/lib/account';
+import { syncEntitlements } from '@/lib/entitlementsRefresh';
+import { safeOpenURL, SUPPORT_EMAIL, ACCOUNT_URL, ACCOUNT_URL_DISPLAY } from '@/lib/linking';
 
 export function PlanGate() {
   const { t } = useTranslation('plans');
@@ -52,13 +52,15 @@ export function PlanGate() {
     onboardingCompleted: profile.onboardingCompleted,
   });
 
-  // Enforcement is conditional on checkout actually being reachable — see
-  // lockoutEnforced(). Never trap the user behind a broken button.
-  const enforced = lockoutEnforced(isBillingConfigured());
+  // Enforcement stays conditional on the user having somewhere to go — see
+  // lockoutEnforced(). ACCOUNT_URL is a constant now rather than an env var, so
+  // this is true in every build; the check is kept because the guarantee it
+  // encodes (never trap a user behind an escape hatch that doesn't exist) is
+  // what stops a future change from re-creating the trap by omission.
+  const enforced = lockoutEnforced(ACCOUNT_URL.length > 0);
   const planName = getPlanConfig(profile.plan).displayName;
   const daysLeft = trialDaysRemaining(profile.trialEndsAt);
 
-  const [busy, setBusy] = useState<UserPlan | null>(null);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState('');
   const [deletingAccount, setDeletingAccount] = useState(false);
@@ -68,45 +70,21 @@ export function PlanGate() {
     onPlanAcknowledged();
   };
 
-  const subscribe = async (target: UserPlan) => {
-    setBusy(target);
-    setError('');
-    try {
-      const result = await startCheckout(target, profile.userID);
-      if (result.status !== 'completed') {
-        // 'completed' only means the browser opened. Anything else has to be
-        // said out loud — with no escape hatch, a silent no-op is a dead button.
-        setError(t('planGate.locked.checkoutFailed', { email: SUPPORT_EMAIL }));
-      }
-    } finally {
-      setBusy(null);
-    }
-  };
-
   /**
-   * Called when the user returns from the browser. Asks n8n to re-read Stripe
-   * first (covering a webhook that hasn't landed yet), then re-reads
-   * entitlements. A successful subscription flips `planStatus` away from
-   * expired, which clears this gate on the next render — the gate is never
-   * dismissed on the user's say-so alone.
+   * Re-reads entitlements from the server. A subscription bought on the web
+   * flips `planStatus` away from expired, which clears this gate on the next
+   * render — the gate is never dismissed on the user's say-so alone. Forced,
+   * because the hourly throttle would otherwise swallow exactly the read this
+   * user is waiting on.
    */
-  const refreshAfterCheckout = async () => {
+  const refreshSubscriptionState = async () => {
     if (!profile.userID) return;
     setChecking(true);
     setError('');
     try {
-      await requestSubscriptionSync(profile.userID);
-      const entitlements = await fetchEntitlementsSync(profile.userID);
-      if (entitlements?.plan) {
-        updateProfile({
-          plan: entitlements.plan,
-          ...(entitlements.status ? { planStatus: entitlements.status } : {}),
-          ...(entitlements.trialEndsAt !== undefined
-            ? { trialEndsAt: entitlements.trialEndsAt }
-            : {}),
-        });
-      }
-      if (!entitlements || entitlements.status === 'expired' || entitlements.status === 'canceled') {
+      await syncEntitlements({ force: true });
+      const { planStatus } = useStore.getState().profile;
+      if (planStatus === 'expired' || planStatus === 'canceled') {
         setError(t('planGate.locked.noActiveSubscription'));
       }
     } finally {
@@ -115,16 +93,14 @@ export function PlanGate() {
   };
 
   /**
-   * The Stripe return deep link (`piggy://plans?checkout=success`) can't reach
-   * plans.tsx while locked — this gate replaces the whole navigation stack, so
-   * that route never mounts to consume the parameter. Re-running the same
-   * check on every real return from the background (checkout opens in the
-   * external browser) covers that case without needing the deep link at all.
-   * "I've already subscribed" below stays as the manual fallback.
+   * The user subscribes in a browser, outside the app entirely, so a return
+   * from the background is the only signal that anything might have changed —
+   * there is no deep link to listen for. "I've already subscribed" below stays
+   * as the manual fallback.
    *
    * Watches specifically for a background→active round trip, not just any
    * 'active' event — 'inactive' also fires for transient interruptions
-   * (control center, a phone call banner) that aren't a return from checkout.
+   * (control center, a phone call banner) that aren't a return from the web.
    */
   useEffect(() => {
     if (reason !== 'locked') return;
@@ -136,7 +112,7 @@ export function PlanGate() {
       }
       if (next === 'active' && wasBackgrounded) {
         wasBackgrounded = false;
-        refreshAfterCheckout();
+        refreshSubscriptionState();
       }
     });
     return () => sub.remove();
@@ -216,31 +192,16 @@ export function PlanGate() {
               </Text>
             </View>
 
-            {!isBillingConfigured() && (
-              <View className="mt-6 rounded-2xl bg-warning-container p-4">
-                <Text className="text-sm text-warning">
-                  {t('planGate.locked.checkoutNotConfigured')}
-                </Text>
-              </View>
-            )}
-
-            <Text className="mt-8 mb-3 text-sm font-bold text-on-surface">
-              {t('planGate.locked.pickPlan')}
-            </Text>
-            <View className="gap-3">
-              {PLAN_ORDER.map((id) => {
-                const c = getPlanConfig(id);
-                return (
-                  <PlanChoice
-                    key={id}
-                    name={c.displayName}
-                    price={`${formatUSD(c.priceUSD)}${t('perMonth')}`}
-                    busy={busy === id}
-                    disabled={busy !== null || checking}
-                    onPress={() => subscribe(id)}
-                  />
-                );
-              })}
+            {/* Plain text, not a link (#173, decision D3): the single tappable
+                route to web billing is the Settings row, which this screen
+                deliberately doesn't duplicate. */}
+            <View className="mt-6 rounded-2xl bg-surface-container-low p-4">
+              <Text className="text-sm leading-5 text-on-surface-variant text-center">
+                {t('planGate.locked.managedOnWeb')}
+              </Text>
+              <Text className="mt-1 text-sm font-bold text-on-surface text-center">
+                {ACCOUNT_URL_DISPLAY}
+              </Text>
             </View>
 
             {error ? (
@@ -250,8 +211,8 @@ export function PlanGate() {
             ) : null}
 
             <TouchableOpacity
-              onPress={refreshAfterCheckout}
-              disabled={checking || busy !== null}
+              onPress={refreshSubscriptionState}
+              disabled={checking}
               className="mt-5 items-center py-2"
             >
               {checking ? (
@@ -282,7 +243,7 @@ export function PlanGate() {
                 </View>
               ) : (
                 <View className="flex-row flex-wrap items-center justify-center gap-5">
-                  <TouchableOpacity onPress={handleLogout} disabled={busy !== null || checking}>
+                  <TouchableOpacity onPress={handleLogout} disabled={checking}>
                     <Text className="text-sm font-semibold text-on-surface-variant underline">
                       {t('planGate.locked.logOut')}
                     </Text>
@@ -295,13 +256,13 @@ export function PlanGate() {
                         t('common:notAvailable')
                       )
                     }
-                    disabled={busy !== null || checking}
+                    disabled={checking}
                   >
                     <Text className="text-sm font-semibold text-on-surface-variant underline">
                       {t('planGate.locked.contactSupport')}
                     </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleDeleteAccount} disabled={busy !== null || checking}>
+                  <TouchableOpacity onPress={handleDeleteAccount} disabled={checking}>
                     <Text className="text-sm font-semibold text-destructive underline">
                       {t('planGate.locked.deleteAccount')}
                     </Text>
@@ -345,38 +306,6 @@ export function PlanGate() {
         </Button>
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-/** One selectable tier on the lapsed screen. Tapping it opens Stripe Checkout. */
-function PlanChoice({
-  name,
-  price,
-  busy,
-  disabled,
-  onPress,
-}: {
-  name: string;
-  price: string;
-  busy: boolean;
-  disabled: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      className={`flex-row items-center justify-between rounded-2xl border border-outline bg-surface-container-low px-5 py-4 ${
-        disabled && !busy ? 'opacity-50' : ''
-      }`}
-    >
-      <View>
-        <Text className="text-base font-bold text-on-surface">{name}</Text>
-        <Text className="text-xs font-medium text-on-surface-variant mt-0.5">{price}</Text>
-      </View>
-      {busy ? <ActivityIndicator color="#1D4ED8" /> : <ArrowRight size={18} color="#1D4ED8" />}
-    </TouchableOpacity>
   );
 }
 

@@ -497,9 +497,11 @@ function buildAndRefreshSchedule(state: PiggyState) {
     expenseCountThisWeek,
     planStatus: profile.planStatus,
     // `trialEndsAt` first: it's the only one of the two the entitlements sync
-    // actually writes. `currentPeriodEnd` is set solely by the checkout-return
-    // path in plans.tsx, so for a trial user it stays null — and the
-    // trial-ending reminder would never be scheduled at all.
+    // actually writes. Nothing writes `currentPeriodEnd` anymore now that the
+    // checkout-return path in plans.tsx is gone (#173) — the server holds it on
+    // the entitlements row but doesn't expose it through the plan read yet — so
+    // without `trialEndsAt` leading, the trial-ending reminder would never be
+    // scheduled at all.
     currentPeriodEnd: profile.trialEndsAt ?? profile.currentPeriodEnd,
     planDisplayName: profile.plan,
     language: profile.language,

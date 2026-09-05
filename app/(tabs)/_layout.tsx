@@ -6,7 +6,7 @@ import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } f
 import { useTranslation } from 'react-i18next';
 import { useStore } from '@/lib/store';
 import { springPresets } from '@/lib/springPresets';
-import { fetchEntitlementsSync } from '@/lib/entitlementsSync';
+import { syncEntitlements } from '@/lib/entitlementsRefresh';
 
 function AnimatedTabIcon({ focused, color, Icon }: { focused: boolean; color: string; Icon: LucideIcon }) {
   const progress = useSharedValue(focused ? 1 : 0);
@@ -39,8 +39,6 @@ function AnimatedTabIcon({ focused, color, Icon }: { focused: boolean; color: st
   );
 }
 
-const SYNC_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
-
 export default function TabLayout() {
   const { t } = useTranslation('common');
   const refreshActiveMissions = useStore((state) => state.refreshActiveMissions);
@@ -48,32 +46,6 @@ export default function TabLayout() {
   const refreshNotifications = useStore((state) => state.refreshNotifications);
   const syncNotificationPermission = useStore((state) => state.syncNotificationPermission);
   const recordActivity = useStore((state) => state.recordActivity);
-  const updateProfile = useStore((state) => state.updateProfile);
-  const setLastProfileSync = useStore((state) => state.setLastProfileSync);
-  const setServerAiMessageUsage = useStore((state) => state.setServerAiMessageUsage);
-
-  const syncUserProfile = async (signal: AbortSignal) => {
-    const { profile, lastProfileSync } = useStore.getState();
-    if (!profile.userID) return;
-    if (lastProfileSync && Date.now() - new Date(lastProfileSync).getTime() < SYNC_INTERVAL_MS) return;
-    const data = await fetchEntitlementsSync(profile.userID, signal);
-    if (!data) return;
-    // The server is authoritative for all of these; `trialEndsAt` may legitimately
-    // be null (no trial), so it's applied whenever the field was present rather
-    // than only when truthy.
-    const profilePatch: Parameters<typeof updateProfile>[0] = {};
-    if (data.plan) profilePatch.plan = data.plan;
-    if (data.status) profilePatch.planStatus = data.status;
-    if (data.trialEndsAt !== undefined) profilePatch.trialEndsAt = data.trialEndsAt;
-    if (Object.keys(profilePatch).length > 0) updateProfile(profilePatch);
-    if (typeof data.quotaAiMessages === 'number' || typeof data.aiMessagesUsed === 'number') {
-      setServerAiMessageUsage(
-        typeof data.quotaAiMessages === 'number' ? data.quotaAiMessages : null,
-        typeof data.aiMessagesUsed === 'number' ? data.aiMessagesUsed : null
-      );
-    }
-    setLastProfileSync(new Date().toISOString());
-  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -81,14 +53,14 @@ export default function TabLayout() {
     checkAndUpdateStreak();
     recordActivity();
     syncNotificationPermission().then(refreshNotifications);
-    syncUserProfile(controller.signal);
+    syncEntitlements({ signal: controller.signal });
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
         refreshActiveMissions();
         checkAndUpdateStreak();
         recordActivity();
         syncNotificationPermission().then(refreshNotifications);
-        syncUserProfile(controller.signal);
+        syncEntitlements({ signal: controller.signal });
       }
     });
     return () => {

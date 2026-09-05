@@ -10,7 +10,7 @@
         "EXPO_PUBLIC_APPWRITE_ENDPOINT": "https://appwrite.piggnify.com/v1",
         "EXPO_PUBLIC_APPWRITE_PROJECT_ID": "6a15741300220ae26d13",
         "EXPO_PUBLIC_APPWRITE_DATABASE_ID": "piggnify_mobile_db",
-        "EXPO_PUBLIC_N8N_BILLING_URL": "https://n8n.piggnify.com/webhook",
+        "EXPO_PUBLIC_N8N_ACCOUNT_URL": "https://n8n.piggnify.com/webhook",
         "EXPO_PUBLIC_REVIEWER_DEMO_EMAILS": "apple@example.com,google@example.com"
       }
     },
@@ -20,7 +20,7 @@
         "EXPO_PUBLIC_APPWRITE_ENDPOINT": "https://appwrite.piggnify.com/v1",
         "EXPO_PUBLIC_APPWRITE_PROJECT_ID": "6a15741300220ae26d13",
         "EXPO_PUBLIC_APPWRITE_DATABASE_ID": "piggnify_mobile_db",
-        "EXPO_PUBLIC_N8N_BILLING_URL": "https://n8n.piggnify.com/webhook",
+        "EXPO_PUBLIC_N8N_ACCOUNT_URL": "https://n8n.piggnify.com/webhook",
         "EXPO_PUBLIC_REVIEWER_DEMO_EMAILS": "apple@example.com,google@example.com"
       }
     },
@@ -29,7 +29,7 @@
         "EXPO_PUBLIC_APPWRITE_ENDPOINT": "https://appwrite.piggnify.com/v1",
         "EXPO_PUBLIC_APPWRITE_PROJECT_ID": "6a15741300220ae26d13",
         "EXPO_PUBLIC_APPWRITE_DATABASE_ID": "piggnify_mobile_db",
-        "EXPO_PUBLIC_N8N_BILLING_URL": "https://n8n.piggnify.com/webhook",
+        "EXPO_PUBLIC_N8N_ACCOUNT_URL": "https://n8n.piggnify.com/webhook",
         "EXPO_PUBLIC_REVIEWER_DEMO_EMAILS": "apple@example.com,google@example.com"
       }
     }

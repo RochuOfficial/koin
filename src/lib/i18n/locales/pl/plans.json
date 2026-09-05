@@ -56,7 +56,7 @@
   "switchToBody": "To wejdzie w życie {{date}}. Nic nigdy nie jest usuwane — jeśli ten plan obsługuje mniej celów niż masz obecnie, wybierzesz, które mają pozostać aktywne.",
   "keepCurrentPlan": "Zachowaj obecny plan",
   "continue": "Kontynuuj",
-  "header": "Wybierz swój plan",
+  "header": "Twoja subskrypcja",
   "confirmingPurchase": "Potwierdzanie zakupu…",
   "pendingBanner": "Zaplanowana zmiana: Twój plan przełączy się na {{plan}} dnia {{date}}. Wybierz ponownie obecny plan poniżej, aby to anulować.",
   "perMonth": "/mies.",
@@ -121,7 +121,8 @@
     "upgradeToHigherPlan": "Ulepsz do wyższego planu",
     "onTopPlan": "Masz już najwyższy plan",
     "maybeLater": "Może później",
-    "perMonth": "/mies."
+    "perMonth": "/mies.",
+    "seePlanDetails": "Zobacz szczegóły planu"
   },
   "downgradeSelection": {
     "nothingToChoose": "Nie ma tu nic do wyboru — wróć i spróbuj ponownie.",
@@ -164,7 +165,8 @@
       "deleteAccountBody": "To trwale usunie Twoje konto i wszystkie dane z naszych serwerów. Tej operacji nie można cofnąć.",
       "deleteAction": "Usuń",
       "somethingWrongTitle": "Coś poszło nie tak",
-      "somethingWrongBody": "Nie udało się usunąć Twojego konta. Spróbuj ponownie."
+      "somethingWrongBody": "Nie udało się usunąć Twojego konta. Spróbuj ponownie.",
+      "managedOnWeb": "Subskrypcją zarządzasz w przeglądarce:"
     },
     "trialIntro": {
       "title": "{{days}} dni planu {{plan}},\nna nasz koszt",
@@ -177,10 +179,12 @@
   },
   "terms": {
     "billing": "Plany odnawiają się automatycznie co miesiąc, w wybranej przez Ciebie walucie, dopóki nie anulujesz subskrypcji.",
-    "cancel": "Możesz anulować w dowolnym momencie w Ustawieniach — dostęp zachowasz do końca bieżącego okresu rozliczeniowego.",
+    "cancel": "Możesz anulować w dowolnym momencie na piggnify.com/account — dostęp zachowasz do końca bieżącego okresu rozliczeniowego.",
     "planMechanics": "Ulepszenia obowiązują natychmiast. Obniżenia planu wchodzą w życie na koniec bieżącego okresu rozliczeniowego, a Twoje dane są zawsze bezpieczne.",
     "termsOfUse": "Regulamin",
     "privacyPolicy": "Polityka prywatności",
     "linkError": "Nie udało się otworzyć tego linku."
-  }
+  },
+  "currentPlanChip": "Obecny",
+  "managedOnWeb": "Subskrypcją zarządzasz w przeglądarce na piggnify.com/account."
 }

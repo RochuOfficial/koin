@@ -135,9 +135,9 @@ export function LoginGate() {
       // onboarding.tsx is the only other place that sets it, so a user who
       // signs into an existing account here (rather than completing fresh
       // onboarding on this device) would otherwise have profile.userID stuck
-      // undefined forever, silently breaking anything keyed on it (e.g.
-      // billing.ts's startCheckout, which falls back to the "Simulate
-      // Payment" dev path when userID is missing).
+      // undefined forever, silently breaking anything keyed on it — the
+      // entitlements read included, which is now the only thing that can
+      // unlock a locked account (#173).
       updateProfile({ userID: userId, ...(!onboardingCompleted && { onboardingCompleted: true }) });
       onLoggedIn(userId, secret); // → needs_pin_setup or needs_pin_confirm
     } catch (err) {

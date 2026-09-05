@@ -49,7 +49,7 @@
   "switchToBody": "This takes effect on {{date}}. Nothing is ever deleted — if this plan holds fewer goals than you have, you'll choose which stay active first.",
   "keepCurrentPlan": "Keep current plan",
   "continue": "Continue",
-  "header": "Choose your plan",
+  "header": "Your subscription",
   "confirmingPurchase": "Confirming your purchase…",
   "pendingBanner": "Scheduled change: your plan switches to {{plan}} on {{date}}. Re-select your current plan below to cancel this.",
   "perMonth": "/mo",
@@ -114,7 +114,8 @@
     "upgradeToHigherPlan": "Upgrade to a higher plan",
     "onTopPlan": "You're on the top plan",
     "maybeLater": "Maybe later",
-    "perMonth": "/mo"
+    "perMonth": "/mo",
+    "seePlanDetails": "See plan details"
   },
   "downgradeSelection": {
     "nothingToChoose": "Nothing to choose here — go back and try again.",
@@ -156,7 +157,8 @@
       "deleteAccountBody": "This permanently deletes your account and all data from our servers. This cannot be undone.",
       "deleteAction": "Delete",
       "somethingWrongTitle": "Something went wrong",
-      "somethingWrongBody": "We could not delete your account. Please try again."
+      "somethingWrongBody": "We could not delete your account. Please try again.",
+      "managedOnWeb": "Your subscription is managed on the web:"
     },
     "trialIntro": {
       "title": "{{days}} days of {{plan}},\non us",
@@ -169,10 +171,12 @@
   },
   "terms": {
     "billing": "Plans renew automatically each month, in your selected currency, until you cancel.",
-    "cancel": "Cancel anytime from Settings — you'll keep access until the end of your current billing period.",
+    "cancel": "Cancel anytime at piggnify.com/account — you'll keep access until the end of your current billing period.",
     "planMechanics": "Upgrades apply immediately. Downgrades take effect at the end of your current billing period, and your data is always kept safe.",
     "termsOfUse": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
     "linkError": "Could not open this link."
-  }
+  },
+  "currentPlanChip": "Current",
+  "managedOnWeb": "Your subscription is managed on the web at piggnify.com/account."
 }

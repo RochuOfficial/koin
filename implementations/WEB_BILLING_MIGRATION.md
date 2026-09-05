@@ -222,14 +222,14 @@ assumption.**
 
 ## Phase 2 — App: build the new seam, delete the old one
 
-- [ ] **`src/lib/linking.ts`** — add next to `PRIVACY_URL` / `TERMS_URL` / `AI_TRANSPARENCY_URL`:
+- [x] **`src/lib/linking.ts`** — add next to `PRIVACY_URL` / `TERMS_URL` / `AI_TRANSPARENCY_URL`:
   ```ts
   /** Web billing/account management. The app has no purchase path of its own (issue #173). */
   export const ACCOUNT_URL = 'https://piggnify.com/account/';
   ```
   Keep it a plain constant, not an env var: it is a product URL like the other three, and an env var
   that can go missing is how the lockout trap in `planGate.ts` was created in the first place.
-- [ ] **New `src/lib/account.ts`** — move `requestAccountDeletion` here verbatim, with its own base
+- [x] **New `src/lib/account.ts`** — move `requestAccountDeletion` here verbatim, with its own base
       URL so the word "billing" leaves the client entirely:
   ```ts
   const N8N_ACCOUNT_URL = process.env.EXPO_PUBLIC_N8N_ACCOUNT_URL ?? '';
@@ -237,9 +237,9 @@ assumption.**
   export function accountEndpointConfigured(): boolean;
   export async function requestAccountDeletion(userId: string): Promise<boolean>;
   ```
-- [ ] Repoint the two importers: [app/delete-account.tsx:23](../app/delete-account.tsx#L23) and
+- [x] Repoint the two importers: [app/delete-account.tsx:23](../app/delete-account.tsx#L23) and
       [src/components/auth/PlanGate.tsx:34](../src/components/auth/PlanGate.tsx#L34).
-- [ ] **New `src/lib/entitlementsRefresh.ts`** — one shared refresh used by every caller, so the
+- [x] **New `src/lib/entitlementsRefresh.ts`** — one shared refresh used by every caller, so the
       1-hour throttle in `(tabs)/_layout.tsx` can be bypassed on demand:
   ```ts
   /** Reads CLAUDE_entitlements_get and patches the store. `force` skips the hourly throttle —
@@ -250,11 +250,11 @@ assumption.**
   [app/(tabs)/_layout.tsx:54-75](../app/(tabs)/_layout.tsx#L54) into it unchanged (throttle read of
   `lastProfileSync`, the `profilePatch` assembly, `setServerAiMessageUsage`, `setLastProfileSync`),
   plus the new `addonBalance` → `setAddonMessageBalance` from Phase 1.
-- [ ] **`src/lib/entitlementsSync.ts`** — parse the new field: `if (typeof raw.addonBalance ===
+- [x] **`src/lib/entitlementsSync.ts`** — parse the new field: `if (typeof raw.addonBalance ===
       'number') result.addonBalance = raw.addonBalance;` and widen `EntitlementsSyncResult`.
-- [ ] **`app/(tabs)/_layout.tsx`** — replace the inlined `syncUserProfile` with
+- [x] **`app/(tabs)/_layout.tsx`** — replace the inlined `syncUserProfile` with
       `syncEntitlements({ signal })`.
-- [ ] **Delete `src/lib/billing.ts`.**
+- [x] **Delete `src/lib/billing.ts`.**
 
 **Phase complete when:** `npx tsc --noEmit` passes, and
 `grep -rniE "stripe|checkout" app/ src/ --include="*.ts" --include="*.tsx"` returns **zero** matches
@@ -267,24 +267,24 @@ outside deliberate historical comments (which Phase 8 rewrites anyway).
 Rewrite [app/plans.tsx](../app/plans.tsx). It keeps its route, its modal presentation, and its
 `?highlight=<plan>` parameter (the upgrade gates deep-link into it), and loses every mutation.
 
-- [ ] Delete the imports that no longer apply: `startCheckout`, `requestSubscriptionSync`,
+- [x] Delete the imports that no longer apply: `startCheckout`, `requestSubscriptionSync`,
       `isBillingConfigured`, `tablesDB`/`DATABASE_ID`, `canSubscribe`, `isUpgrade`, `isDowngrade`,
       `evaluateDowngradeRetention`, `changePlan`, `formatUSD`, `SUPPORT_EMAIL`.
-- [ ] Delete the `checkout=success` effect (lines 126-159) and the `checkout` search param.
-- [ ] Delete `onSelectPlan` (lines 161-241), `applyChange` (120-124), and the `busy`/`syncing` state.
-- [ ] Plan cards: drop the price element (line 322-325) and the `aiMessagesExtra` price suffix
+- [x] Delete the `checkout=success` effect (lines 126-159) and the `checkout` search param.
+- [x] Delete `onSelectPlan` (lines 161-241), `applyChange` (120-124), and the `busy`/`syncing` state.
+- [x] Plan cards: drop the price element (line 322-325) and the `aiMessagesExtra` price suffix
       (line 57). Keep `displayName`, the Family star, and the full feature/quota bullet list.
-- [ ] Replace the per-card button block (lines 354-372) with a non-interactive state marker:
+- [x] Replace the per-card button block (lines 354-372) with a non-interactive state marker:
       current plan → a "Current plan" chip; every other tier → nothing at all. No `Button`, no
       `onPress`, nowhere on this screen.
-- [ ] Keep the trial banner, the `pendingPlan` banner and the status line — all read-only, all
+- [x] Keep the trial banner, the `pendingPlan` banner and the status line — all read-only, all
       already driven by server-synced state.
-- [ ] Add a single plain-text line under the cards: *"Your subscription is managed on the web."*
+- [x] Add a single plain-text line under the cards: *"Your subscription is managed on the web."*
       **Not tappable** (D3 puts the only link in Settings).
-- [ ] Keep [`<BillingTerms />`](../src/components/BillingTerms.tsx) — but reword `terms.cancel`,
+- [x] Keep [`<BillingTerms />`](../src/components/BillingTerms.tsx) — but reword `terms.cancel`,
       which currently claims *"Cancel anytime from Settings"* and has never been true (there is no
       in-app cancel; `cancelPlan` in the store is dead code). See Phase 7.
-- [ ] Rename the screen header from "Choose your plan" to "Your subscription" (`plans:header`).
+- [x] Rename the screen header from "Choose your plan" to "Your subscription" (`plans:header`).
 
 **Phase complete when:** `/plans` renders correctly for each of `trialing` / `active` /
 `cancel_scheduled` / `past_due` / `expired` / `canceled`, contains **no** `Button`, no `Pressable`
@@ -296,11 +296,11 @@ purchase affordance, and no currency string anywhere in its rendered output.
 
 ### 4.1 `UpgradeModal` (C13 — gated features stay visible)
 
-- [ ] [src/components/UpgradeModal.tsx](../src/components/UpgradeModal.tsx): delete the price block
+- [x] [src/components/UpgradeModal.tsx](../src/components/UpgradeModal.tsx): delete the price block
       (lines 82-97) and `formatUSD`. Keep the recommended-plan name.
-- [ ] Change the primary CTA from `upgradeModal.upgradeToPlan` ("Upgrade to Family") to a neutral
+- [x] Change the primary CTA from `upgradeModal.upgradeToPlan` ("Upgrade to Family") to a neutral
       "See plan details", still routing to `/plans?highlight=<plan>` — which is now read-only.
-- [ ] `onUpgrade` prop → rename `onViewPlans` at all three call sites:
+- [x] `onUpgrade` prop → rename `onViewPlans` at all three call sites:
       [app/(tabs)/index.tsx:122](../app/(tabs)/index.tsx#L122),
       [app/(tabs)/goals.tsx:540](../app/(tabs)/goals.tsx#L540),
       [app/(tabs)/coach.tsx:157](../app/(tabs)/coach.tsx#L157).
@@ -310,26 +310,26 @@ purchase affordance, and no currency string anywhere in its rendered output.
 This is the delicate one: a locked user cannot reach Settings (the gate replaces the whole navigation
 stack), so under D3 they get no tappable link at all.
 
-- [ ] [src/components/auth/PlanGate.tsx](../src/components/auth/PlanGate.tsx): delete `subscribe()`
+- [x] [src/components/auth/PlanGate.tsx](../src/components/auth/PlanGate.tsx): delete `subscribe()`
       (71-84), the `PlanChoice` list (230-244), the `PlanChoice` component (352-381), and `busy`.
-- [ ] Replace the tier list with plain, unlinked text naming the web page:
+- [x] Replace the tier list with plain, unlinked text naming the web page:
       *"Your subscription is managed at piggnify.com/account."*
-- [ ] `refreshAfterCheckout` → rename `refreshSubscriptionState`, drop `requestSubscriptionSync`, and
+- [x] `refreshAfterCheckout` → rename `refreshSubscriptionState`, drop `requestSubscriptionSync`, and
       call `syncEntitlements({ force: true })`. Keep the `AppState` background→active listener
       (lines 129-143) — it is now the main way a user who just subscribed on the web gets unlocked —
       and keep the manual "I've already subscribed" fallback.
-- [ ] Lockout enforcement: `lockoutEnforced(isBillingConfigured())` (line 57) →
+- [x] Lockout enforcement: `lockoutEnforced(isBillingConfigured())` (line 57) →
       `lockoutEnforced(ACCOUNT_URL.length > 0)`. Keep the *structural* shape from
       [src/lib/planGate.ts:36](../src/lib/planGate.ts#L36) — the guarantee it encodes ("never trap a
       user behind an escape hatch that does not exist") is worth preserving even though a constant
       makes it always true today.
-- [ ] Update `planGate.ts`'s doc comment (lines 22-35), which explains the rule in terms of
+- [x] Update `planGate.ts`'s doc comment (lines 22-35), which explains the rule in terms of
       `EXPO_PUBLIC_N8N_BILLING_URL` — an env var that will no longer exist.
-- [ ] Delete the `!isBillingConfigured()` warning banner (219-225) and its
+- [x] Delete the `!isBillingConfigured()` warning banner (219-225) and its
       `planGate.locked.checkoutNotConfigured` string.
-- [ ] Keep log out / contact support / delete account untouched — with no in-app purchase path these
+- [x] Keep log out / contact support / delete account untouched — with no in-app purchase path these
       are now the *only* actions on this screen, which makes their correctness load-bearing.
-- [ ] Re-read [src/components/auth/LoginGate.tsx:139](../src/components/auth/LoginGate.tsx#L139),
+- [x] Re-read [src/components/auth/LoginGate.tsx:139](../src/components/auth/LoginGate.tsx#L139),
       which references `billing.ts`'s simulate fallback in a comment.
 
 **Phase complete when:** a user whose entitlements are `expired` sees the locked screen with no
@@ -340,21 +340,60 @@ clears the gate within one refresh, with **no** app restart and no deep link inv
 
 ## Phase 5 — Coach: remove the add-on purchase, keep the balance (D4)
 
-- [ ] [app/(tabs)/coach.tsx](../app/(tabs)/coach.tsx): delete `buyMore` (180-203), the `addon=success`
+- [x] [app/(tabs)/coach.tsx](../app/(tabs)/coach.tsx): delete `buyMore` (180-203), the `addon=success`
       effect (212-224), the `addon` search param, `canBuyMore` (137), and the `secondaryAction`
       passed to `UpgradeModal` (542-544).
-- [ ] Keep `addonMessageBalance`, `setAddonMessageBalance`, and the spend path
+- [x] Keep `addonMessageBalance`, `setAddonMessageBalance`, and the spend path
       (`incrementCoachMessages` in [store.ts:838-851](../src/lib/store.ts#L838)) exactly as they are.
-- [ ] The balance is now refreshed **only** by `syncEntitlements` (Phase 2) via the new
+- [x] The balance is now refreshed **only** by `syncEntitlements` (Phase 2) via the new
       `addonBalance` field — confirm it lands on a fresh install with an existing balance, since the
       previous refresh point (the checkout return) is gone.
-- [ ] Honour the Phase 1 finding: if `quota_ai_messages` already includes `addon_balance`, make sure
+- [x] Honour the Phase 1 finding: if `quota_ai_messages` already includes `addon_balance`, make sure
       the client does not add it a second time on top of `serverAiMessagesQuota`.
-- [ ] The `aiMessages` gate keeps its title/description but loses its buy CTA — the user is told the
+- [x] The `aiMessages` gate keeps its title/description but loses its buy CTA — the user is told the
       allowance is used up and where more come from, without a purchase button.
 
 **Phase complete when:** a user with a non-zero add-on balance can still spend it, the balance
 survives a cold start, and no code path in `app/` or `src/` can increase it.
+
+---
+
+## Phases 2–5 — done 2026-09-05
+
+Implemented as one change (`f18cc2e`..): Phase 2's new seam can't land without its three consumers
+moving at the same time, since deleting `billing.ts` while `plans.tsx`/`coach.tsx`/`PlanGate.tsx`
+still import it doesn't compile.
+
+**Verified:** `npx tsc --noEmit` clean; `npm test` 390/390 green (4 tests removed with
+`canSubscribe`); `grep -rniE "stripe|checkout" app/ src/` returns only accurate historical comments
+about the *server-side* rail.
+
+**Done beyond the phase list, because leaving it would have shipped a broken window:**
+- **Env renamed early** (Phase 8.2's item): `EXPO_PUBLIC_N8N_BILLING_URL` → `EXPO_PUBLIC_N8N_ACCOUNT_URL`
+  in `eas.json` (all 3 profiles) and `.env`. `account.ts` reads the new name, so deferring this to
+  Phase 8 would have silently broken account deletion in every build in the meantime.
+- **New i18n keys added to all four locales now** (part of Phase 8.1): `currentPlanChip`,
+  `managedOnWeb`, `upgradeModal.seePlanDetails`, `planGate.locked.managedOnWeb`, plus reworded
+  `header` and `terms.cancel`. `locales.test.ts` enforces en↔all parity, so a key added in `en`
+  alone fails the suite — these could not wait for Phase 8. **Dead keys are still to be swept in
+  Phase 8.1** (removal doesn't fail any test, so it was left where the plan put it).
+- **`canSubscribe` deleted** from `planGate.ts` with its 4 tests — it existed only to decide whether
+  to open checkout, so it went dead the moment `plans.tsx` stopped mutating plans.
+- **Stale comments corrected** in `LoginGate.tsx` (referenced `billing.ts`'s simulate-payment path),
+  `planGate.ts` (`lockoutEnforced` documented in terms of the removed env var; parameter renamed
+  `billingConfigured` → `recoveryPathAvailable`), and `store.ts`.
+
+**Gaps this surfaced — carry into Phase 6:**
+- **`profile.currentPeriodEnd` now has no writer.** It was set only by the checkout-return path in
+  `plans.tsx`. `CLAUDE_entitlements_get` doesn't expose `current_period_end` even though the
+  `entitlements` row holds it, so renewal/cancellation dates fall back to the generic "the end of
+  your billing period" string, and the trial-ending notification leans entirely on `trialEndsAt`.
+  Fix by adding `currentPeriodEnd` to the plan-read response (same additive shape as `addonBalance`)
+  and applying it in `syncEntitlements`.
+- **`/downgrade-selection` is currently unreachable.** `plans.tsx` was its only entry point. Phase 6
+  makes it reactive as planned — until then a web downgrade below the goal limit archives nothing.
+- **`changePlan` / `cancelPlan` / `clearPendingPlan` / `applyPendingPlan` / `applyDowngradeWithRetention`
+  are now all dead** in `store.ts`, exactly as Phase 6 anticipated. Left in place for that phase.
 
 ---
 

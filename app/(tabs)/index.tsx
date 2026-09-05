@@ -117,7 +117,7 @@ export default function Dashboard() {
 
   const openGate = (key: GateKey) => setGate(gateInfo(key, plan, tPlans));
   const closeGate = () => setGate(null);
-  const goUpgrade = (target: UserPlan) => {
+  const goViewPlans = (target: UserPlan) => {
     setGate(null);
     router.push(`/plans?highlight=${target}`);
   };
@@ -533,7 +533,7 @@ export default function Dashboard() {
         isVisible={gate !== null}
         gate={gate}
         onClose={closeGate}
-        onUpgrade={goUpgrade}
+        onViewPlans={goViewPlans}
       />
 
       <DeepAnalysisConfirmModal

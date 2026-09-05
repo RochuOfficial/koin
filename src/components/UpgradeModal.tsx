@@ -12,15 +12,15 @@ import { X, Sparkles } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { BottomSheet } from './animation/BottomSheet';
 import { Button } from './ui/button';
-import { getPlanConfig, formatUSD, type GateInfo } from '@/lib/entitlements';
+import { getPlanConfig, type GateInfo } from '@/lib/entitlements';
 
 interface UpgradeModalProps {
   isVisible: boolean;
   gate: GateInfo | null;
   onClose: () => void;
-  /** Called with the suggested plan when the user chooses to upgrade. */
-  onUpgrade: (targetPlan: NonNullable<GateInfo['requiredPlan']>) => void;
-  /** Optional lower-emphasis action rendered below the main upgrade CTA. */
+  /** Called with the suggested plan when the user chooses to see plan details. */
+  onViewPlans: (targetPlan: NonNullable<GateInfo['requiredPlan']>) => void;
+  /** Optional lower-emphasis action rendered below the main CTA. */
   secondaryAction?: { label: string; onPress: () => void };
 }
 
@@ -28,7 +28,7 @@ export function UpgradeModal({
   isVisible,
   gate,
   onClose,
-  onUpgrade,
+  onViewPlans,
   secondaryAction,
 }: UpgradeModalProps) {
   const { t } = useTranslation('plans');
@@ -40,10 +40,10 @@ export function UpgradeModal({
     onClose();
   };
 
-  const handleUpgrade = () => {
+  const handleViewPlans = () => {
     if (!requiredPlan) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    onUpgrade(requiredPlan);
+    onViewPlans(requiredPlan);
   };
 
   const handleSecondary = () => {
@@ -79,33 +79,22 @@ export function UpgradeModal({
           </Text>
         </View>
 
+        {/* No price here (#173): the app shows no prices and offers no purchase
+            path, so this names the tier and sends the user to the read-only
+            plan detail rather than to a checkout. */}
         {targetConfig && (
-          <View className="mb-5 rounded-2xl bg-surface-container-low p-4 flex-row items-center justify-between">
-            <View>
-              <Text className="text-xs font-semibold text-on-surface-variant">
-                {t('upgradeModal.recommendedPlan')}
-              </Text>
-              <Text className="text-base font-black text-on-surface mt-0.5">
-                {targetConfig.displayName}
-              </Text>
-            </View>
-            <Text className="text-base font-black text-primary">
-              {formatUSD(targetConfig.priceUSD)}
-              <Text className="text-xs font-semibold text-on-surface-variant">{t('upgradeModal.perMonth')}</Text>
+          <View className="mb-5 rounded-2xl bg-surface-container-low p-4">
+            <Text className="text-xs font-semibold text-on-surface-variant">
+              {t('upgradeModal.recommendedPlan')}
+            </Text>
+            <Text className="text-base font-black text-on-surface mt-0.5">
+              {targetConfig.displayName}
             </Text>
           </View>
         )}
 
         {requiredPlan ? (
-          <Button
-            onPress={handleUpgrade}
-            label={
-              targetConfig
-                ? t('upgradeModal.upgradeToPlan', { plan: targetConfig.displayName })
-                : t('upgradeModal.upgradeToHigherPlan')
-            }
-            className="w-full"
-          />
+          <Button onPress={handleViewPlans} label={t('upgradeModal.seePlanDetails')} className="w-full" />
         ) : (
           <Button onPress={handleClose} label={t('upgradeModal.onTopPlan')} disabled className="w-full" />
         )}

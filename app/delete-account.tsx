@@ -20,7 +20,7 @@ import * as Haptics from 'expo-haptics';
 import { useAuthLock } from '@/lib/authLock';
 import { useStore } from '@/lib/store';
 import { PIN_LENGTH } from '@/lib/pin';
-import { requestAccountDeletion } from '@/lib/billing';
+import { requestAccountDeletion } from '@/lib/account';
 import { PinPad, PinDots } from '@/components/auth/PinPad';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/icons/Icon';
