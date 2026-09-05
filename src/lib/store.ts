@@ -26,7 +26,6 @@ import {
 } from './missions';
 import { PIGGY_STORE_VERSION, migratePiggyState } from './storeMigrations';
 import { convertProfileAmounts, convertGoalAmounts } from './currencyConversion';
-import { PLAN_RANK } from './entitlements';
 import { detectDeviceLanguage, type SupportedLanguage } from './i18n/detect';
 import { formatMoney } from './i18n/format';
 import {
@@ -332,6 +331,13 @@ export interface PiggyState {
   serverAiMessagesUsed: number | null;
   /** Purchased extra AI messages, not tied to a billing period (roll over indefinitely). */
   addonMessageBalance: number;
+  /**
+   * Plan the user has been downgraded to (on the web) while holding more active
+   * goals than it allows — null when there's nothing to resolve. Set by the
+   * entitlements sync, cleared by `applyRetentionSelection`. Persisted so a
+   * dismissed prompt survives a restart and can be re-asked rather than lost.
+   */
+  retentionRequiredFor: UserPlan | null;
   deepAnalysisUsed: number;
   deepAnalysisMonth: string;
   lastProfileSync: string;
@@ -347,36 +353,28 @@ export interface PiggyState {
   revokeAiConsent: () => void;
 
   /**
-   * Apply a plan change. Upgrades (higher rank) take effect immediately (C1);
-   * downgrades (lower rank) are scheduled for the next billing cycle (C2) and
-   * stored in `pendingPlan` without mutating the active plan or any data (C4).
-   * A trialing user has no real subscription to rank against — they're
-   * provisioned onto Family regardless of what they'll pay for, so every
-   * other tier would rank as a "downgrade" and get scheduled instead of
-   * applied. Any target applies immediately while trialing, same as C1.
+   * Archive goals not in `keepGoalIds` (never deleted — C4, see `Goal.archived`)
+   * and clear `retentionRequiredFor`.
    *
-   * NOTE: In production this state is authoritative on the backend and driven by
-   * a Stripe webhook -> Appwrite sync, not the client. This client action is the
-   * local apply point for the vertical slice (see entitlements.ts header).
+   * Archive-only since #173: the plan itself is never changed here. Plan changes
+   * happen on the web and arrive through the entitlements sync, so by the time
+   * the user picks what to keep, the downgrade has already taken effect
+   * server-side — this only resolves the over-limit goals it left behind.
+   *
+   * Deliberately takes plain IDs rather than importing retention.ts's evaluation
+   * here — that logic (and re-validating it, since counts can change between the
+   * prompt and the confirm) lives in the UI layer (downgrade-selection.tsx),
+   * consistent with retention.ts staying a pure, independently-tested module
+   * rather than folding its rules into the store.
    */
-  changePlan: (target: UserPlan) => void;
+  applyRetentionSelection: (keepGoalIds: string[]) => void;
   /**
-   * Archive goals not in `keepGoalIds` (never deleted — C4, see `Goal.archived`),
-   * then run the same scheduling `changePlan` does. Used when a downgrade would
-   * exceed the target plan's limits (retention.ts) and the user has chosen what
-   * to keep. Deliberately takes plain IDs rather than importing retention.ts's
-   * evaluation here — that logic (and re-validating it, since counts can change
-   * between the request and the confirm) lives in the UI layer (plans.tsx,
-   * downgrade-selection.tsx), consistent with retention.ts staying a pure,
-   * independently-tested module rather than folding its rules into the store.
+   * Set (or clear) the plan whose goal limit the user is currently over, after a
+   * downgrade made on the web. The UI watches this to prompt for a selection;
+   * it stays set until resolved, so dismissing the prompt re-asks later rather
+   * than silently auto-archiving anything (C4/C7).
    */
-  applyDowngradeWithRetention: (target: UserPlan, keepGoalIds: string[]) => void;
-  /** Cancel renewal; plan stays active until currentPeriodEnd (C3). */
-  cancelPlan: () => void;
-  /** Clear a scheduled downgrade before it takes effect. */
-  clearPendingPlan: () => void;
-  /** Apply a pending downgrade (called at cycle rollover; webhook-driven in prod). */
-  applyPendingPlan: () => void;
+  setRetentionRequired: (plan: UserPlan | null) => void;
 
   setGoals: (g: Goal[]) => void;
   addGoal: (g: Goal) => void;
@@ -496,12 +494,11 @@ function buildAndRefreshSchedule(state: PiggyState) {
     savedThisWeekLabel: formatCurrency(savedThisWeek, profile.currency, profile.language),
     expenseCountThisWeek,
     planStatus: profile.planStatus,
-    // `trialEndsAt` first: it's the only one of the two the entitlements sync
-    // actually writes. Nothing writes `currentPeriodEnd` anymore now that the
-    // checkout-return path in plans.tsx is gone (#173) — the server holds it on
-    // the entitlements row but doesn't expose it through the plan read yet — so
-    // without `trialEndsAt` leading, the trial-ending reminder would never be
-    // scheduled at all.
+    // `trialEndsAt` first: for a trial user it's the meaningful date, and
+    // `currentPeriodEnd` is null until there's a real subscription — without
+    // this order the trial-ending reminder would never be scheduled at all.
+    // Both are written by the entitlements sync (#173 Phase 6); nothing on the
+    // client derives either one anymore.
     currentPeriodEnd: profile.trialEndsAt ?? profile.currentPeriodEnd,
     planDisplayName: profile.plan,
     language: profile.language,
@@ -523,6 +520,7 @@ export const useStore = create<PiggyState>()(
       serverAiMessagesQuota: null,
       serverAiMessagesUsed: null,
       addonMessageBalance: 0,
+      retentionRequiredFor: null,
       deepAnalysisUsed: 0,
       deepAnalysisMonth: getTodayString().slice(0, 7),
       lastProfileSync: '',
@@ -547,66 +545,14 @@ export const useStore = create<PiggyState>()(
         },
       })),
 
-      changePlan: (target) => set((state) => {
-        const current = state.profile.plan;
-        if (target === current) {
-          // Re-selecting the active plan cancels any pending downgrade.
-          return { profile: { ...state.profile, pendingPlan: null, planStatus: 'active' } };
-        }
-        if (PLAN_RANK[target] > PLAN_RANK[current] || state.profile.planStatus === 'trialing') {
-          // Upgrade — immediate (C1). Resets loyalty tenure and clears pending state.
-          // Also immediate for any target while trialing (see doc comment above).
-          const now = new Date();
-          const periodEnd = new Date(now);
-          periodEnd.setMonth(periodEnd.getMonth() + 1);
-          return {
-            profile: {
-              ...state.profile,
-              plan: target,
-              planStatus: 'active',
-              pendingPlan: null,
-              planSince: now.toISOString(),
-              currentPeriodEnd: periodEnd.toISOString(),
-            },
-          };
-        }
-        // Downgrade — scheduled for next cycle (C2); active plan and data untouched (C4).
-        return { profile: { ...state.profile, pendingPlan: target } };
-      }),
-
-      applyDowngradeWithRetention: (target, keepGoalIds) => {
-        set((state) => ({
-          goals: state.goals.map((g) =>
-            g.archived || keepGoalIds.includes(g.id) ? g : { ...g, archived: true }
-          ),
-        }));
-        get().changePlan(target);
-      },
-
-      cancelPlan: () => set((state) => ({
-        profile: { ...state.profile, planStatus: 'canceled' },
+      applyRetentionSelection: (keepGoalIds) => set((state) => ({
+        goals: state.goals.map((g) =>
+          g.archived || keepGoalIds.includes(g.id) ? g : { ...g, archived: true }
+        ),
+        retentionRequiredFor: null,
       })),
 
-      clearPendingPlan: () => set((state) => ({
-        profile: { ...state.profile, pendingPlan: null },
-      })),
-
-      applyPendingPlan: () => set((state) => {
-        const { pendingPlan } = state.profile;
-        if (!pendingPlan) return {};
-        const now = new Date();
-        const periodEnd = new Date(now);
-        periodEnd.setMonth(periodEnd.getMonth() + 1);
-        return {
-          profile: {
-            ...state.profile,
-            plan: pendingPlan,
-            pendingPlan: null,
-            planSince: now.toISOString(),
-            currentPeriodEnd: periodEnd.toISOString(),
-          },
-        };
-      }),
+      setRetentionRequired: (plan) => set({ retentionRequiredFor: plan }),
 
       setGoals: (goals) => set({ goals }),
       addGoal: (g) => set((state) => {

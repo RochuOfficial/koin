@@ -11,6 +11,7 @@
  * didn't work. Hence `force`.
  */
 import { fetchEntitlementsSync } from './entitlementsSync';
+import { evaluateDowngradeRetention } from './retention';
 import { useStore } from './store';
 
 /** How long a background/foreground refresh trusts the last successful sync. */
@@ -56,6 +57,7 @@ export async function syncEntitlements(opts: SyncOptions = {}): Promise<boolean>
   if (data.plan) profilePatch.plan = data.plan;
   if (data.status) profilePatch.planStatus = data.status;
   if (data.trialEndsAt !== undefined) profilePatch.trialEndsAt = data.trialEndsAt;
+  if (data.currentPeriodEnd !== undefined) profilePatch.currentPeriodEnd = data.currentPeriodEnd;
   if (Object.keys(profilePatch).length > 0) updateProfile(profilePatch);
 
   if (typeof data.quotaAiMessages === 'number' || typeof data.aiMessagesUsed === 'number') {
@@ -70,5 +72,18 @@ export async function syncEntitlements(opts: SyncOptions = {}): Promise<boolean>
   if (typeof data.addonBalance === 'number') setAddonMessageBalance(data.addonBalance);
 
   setLastProfileSync(new Date().toISOString());
+
+  // A downgrade made on the web can leave the user holding more active goals
+  // than the new plan allows. Nothing is archived automatically (C4/C7) — this
+  // only records that a choice is owed; the UI prompts for it and
+  // `applyRetentionSelection` resolves it.
+  const { profile: synced, goals, setRetentionRequired } = useStore.getState();
+  const requirement = evaluateDowngradeRetention(synced.plan, {
+    goals: goals.filter((g) => !g.archived).length,
+    incomes: synced.monthlyIncome != null ? 1 : 0,
+    devices: 0,
+  });
+  setRetentionRequired(requirement.selectionRequired ? synced.plan : null);
+
   return true;
 }

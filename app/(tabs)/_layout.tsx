@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Tabs } from 'expo-router';
+import { useEffect, useRef } from 'react';
+import { Tabs, useRouter } from 'expo-router';
 import { Home, Target, Zap, MessageCircle, User, type LucideIcon } from 'lucide-react-native';
 import { AppState, View } from 'react-native';
 import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -46,6 +46,9 @@ export default function TabLayout() {
   const refreshNotifications = useStore((state) => state.refreshNotifications);
   const syncNotificationPermission = useStore((state) => state.syncNotificationPermission);
   const recordActivity = useStore((state) => state.recordActivity);
+  const retentionRequiredFor = useStore((state) => state.retentionRequiredFor);
+  const router = useRouter();
+  const promptedRetentionFor = useRef<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -68,6 +71,19 @@ export default function TabLayout() {
       controller.abort();
     };
   }, []);
+
+  /**
+   * A downgrade made on the web can leave more active goals than the new plan
+   * allows; the sync records that in `retentionRequiredFor` and this prompts for
+   * the choice. Fired at most once per plan per session (the ref) so dismissing
+   * the modal doesn't immediately re-open it — the flag stays set, so the ask
+   * comes back on the next launch until it's resolved.
+   */
+  useEffect(() => {
+    if (!retentionRequiredFor || promptedRetentionFor.current === retentionRequiredFor) return;
+    promptedRetentionFor.current = retentionRequiredFor;
+    router.push({ pathname: '/downgrade-selection', params: { target: retentionRequiredFor } });
+  }, [retentionRequiredFor]);
 
   return (
     <Tabs

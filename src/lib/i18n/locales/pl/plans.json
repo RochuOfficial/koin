@@ -127,9 +127,9 @@
   "downgradeSelection": {
     "nothingToChoose": "Nie ma tu nic do wyboru — wróć i spróbuj ponownie.",
     "chooseWhatToKeep": "Wybierz, co zachować",
-    "keepBody_one": "Plan {{plan}} pozwala zachować {{count}} aktywny cel. Masz {{total}}. Wybierz {{pickText}}, aby zachować aktywne — reszta zniknie z listy, ale nic nigdy nie jest usuwane. Wrócą od razu, jeśli znów przejdziesz na wyższy plan.",
-    "keepBody_few": "Plan {{plan}} pozwala zachować {{count}} aktywne cele. Masz {{total}}. Wybierz {{pickText}}, aby zachować aktywne — reszta zniknie z listy, ale nic nigdy nie jest usuwane. Wrócą od razu, jeśli znów przejdziesz na wyższy plan.",
-    "keepBody_many": "Plan {{plan}} pozwala zachować {{count}} aktywnych celów. Masz {{total}}. Wybierz {{pickText}}, aby zachować aktywne — reszta zniknie z listy, ale nic nigdy nie jest usuwane. Wrócą od razu, jeśli znów przejdziesz na wyższy plan.",
+    "keepBody_one": "Twój plan to teraz {{plan}}, który pozwala zachować {{count}} aktywny cel. Masz {{total}}. Wybierz {{pickText}}, aby zachować aktywne — reszta zniknie z listy, ale nic nigdy nie jest usuwane. Wrócą od razu, jeśli znów przejdziesz na wyższy plan.",
+    "keepBody_few": "Twój plan to teraz {{plan}}, który pozwala zachować {{count}} aktywne cele. Masz {{total}}. Wybierz {{pickText}}, aby zachować aktywne — reszta zniknie z listy, ale nic nigdy nie jest usuwane. Wrócą od razu, jeśli znów przejdziesz na wyższy plan.",
+    "keepBody_many": "Twój plan to teraz {{plan}}, który pozwala zachować {{count}} aktywnych celów. Masz {{total}}. Wybierz {{pickText}}, aby zachować aktywne — reszta zniknie z listy, ale nic nigdy nie jest usuwane. Wrócą od razu, jeśli znów przejdziesz na wyższy plan.",
     "pickOne": "jeden",
     "pickUpTo": "do {{count}}",
     "keepingCountOfLimit": "Zachowujesz {{count}} z {{limit}}",

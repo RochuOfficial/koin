@@ -120,8 +120,8 @@
   "downgradeSelection": {
     "nothingToChoose": "Nothing to choose here — go back and try again.",
     "chooseWhatToKeep": "Choose what to keep",
-    "keepBody_one": "{{plan}} keeps {{count}} active goal. You have {{total}}. Pick {{pickText}} to keep active — the rest come off your list, but nothing is ever deleted. They come straight back if you upgrade again.",
-    "keepBody_other": "{{plan}} keeps {{count}} active goals. You have {{total}}. Pick {{pickText}} to keep active — the rest come off your list, but nothing is ever deleted. They come straight back if you upgrade again.",
+    "keepBody_one": "Your plan is now {{plan}}, which keeps {{count}} active goal. You have {{total}}. Pick {{pickText}} to keep active — the rest come off your list, but nothing is ever deleted. They come straight back if you upgrade again.",
+    "keepBody_other": "Your plan is now {{plan}}, which keeps {{count}} active goals. You have {{total}}. Pick {{pickText}} to keep active — the rest come off your list, but nothing is ever deleted. They come straight back if you upgrade again.",
     "pickOne": "the one",
     "pickUpTo": "up to {{count}}",
     "keepingCountOfLimit": "Keeping {{count}} of {{limit}}",

@@ -24,6 +24,13 @@ export interface EntitlementsSyncResult {
    * that figure (see n8n/code-nodes/resolve-entitlements.js).
    */
   addonBalance?: number;
+  /**
+   * ISO timestamp the current paid period ends — the renewal date, or the date
+   * access stops after a cancellation. Added server-side in #173 Phase 6: the
+   * app used to derive this itself on a successful checkout and had no source
+   * for it once the purchase path moved to the web.
+   */
+  currentPeriodEnd?: string | null;
 }
 
 /**
@@ -80,6 +87,12 @@ export async function fetchEntitlementsSync(
     // Explicit null is meaningful (no trial), so it's forwarded rather than dropped.
     if (typeof raw.trialEndsAt === 'string' || raw.trialEndsAt === null) {
       result.trialEndsAt = raw.trialEndsAt;
+    }
+
+    // Same treatment: null means "no period end on record", which is different
+    // from the field being absent (an older backend that doesn't send it).
+    if (typeof raw.currentPeriodEnd === 'string' || raw.currentPeriodEnd === null) {
+      result.currentPeriodEnd = raw.currentPeriodEnd;
     }
 
     return result;

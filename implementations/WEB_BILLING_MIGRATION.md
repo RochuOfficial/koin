@@ -403,31 +403,65 @@ The store currently lets the *client* grant itself a plan. With no in-app purcha
 and dangerous (it is the same shape of hole as the "Simulate payment" button the audit flagged under
 2.3.1).
 
-- [ ] [src/lib/store.ts](../src/lib/store.ts): delete `changePlan` (548-573), `cancelPlan`
+- [x] [src/lib/store.ts](../src/lib/store.ts): delete `changePlan` (548-573), `cancelPlan`
       (584-586), `clearPendingPlan` (588-590), `applyPendingPlan` (592-607) and their interface
       declarations (362-379). The last three already have zero callers.
-- [ ] Replace `applyDowngradeWithRetention` (575-582) with an **archive-only**
+- [x] Replace `applyDowngradeWithRetention` (575-582) with an **archive-only**
       `applyRetentionSelection(keepGoalIds: string[])` — same archiving behaviour, no plan mutation.
-- [ ] `plan`, `planStatus`, `pendingPlan`, `currentPeriodEnd`, `trialEndsAt` stay as persisted
+- [x] `plan`, `planStatus`, `pendingPlan`, `currentPeriodEnd`, `trialEndsAt` stay as persisted
       fields, written only by `updateProfile` from the entitlements sync. **No persisted shape
       changes, so no `storeMigrations.ts` version bump.** Confirm this by re-running
       `src/lib/storeMigrations.test.ts`.
-- [ ] **Downgrade retention becomes reactive.** Today [app/plans.tsx:226-236](../app/plans.tsx#L226)
+- [x] **Downgrade retention becomes reactive.** Today [app/plans.tsx:226-236](../app/plans.tsx#L226)
       calls `evaluateDowngradeRetention` *before* scheduling a downgrade. Downgrades now happen on
       the web, so the app learns about them after the fact — and constraint C4/C7 (never auto-delete;
       block until the user chooses what to keep) still has to hold.
-  - [ ] After `syncEntitlements` applies a plan change, evaluate
+  - [x] After `syncEntitlements` applies a plan change, evaluate
         `evaluateDowngradeRetention(newPlan, currentCounts)`. If `selectionRequired`, route to
         `/downgrade-selection` with the new plan as `target`.
-  - [ ] [app/downgrade-selection.tsx](../app/downgrade-selection.tsx): reword from "you are about to
+  - [x] [app/downgrade-selection.tsx](../app/downgrade-selection.tsx): reword from "you are about to
         downgrade" to "your plan changed — choose what stays active", and call
         `applyRetentionSelection` instead of `applyDowngradeWithRetention`.
-  - [ ] [src/lib/retention.ts](../src/lib/retention.ts) is pure and needs **no** change; its tests
+  - [x] [src/lib/retention.ts](../src/lib/retention.ts) is pure and needs **no** change; its tests
         stay green untouched.
 
 **Phase complete when:** nothing in `app/` or `src/` can change `profile.plan` except the entitlements
 sync; a plan downgraded on the web while the app is backgrounded prompts for a retention selection on
 return; and `src/lib/retention.test.ts` + `src/lib/storeMigrations.test.ts` pass unchanged.
+**Met** (done 2026-09-05) — `tsc` clean, 390/390 tests green, and a grep for all five removed actions
+returns nothing.
+
+### How the reactive prompt actually works
+
+`syncEntitlements` evaluates `evaluateDowngradeRetention(profile.plan, …)` after applying server
+state and writes the answer to a new `retentionRequiredFor: UserPlan | null` on the store. The tabs
+layout watches it and pushes `/downgrade-selection`; `applyRetentionSelection` archives and clears it.
+
+Three properties worth keeping in mind if this is touched again:
+- **It's evaluated against the current plan, not a diff**, so it self-heals: upgrade back above the
+  limit and the flag clears on the next sync without anything special.
+- **Dismissing archives nothing.** The flag stays set, and a ref keeps the prompt to once per plan
+  per session, so the ask returns on the next launch instead of fighting the user (C4/C7: no silent
+  auto-archive, ever).
+- **A locked user is never prompted** — `PlanGate` replaces the whole stack, so the tabs layout that
+  watches the flag isn't mounted. The prompt lands after they subscribe again, which is the correct
+  moment: the trial grants Family (unlimited goals), so someone who made five goals on trial and
+  later subscribes to Beginner genuinely does need to choose.
+
+### Deviations from the plan as written
+
+- **One persisted field was added** (`retentionRequiredFor`), so the claim above that there are "no
+  persisted shape changes" isn't quite true anymore. It still needs **no migration**: zustand's
+  persist merges the stored blob over the initial state, so an older blob simply keeps the `null`
+  default. `storeMigrations.test.ts` passes untouched, and `PIGGY_STORE_VERSION` stays at 8.
+- **`currentPeriodEnd` was fixed here rather than left as a gap** (it was carried into this phase
+  from Phases 2–5). `CLAUDE_entitlements_get` now returns `currentPeriodEnd` from the entitlements
+  row — same additive shape as `addonBalance`, tested and published — and `syncEntitlements` applies
+  it. Renewal and cancellation dates are real again instead of falling back to "the end of your
+  billing period". Nothing on the client derives the date anymore.
+- **`downgradeSelection.keepBody` reworded in all four locales** to lead with "Your plan is now
+  {{plan}}…", since the screen now opens *after* the change rather than before it. Plural variants
+  (`_one`/`_other`, and `_one`/`_few`/`_many` for `pl`) all updated.
 
 ---
 

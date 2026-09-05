@@ -120,8 +120,8 @@
   "downgradeSelection": {
     "nothingToChoose": "Itt nincs mit választani — lépj vissza, és próbáld újra.",
     "chooseWhatToKeep": "Válaszd ki, mit tartasz meg",
-    "keepBody_one": "A(z) {{plan}} csomag {{count}} aktív célt enged. Neked {{total}} van. Válassz {{pickText}} aktívan tartáshoz — a többi lekerül a listádról, de semmi sem törlődik véglegesen. Azonnal visszatérnek, ha újra frissítesz.",
-    "keepBody_other": "A(z) {{plan}} csomag {{count}} aktív célt enged. Neked {{total}} van. Válassz {{pickText}} aktívan tartáshoz — a többi lekerül a listádról, de semmi sem törlődik véglegesen. Azonnal visszatérnek, ha újra frissítesz.",
+    "keepBody_one": "A csomagod mostantól {{plan}}, amely {{count}} aktív célt enged. Neked {{total}} van. Válassz {{pickText}} aktívan tartáshoz — a többi lekerül a listádról, de semmi sem törlődik véglegesen. Azonnal visszatérnek, ha újra frissítesz.",
+    "keepBody_other": "A csomagod mostantól {{plan}}, amely {{count}} aktív célt enged. Neked {{total}} van. Válassz {{pickText}} aktívan tartáshoz — a többi lekerül a listádról, de semmi sem törlődik véglegesen. Azonnal visszatérnek, ha újra frissítesz.",
     "pickOne": "egyet",
     "pickUpTo": "legfeljebb {{count}}-t",
     "keepingCountOfLimit": "{{count}} / {{limit}} megtartva",
