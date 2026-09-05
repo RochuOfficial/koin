@@ -12,7 +12,6 @@
     "aiMessagesUnlimited": "Korlátlan AI-üzenet/hó",
     "aiMessages_one": "{{count}} AI-üzenet/hó",
     "aiMessages_other": "{{count}} AI-üzenet/hó",
-    "aiMessagesExtra": " (utána {{price}}/üzenet)",
     "emailReportsUnlimited": "Korlátlan e-mail riport/hó",
     "emailReports_one": "{{count}} e-mail riport/hó",
     "emailReports_other": "{{count}} e-mail riport/hó"
@@ -35,24 +34,10 @@
     "daysLeft_other": "{{count}} nap van hátra az ingyenes próbaidőszakból",
     "activeBody": "A(z) {{plan}} csomagot használod minden funkcióval feloldva, és soha nem kértünk kártyát."
   },
-  "planUpdatedTitle": "Csomag frissítve",
-  "planUpdatedBody": "Most már a(z) {{plan}} csomagon vagy. Élvezd az új funkciókat! 🎉",
-  "downgradeCanceledTitle": "Visszaminősítés visszavonva",
-  "downgradeCanceledBody": "Maradsz a(z) {{plan}} csomagon.",
-  "checkoutNotConfiguredTitle": "A fizetés nincs beállítva",
-  "checkoutNotConfiguredBody": "A Stripe Checkout nincs beállítva ebben a verzióban. Szimuláljunk egy sikeres fizetést a(z) {{plan}} csomagért?",
   "cancel": "Mégse",
-  "simulatePayment": "Fizetés szimulálása",
-  "checkoutFailedTitle": "Nem sikerült megnyitni a fizetést",
-  "checkoutFailedBody": "Nem sikerült megnyitni a fizetést. Ellenőrizd a kapcsolatot, és próbáld újra, vagy írj nekünk: {{email}}.",
-  "switchToTitle": "Váltasz a(z) {{plan}} csomagra?",
-  "switchToBody": "Ez ekkor lép életbe: {{date}}. Semmi sem törlődik — ha ez a csomag kevesebb célt támogat, mint amennyid van, kiválaszthatod, melyek maradjanak aktívak.",
-  "keepCurrentPlan": "Jelenlegi csomag megtartása",
   "continue": "Tovább",
   "header": "Az előfizetésed",
-  "confirmingPurchase": "Vásárlás megerősítése…",
   "pendingBanner": "Ütemezett váltás: a csomagod {{date}} napon átvált erre: {{plan}}. Válaszd ki újra a jelenlegi csomagodat lent ennek visszavonásához.",
-  "perMonth": "/hó",
   "status": {
     "activeUntilCanceled": "Aktív eddig: {{date}} (lemondva)",
     "trialEndedPaused": "Próbaidőszak véget ért — funkciók szüneteltetve",
@@ -60,13 +45,6 @@
     "pastDue": "Sikertelen fizetés — frissítsd a kártyádat, hogy ne veszítsd el a hozzáférést",
     "current": "Jelenlegi csomag",
     "scheduledNextCycle": "A következő ciklusra ütemezve"
-  },
-  "buttons": {
-    "yourCurrentPlan": "A jelenlegi csomagod",
-    "keepThisPlan": "Ennél a csomagnál maradok",
-    "openingCheckout": "Fizetés megnyitása…",
-    "upgradeTo": "Frissítés erre: {{plan}}",
-    "switchTo": "Váltás erre: {{plan}}"
   },
   "gates": {
     "aiCoach": {
@@ -110,11 +88,8 @@
     "defaultTitle": "Csomag frissítése",
     "defaultDescription": "Ez a funkció egy magasabb csomagban érhető el. Frissíts a feloldásához.",
     "recommendedPlan": "Ajánlott csomag",
-    "upgradeToPlan": "Frissítés erre: {{plan}}",
-    "upgradeToHigherPlan": "Frissítés magasabb csomagra",
     "onTopPlan": "Már a legmagasabb csomagon vagy",
     "maybeLater": "Talán később",
-    "perMonth": "/hó",
     "seePlanDetails": "Csomag részletei"
   },
   "downgradeSelection": {
@@ -142,15 +117,12 @@
       "featuresPaused": "A(z) {{plan}} funkciói egyelőre szüneteltetve vannak.",
       "nothingDeletedBold": "Semmi sem törlődött.",
       "nothingDeletedRest": " A céljaid, befizetéseid, sorozatod és előzményeid pontosan ott vannak, ahol hagytad őket, és azonnal visszatérnek, ha előfizetsz.",
-      "checkoutNotConfigured": "A fizetés nincs beállítva ebben a verzióban, így az előfizetés itt nem fog működni. Egyelőre tovább használhatod a Piggyt.",
-      "pickPlan": "Válassz csomagot a folytatáshoz",
       "alreadySubscribed": "Már előfizettem",
       "continueWithoutSubscribing": "Folytatás előfizetés nélkül",
       "deletingAccount": "Fiók törlése…",
       "logOut": "Kijelentkezés",
       "contactSupport": "Kapcsolatfelvétel az ügyfélszolgálattal",
       "deleteAccount": "Fiók törlése",
-      "checkoutFailed": "Nem sikerült megnyitni a fizetést. Ellenőrizd a kapcsolatot, és próbáld újra, vagy írj nekünk: {{email}}.",
       "noActiveSubscription": "Még nem találtunk aktív előfizetést. Ha most fizettél, adj neki egy kis időt, és próbáld újra.",
       "logoutBody": "Bármikor visszajelentkezhetsz az e-mail-címeddel.",
       "deleteAccountTitle": "Fiók törlése",

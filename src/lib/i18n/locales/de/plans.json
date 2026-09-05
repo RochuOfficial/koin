@@ -12,7 +12,6 @@
     "aiMessagesUnlimited": "Unbegrenzte KI-Nachrichten/Monat",
     "aiMessages_one": "{{count}} KI-Nachricht/Monat",
     "aiMessages_other": "{{count}} KI-Nachrichten/Monat",
-    "aiMessagesExtra": " (dann {{price}}/Nachricht)",
     "emailReportsUnlimited": "Unbegrenzte E-Mail-Berichte/Monat",
     "emailReports_one": "{{count}} E-Mail-Bericht/Monat",
     "emailReports_other": "{{count}} E-Mail-Berichte/Monat"
@@ -35,24 +34,10 @@
     "daysLeft_other": "{{count}} Tage deiner kostenlosen Testphase übrig",
     "activeBody": "Du nutzt {{plan}} mit allem freigeschaltet, und wir haben nie nach einer Karte gefragt."
   },
-  "planUpdatedTitle": "Plan aktualisiert",
-  "planUpdatedBody": "Du bist jetzt im {{plan}}-Plan. Viel Freude mit deinen neuen Funktionen! 🎉",
-  "downgradeCanceledTitle": "Downgrade abgebrochen",
-  "downgradeCanceledBody": "Du bleibst im {{plan}}-Plan.",
-  "checkoutNotConfiguredTitle": "Checkout nicht konfiguriert",
-  "checkoutNotConfiguredBody": "Stripe Checkout ist in diesem Build nicht eingerichtet. Eine erfolgreiche Zahlung für {{plan}} simulieren?",
   "cancel": "Abbrechen",
-  "simulatePayment": "Zahlung simulieren",
-  "checkoutFailedTitle": "Checkout konnte nicht geöffnet werden",
-  "checkoutFailedBody": "Wir konnten den Checkout nicht öffnen. Überprüfe deine Verbindung und versuche es erneut, oder schreibe uns an {{email}}.",
-  "switchToTitle": "Zu {{plan}} wechseln?",
-  "switchToBody": "Dies tritt am {{date}} in Kraft. Es wird nie etwas gelöscht — wenn dieser Plan weniger Ziele bietet als du hast, wählst du selbst aus, welche zuerst aktiv bleiben.",
-  "keepCurrentPlan": "Aktuellen Plan behalten",
   "continue": "Weiter",
   "header": "Dein Abo",
-  "confirmingPurchase": "Dein Kauf wird bestätigt…",
   "pendingBanner": "Geplante Änderung: Dein Plan wechselt am {{date}} zu {{plan}}. Wähle deinen aktuellen Plan unten erneut aus, um dies abzubrechen.",
-  "perMonth": "/Monat",
   "status": {
     "activeUntilCanceled": "Aktiv bis {{date}} (gekündigt)",
     "trialEndedPaused": "Testphase beendet — Funktionen pausiert",
@@ -60,13 +45,6 @@
     "pastDue": "Zahlung fehlgeschlagen — aktualisiere deine Karte, um den Zugriff nicht zu verlieren",
     "current": "Aktueller Plan",
     "scheduledNextCycle": "Geplant für den nächsten Zyklus"
-  },
-  "buttons": {
-    "yourCurrentPlan": "Dein aktueller Plan",
-    "keepThisPlan": "Diesen Plan behalten",
-    "openingCheckout": "Checkout wird geöffnet…",
-    "upgradeTo": "Auf {{plan}} upgraden",
-    "switchTo": "Zu {{plan}} wechseln"
   },
   "gates": {
     "aiCoach": {
@@ -110,11 +88,8 @@
     "defaultTitle": "Upgrade deinen Plan",
     "defaultDescription": "Diese Funktion ist in einem höheren Plan verfügbar. Upgrade, um sie freizuschalten.",
     "recommendedPlan": "Empfohlener Plan",
-    "upgradeToPlan": "Auf {{plan}} upgraden",
-    "upgradeToHigherPlan": "Auf einen höheren Plan upgraden",
     "onTopPlan": "Du bist im höchsten Plan",
     "maybeLater": "Vielleicht später",
-    "perMonth": "/Monat",
     "seePlanDetails": "Plandetails ansehen"
   },
   "downgradeSelection": {
@@ -142,15 +117,12 @@
       "featuresPaused": "{{plan}}-Funktionen sind vorübergehend pausiert.",
       "nothingDeletedBold": "Es wurde nichts gelöscht.",
       "nothingDeletedRest": " Deine Ziele, Einzahlungen, Serie und dein Verlauf sind genau dort, wo du sie zurückgelassen hast, und kommen sofort zurück, wenn du abonnierst.",
-      "checkoutNotConfigured": "Checkout ist in diesem Build nicht konfiguriert, daher funktioniert ein Abo hier nicht. Du kannst Piggy vorerst weiter nutzen.",
-      "pickPlan": "Wähle einen Plan, um weiterzumachen",
       "alreadySubscribed": "Ich habe bereits abonniert",
       "continueWithoutSubscribing": "Ohne Abo fortfahren",
       "deletingAccount": "Dein Konto wird gelöscht…",
       "logOut": "Abmelden",
       "contactSupport": "Support kontaktieren",
       "deleteAccount": "Konto löschen",
-      "checkoutFailed": "Wir konnten den Checkout nicht öffnen. Überprüfe deine Verbindung und versuche es erneut, oder schreibe uns an {{email}}.",
       "noActiveSubscription": "Wir konnten noch kein aktives Abo finden. Falls du gerade bezahlt hast, warte einen Moment und tippe erneut.",
       "logoutBody": "Du kannst dich jederzeit wieder mit deiner E-Mail anmelden.",
       "deleteAccountTitle": "Konto löschen",

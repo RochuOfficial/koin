@@ -14,7 +14,7 @@ Status: **A–I all merged.** E–H rewritten 2026-08-16 after the RevenueCat pl
 | E | Trial entitlement machinery (no payment) | ✅ merged ([#81](https://github.com/Koin-App-Official/pignify/pull/81)) — verified live 2026-08-16 |
 | F | App-side trial state | ✅ merged ([#84](https://github.com/Koin-App-Official/pignify/pull/84)) — device check pending |
 | G | Trial gate + day-15 lockout | ☑ implemented ([#86](https://github.com/Koin-App-Official/pignify/issues/86)) — device check pending |
-| H | Stripe checkout + full lockout | ☑ implemented ([#89](https://github.com/Koin-App-Official/pignify/issues/89)) — needs `EXPO_PUBLIC_N8N_BILLING_URL` set |
+| H | Stripe checkout + full lockout | ☑ implemented ([#89](https://github.com/Koin-App-Official/pignify/issues/89)) — **in-app checkout since removed**, see [#173](https://github.com/Koin-App-Official/pignify/issues/173); lockout stays |
 | I | Downgrade selection (what to keep) | ✅ merged ([#102](https://github.com/Koin-App-Official/pignify/pull/102)) — scoped to goals only, see the PR for why |
 
 ## Decisions
@@ -244,19 +244,19 @@ The rail already exists and is live — `billing.ts`, `CLAUDE_billing_checkout`,
 - [x] **Removed the 7-day Family trial** from `CLAUDE_billing_checkout` (live workflow, repo template and README). The app grants the 14 days, so Stripe adding its own meant Family got 21 free days and no charge until day 21.
 - [x] **Closed the quota leak** noted in G: every quota except AI messages was read from `PLAN_CONFIG[plan]`, and a locked user keeps their tier name, so an expired Family user still held Family's limits.
 - [x] `npm run typecheck` + `npm test` clean (202 passed).
-- [ ] Device check: subscribe flow, return path, and the unconfigured-build warning.
+- [x] ~~Device check: subscribe flow, return path, and the unconfigured-build warning.~~ Obsolete — all three were removed with the in-app purchase path ([#173](https://github.com/Koin-App-Official/pignify/issues/173)).
 
-### ⚠️ `EXPO_PUBLIC_N8N_BILLING_URL` is not set
+### ⚠️ ~~`EXPO_PUBLIC_N8N_BILLING_URL` is not set~~ — resolved, then obsoleted
 
-Neither `.env` nor `eas.json` defines it, so `isBillingConfigured()` is false and **every Subscribe tap returns `unavailable`**. Until it is set, checkout cannot work in any build.
+It was set shortly after this was written; since [#173](https://github.com/Koin-App-Official/pignify/issues/173) the variable is gone entirely (renamed `EXPO_PUBLIC_N8N_ACCOUNT_URL`, and no longer gates anything but account deletion). There is no in-app Subscribe tap left to break.
 
-That is also why enforcement is `lockoutEnforced(billingConfigured)` rather than a second boolean someone has to remember to flip. A total lockout has no escape hatch, so enforcing it while checkout is broken would strand a lapsed user on a screen whose only action does nothing — locked out of an app they were using minutes earlier. Tying the two together makes that trap unshippable by omission.
+The reasoning below is kept because the *structure* outlived the variable: enforcement is still `lockoutEnforced(recoveryPathAvailable)` rather than a second boolean someone has to remember to flip — it's just keyed on `ACCOUNT_URL`, a constant, instead. A total lockout has no escape hatch, so enforcing it while checkout is broken would strand a lapsed user on a screen whose only action does nothing — locked out of an app they were using minutes earlier. Tying the two together makes that trap unshippable by omission.
 
 The failure direction is deliberate: a misconfigured build lets lapsed users through, costing revenue, rather than bricking them, costing the user.
 
 ### Manual, needs your accounts
 
-- [ ] Set `EXPO_PUBLIC_N8N_BILLING_URL` in `.env` and the EAS build profiles.
+- [x] ~~Set `EXPO_PUBLIC_N8N_BILLING_URL` in `.env` and the EAS build profiles.~~ Done, then renamed to `EXPO_PUBLIC_N8N_ACCOUNT_URL` in [#173](https://github.com/Koin-App-Official/pignify/issues/173).
 - [ ] Enable Apple Pay / Google Pay in Stripe Checkout — the browser round-trip is this rail's main conversion cost, and one-tap wallets recover most of it.
 
 ---

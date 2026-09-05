@@ -1,5 +1,18 @@
 # Stripe Billing Hardening — Implementation Plan
 
+> **Client-side sections superseded 2026-09-05
+> ([#173](https://github.com/Koin-App-Official/pignify/issues/173)).** Everything here about the
+> *server* rail — the webhook branches, idempotency, reconciliation, loyalty, `plans` columns — is
+> still current. Everything about the *app* is not: `src/lib/billing.ts` no longer exists, the app
+> starts no checkout, calls no `/billing-sync`, and reads the `subscriptions` table not at all.
+> Where this document says "the client does X", read "the website does X".
+> See [WEB_BILLING_MIGRATION.md](WEB_BILLING_MIGRATION.md).
+>
+> One item here needs re-checking rather than re-reading: the **hourly reconciliation cron** this
+> plan introduced ([#137](https://github.com/Koin-App-Official/pignify/issues/137)) has in fact
+> never succeeded — 334/334 executions error on a malformed Appwrite query. It is now the *only*
+> backstop, since the app no longer calls `/billing-sync` itself. Tracked separately.
+
 Post-launch hardening of the Stripe payment rail. The core "user pays → app unlocks"
 loop is already live and working; this plan covers everything *around* the happy path
 that was deferred or silently broken: renewals, failed payments, refunds, reconciliation,

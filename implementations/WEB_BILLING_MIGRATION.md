@@ -510,19 +510,19 @@ decision in Phase 8** rather than something to delete silently.
 `src/lib/i18n/locales.test.ts` enforces key-for-key parity with `en`, so every add/remove below must
 land in all four files or the suite fails. Full delta in [Appendix B](#appendix-b--i18n-key-delta).
 
-- [ ] `plans.json` — remove 9 keys, reword 4, add 2 (×4 locales)
-- [ ] `coach.json` — remove 6 keys (×4 locales)
-- [ ] `settings.json` — remove 1, add 2 (×4 locales)
-- [ ] `common.json` — add 1 accessibility label (×4 locales)
-- [ ] Run `npx vitest run src/lib/i18n` — `locales.test.ts` and `contentParity.test.ts` must both pass.
+- [x] `plans.json` — remove 9 keys, reword 4, add 2 (×4 locales)
+- [x] `coach.json` — remove 6 keys (×4 locales)
+- [x] `settings.json` — remove 1, add 2 (×4 locales)
+- [x] `common.json` — add 1 accessibility label (×4 locales)
+- [x] Run `npx vitest run src/lib/i18n` — `locales.test.ts` and `contentParity.test.ts` must both pass.
 
 ### 8.2 Config
 
-- [ ] [eas.json](../eas.json): rename `EXPO_PUBLIC_N8N_BILLING_URL` → `EXPO_PUBLIC_N8N_ACCOUNT_URL`
+- [x] [eas.json](../eas.json): rename `EXPO_PUBLIC_N8N_BILLING_URL` → `EXPO_PUBLIC_N8N_ACCOUNT_URL`
       in **all three** profiles (`development`, `preview`, `production`). Same value.
-- [ ] `.env`: same rename.
-- [ ] `.env.appwrite.example`: check for and update any billing entries.
-- [ ] Confirm nothing else reads the old name:
+- [x] `.env`: same rename.
+- [x] `.env.appwrite.example`: check for and update any billing entries.
+- [x] Confirm nothing else reads the old name:
       `grep -rn "N8N_BILLING\|CHECKOUT_PATH\|ADDON_PATH\|SYNC_PATH" . --exclude-dir=node_modules`.
 
 ### 8.3 Documentation
@@ -534,17 +534,47 @@ land in all four files or the suite fails. Full delta in [Appendix B](#appendix-
       Phase 8.2, not a Phase 1 (n8n-only) change; update this section together with 8.2.
 - [x] [n8n/workflows/billing-checkout.template.json](../n8n/workflows/billing-checkout.template.json):
       return URLs updated to match live, 2026-09-05.
-- [ ] [implementations/APP_REVIEW_BLOCKERS.md](APP_REVIEW_BLOCKERS.md): record that Blocker 1 is
+- [x] [implementations/APP_REVIEW_BLOCKERS.md](APP_REVIEW_BLOCKERS.md): record that Blocker 1 is
       resolved via Option 3 and link here.
-- [ ] [implementations/ADDONS.md](ADDONS.md): add a closing note — the add-on rail survives on the
+- [x] [implementations/ADDONS.md](ADDONS.md): add a closing note — the add-on rail survives on the
       web, the in-app purchase path is gone.
-- [ ] [implementations/STRIPE_BILLING_HARDENING.md](STRIPE_BILLING_HARDENING.md): mark the
+- [x] [implementations/STRIPE_BILLING_HARDENING.md](STRIPE_BILLING_HARDENING.md): mark the
       client-side sections superseded.
-- [ ] [docs/ONBOARDING_FLOW.md](../docs/ONBOARDING_FLOW.md): re-check its billing references.
-- [ ] [README.md](../README.md): update if it describes an in-app payment path.
+- [x] [docs/ONBOARDING_FLOW.md](../docs/ONBOARDING_FLOW.md): re-check its billing references.
+- [x] [README.md](../README.md): update if it describes an in-app payment path.
 
 **Phase complete when:** `npm test` and `npx tsc --noEmit` both pass, and no document in the repo
-still tells a reader the app opens Stripe Checkout.
+still tells a reader the app opens Stripe Checkout. **Met** (done 2026-09-05).
+
+### What the sweep actually removed
+
+A script flattened every key in `en/{plans,coach,settings,common}.json`, stripped plural suffixes,
+and checked each base key against the full text of `app/` + `src/`. **22 dead keys in `plans.json`**
+(including the whole `buttons` object) and **6 in `coach.json`**, removed from all four locales — 112
+deletions in total. A re-run reports **0 possibly-unused keys across all four namespaces**, so this
+is verified rather than eyeballed. `settings.json`/`common.json` were already clean after Phase 7.
+
+### Docs corrected beyond the list
+
+Three more files made claims that had become false, so they were fixed rather than left to rot:
+- [REVIEWER_DEMO_LOGIN.md](REVIEWER_DEMO_LOGIN.md) — said lockout is enforced "whenever billing is
+  configured (`EXPO_PUBLIC_N8N_BILLING_URL` is set)". Now keyed on `ACCOUNT_URL`.
+- [APP_REVIEW_SHOULD_FIX.md](APP_REVIEW_SHOULD_FIX.md) — its whole "Simulate payment" section
+  describes code that no longer exists; marked moot, kept as history.
+- [ONBOARDING_V2.md](ONBOARDING_V2.md) — carried an open task to set a variable that has since been
+  renamed away, and a device-check item for a subscribe flow that no longer exists.
+
+[ONBOARDING_FLOW.md](../docs/ONBOARDING_FLOW.md)'s billing paragraph was already accurate ("the app
+only ever reads it") and is now literally true; its trust-model warning about browsers was upgraded
+from hypothetical to live, since the checkout webhooks are browser-driven now.
+
+### `priceUSD` — decided: keep
+
+`PLAN_CONFIG[*].priceUSD` ($5.99/$7.99/$9.99) has no readers left after `formatUSD` went in Phase 7.
+**Kept deliberately**, with a comment in `entitlements.ts` saying nothing renders it: it is catalogue
+data mirroring the `plans` table's `price_cents`, not dead code, and it's what any future paywall or
+IAP work would start from. Deleting a subscription product's price catalogue to satisfy a lint is the
+wrong trade.
 
 ---
 

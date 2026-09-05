@@ -1,5 +1,14 @@
 # App Review Blockers — AI consent (5.1.2(i)) + subscription disclosure (3.1.2)
 
+> **Blocker 1 is resolved — 2026-09-05, [#173](https://github.com/Koin-App-Official/pignify/issues/173).**
+> The reader model this document called "deferred" was built: `src/lib/billing.ts` is deleted, the
+> app shows no prices and offers no purchase path, and subscriptions are managed on
+> `piggnify.com/account`. The fork described below (§"The Blocker 1 ↔ Blocker 2 dependency") went the
+> way it predicted — **reader model, not StoreKit** — so the 3.1.2 fix was to *remove* the purchase
+> screen rather than add renewal terms to it. `<BillingTerms />` survives on the read-only plan
+> screen, since Phase 5 deliberately built it branch-independent. Full plan and residual risks:
+> [WEB_BILLING_MIGRATION.md](WEB_BILLING_MIGRATION.md).
+
 ## Context
 
 Pre-submission audit against the 2026 App Review guide found three blockers. Decisions from conversation:

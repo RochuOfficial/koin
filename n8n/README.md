@@ -295,15 +295,26 @@ while wiring this up:
   credential-audit note above.
 
 ## App config (set in the Expo env / app.json `extra`)
-- `EXPO_PUBLIC_N8N_BILLING_URL` = your n8n webhook base, e.g. `https://n8n.piggnify.com/webhook`
-- `EXPO_PUBLIC_N8N_CHECKOUT_PATH` / `_ADDON_PATH` / `_SYNC_PATH` / `_ACCOUNT_DELETE_PATH`
-  (defaults: `billing-checkout` / `billing-addon` / `billing-sync` / `account-delete`)
-  — set to the n8n webhook ids.
+
+**Rewritten 2026-09-05 ([#173](https://github.com/Koin-App-Official/pignify/issues/173))** — the app
+no longer calls any billing webhook, so the four checkout-era variables below are gone from the
+client entirely. `src/lib/billing.ts` was deleted; what's left is `src/lib/account.ts`.
+
+- `EXPO_PUBLIC_N8N_ACCOUNT_URL` = your n8n webhook base, e.g. `https://n8n.piggnify.com/webhook`.
+  Renamed from `EXPO_PUBLIC_N8N_BILLING_URL` (same value) — the only thing the app still calls it
+  for is account deletion.
+- `EXPO_PUBLIC_N8N_ACCOUNT_DELETE_PATH` (default `account-delete`) — the n8n webhook id.
+- **Removed:** `EXPO_PUBLIC_N8N_CHECKOUT_PATH` / `_ADDON_PATH` / `_SYNC_PATH`. Nothing in the client
+  reads them; `billing-checkout` and `billing-addon` are called by the website now, and
+  `billing-sync` by its own hourly cron.
 - `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` — **dead, not referenced anywhere in
-  `src/`/`app/`** (checked 2026-08-22). Was for an in-app PaymentSheet design;
+  `src/`/`app/`** (checked 2026-08-22, still true). Was for an in-app PaymentSheet design;
   the live add-on flow uses hosted Checkout instead (§2 above), which needs no
   client-side Stripe SDK at all. Safe to remove from env config whenever
   convenient — not urgent, just unused.
+- The web billing address itself is **not** an env var: it's `ACCOUNT_URL` in `src/lib/linking.ts`,
+  a constant alongside the privacy/terms URLs. A missing env var is how the lockout trap below came
+  about, and this URL is the only route back in for a locked-out user.
 - `EXPO_PUBLIC_PRIVACY_URL` / `EXPO_PUBLIC_TERMS_URL` / `EXPO_PUBLIC_SUPPORT_EMAIL` —
   optional; the Settings → Support & About rows only render when set (see
   `app/settings.tsx`). Not billing-related, just documented here alongside the
@@ -313,7 +324,8 @@ while wiring this up:
 
 The three items this section used to list as outstanding are all done: Stripe
 Price ids are live in the `plans` table for all three tiers (confirmed 2026-08-22),
-`EXPO_PUBLIC_N8N_BILLING_URL` is set (`eas.json`/`.env`), and the webhook is
+the n8n webhook base is set (`eas.json`/`.env` — as `EXPO_PUBLIC_N8N_ACCOUNT_URL`
+since [#173](https://github.com/Koin-App-Official/pignify/issues/173)), and the webhook is
 confirmed registered and `enabled` in live mode (see the events section above) —
 which wouldn't be possible without a working signing secret on the Stripe Trigger
 node, so that's implicitly confirmed too.
