@@ -156,7 +156,6 @@ const Button = React.forwardRef<React.ElementRef<typeof View>, ButtonProps>(
             <Text
               className={cn(buttonTextVariants({ variant, size, className: textClassName }))}
               numberOfLines={1}
-              adjustsFontSizeToFit
             >
               {label}
             </Text>
