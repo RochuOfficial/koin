@@ -192,7 +192,12 @@ export function LoginGate() {
                   placeholder={t('login.emailPlaceholder')}
                 />
                 {error ? <Text className="mt-2 text-xs text-destructive">{error}</Text> : null}
-                <Button onPress={sendCode} disabled={busy} className="mt-8 w-full h-14">
+                <Button
+                  onPress={sendCode}
+                  disabled={busy}
+                  accessibilityLabel={t('login.sendCode')}
+                  className="mt-8 w-full h-14"
+                >
                   {busy ? (
                     <ActivityIndicator color="#ffffff" />
                   ) : (
@@ -218,7 +223,12 @@ export function LoginGate() {
                   autoFocus
                 />
                 {error ? <Text className="mt-2 text-xs text-destructive">{error}</Text> : null}
-                <Button onPress={submitPassword} disabled={busy || !password} className="mt-8 w-full h-14">
+                <Button
+                  onPress={submitPassword}
+                  disabled={busy || !password}
+                  accessibilityLabel={t('login.signIn')}
+                  className="mt-8 w-full h-14"
+                >
                   {busy ? (
                     <ActivityIndicator color="#ffffff" />
                   ) : (
@@ -247,7 +257,12 @@ export function LoginGate() {
                   autoFocus
                 />
                 {error ? <Text className="mt-2 text-xs text-destructive">{error}</Text> : null}
-                <Button onPress={verify} disabled={busy || code.length !== 6} className="mt-8 w-full h-14">
+                <Button
+                  onPress={verify}
+                  disabled={busy || code.length !== 6}
+                  accessibilityLabel={t('login.verify')}
+                  className="mt-8 w-full h-14"
+                >
                   {busy ? (
                     <ActivityIndicator color="#ffffff" />
                   ) : (

@@ -799,6 +799,7 @@ export default function Onboarding() {
             <Button
               onPress={() => resolvePushChoice(true)}
               disabled={isLoading}
+              accessibilityLabel={t('pushPermission.keepMeOnTrack')}
               className="w-full flex-row items-center justify-center gap-2 h-14"
             >
               {isLoading ? (
@@ -850,6 +851,13 @@ export default function Onboarding() {
               disabled={
                 isLoading ||
                 (verifiedSession ? false : otpSent ? code.length !== 6 : !isEmailValid(email))
+              }
+              accessibilityLabel={
+                verifiedSession
+                  ? t('account.retry')
+                  : otpSent
+                    ? t('account.verifyCreate')
+                    : t('account.sendCode')
               }
               className="flex-1 items-center justify-center flex-row gap-2 h-14"
             >
