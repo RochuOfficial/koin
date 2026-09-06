@@ -16,6 +16,8 @@ export interface PickerItem {
 interface PickerModalProps {
   isVisible: boolean;
   onClose: () => void;
+  /** Fires once the sheet has actually finished closing (see BottomSheet's onClosed) — for callers that need to sequence a follow-up modal after this one is truly gone. */
+  onClosed?: () => void;
   onSelect: (item: PickerItem) => void;
   items: PickerItem[];
   selectedCode: string;
@@ -52,7 +54,7 @@ const PickerListItem = React.memo(function PickerListItem({
 
 const ItemSeparator = () => <View className="h-px bg-outline-variant/40 mx-5" />;
 
-export const PickerModal = ({ isVisible, onClose, onSelect, items, selectedCode, title }: PickerModalProps) => {
+export const PickerModal = ({ isVisible, onClose, onClosed, onSelect, items, selectedCode, title }: PickerModalProps) => {
   const { t } = useTranslation('common');
   const [search, setSearch] = useState('');
 
@@ -84,7 +86,7 @@ export const PickerModal = ({ isVisible, onClose, onSelect, items, selectedCode,
   };
 
   return (
-    <BottomSheet visible={isVisible} onClose={handleClose}>
+    <BottomSheet visible={isVisible} onClose={handleClose} onClosed={onClosed}>
       <View className="flex-row items-center justify-between border-b border-outline-variant bg-surface p-5">
         <Text className="text-xl font-bold text-on-surface">{title}</Text>
         <Pressable

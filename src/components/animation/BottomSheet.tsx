@@ -19,6 +19,8 @@ import { springPresets, timingPresets } from '@/lib/springPresets';
 interface BottomSheetProps {
   visible: boolean;
   onClose: () => void;
+  /** Fires once the sheet's native <Modal> has actually been unmounted (animation finished), not when close is merely requested. Use this instead of guessing at the close-animation duration to sequence a follow-up modal (see #177). */
+  onClosed?: () => void;
   children: ReactNode;
   maxHeight?: number;
 }
@@ -36,7 +38,7 @@ interface BottomSheetProps {
  * rather than fixed, so short content (e.g. a calendar) doesn't stretch to fill
  * the screen.
  */
-export function BottomSheet({ visible, onClose, children, maxHeight }: BottomSheetProps) {
+export function BottomSheet({ visible, onClose, onClosed, children, maxHeight }: BottomSheetProps) {
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const cap = maxHeight ?? windowHeight * 0.9;
@@ -82,13 +84,18 @@ export function BottomSheet({ visible, onClose, children, maxHeight }: BottomShe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleClosed = () => {
+    setMounted(false);
+    onClosed?.();
+  };
+
   useEffect(() => {
     if (!mounted) return;
     if (visible && sheetHeight > 0) {
       translateY.value = withTiming(0, timingPresets.sheet);
     } else if (!visible) {
       translateY.value = withTiming(sheetHeight || windowHeight, timingPresets.sheet, (finished) => {
-        if (finished) runOnJS(setMounted)(false);
+        if (finished) runOnJS(handleClosed)();
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
