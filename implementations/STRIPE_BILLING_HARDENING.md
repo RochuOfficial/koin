@@ -8,10 +8,14 @@
 > Where this document says "the client does X", read "the website does X".
 > See [WEB_BILLING_MIGRATION.md](WEB_BILLING_MIGRATION.md).
 >
-> One item here needs re-checking rather than re-reading: the **hourly reconciliation cron** this
-> plan introduced ([#137](https://github.com/Koin-App-Official/pignify/issues/137)) has in fact
-> never succeeded — 334/334 executions error on a malformed Appwrite query. It is now the *only*
-> backstop, since the app no longer calls `/billing-sync` itself. Tracked separately.
+> One item here needed re-checking rather than re-reading: the **hourly reconciliation cron** this
+> plan introduced ([#137](https://github.com/Koin-App-Official/pignify/issues/137)) had in fact
+> never succeeded — 334/334 executions errored on a malformed Appwrite query (`queries[]` sent as
+> two same-named keys, which n8n's array serializer mangled into a shape Appwrite rejects). Fixed
+> 2026-09-06 and verified against live Appwrite; see
+> [WEB_BILLING_MIGRATION.md](WEB_BILLING_MIGRATION.md) Phase 1 for the root cause and fix. It is now
+> the *only* backstop, since the app no longer calls `/billing-sync` itself — which is exactly why
+> this needed fixing rather than just flagging.
 
 Post-launch hardening of the Stripe payment rail. The core "user pays → app unlocks"
 loop is already live and working; this plan covers everything *around* the happy path

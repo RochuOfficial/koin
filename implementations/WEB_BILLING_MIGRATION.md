@@ -182,10 +182,10 @@ when the app started the session. Once the website starts them, those redirects 
   > `quota_ai_messages` includes `addon_balance`: ☑ yes ☐ no — verified by Claude, reading
   > `n8n/code-nodes/resolve-entitlements.js` line `aiQuota = plan.quota_ai_messages + allowance`
 
-**Left untouched, on purpose:** `CLAUDE_stripe_webhook` (`CH8BNqTucylUhHBC`), `CLAUDE_billing_sync`
-(`XTlWxBQB0LwkeAKK` — see the ⚠️ finding below), `CLAUDE_account_delete` (`NejmQWYGvpJDsSaZ`),
-`CLAUDE_onboarding` (`FiA67LUzb5BF6csa`, still grants the 14-day trial), `CLAUDE_coach_reply`
-(`2ZLK31SPSSrplvlO`).
+**Left untouched initially, then fixed separately below:** `CLAUDE_stripe_webhook`
+(`CH8BNqTucylUhHBC`), `CLAUDE_billing_sync` (`XTlWxBQB0LwkeAKK`), `CLAUDE_account_delete`
+(`NejmQWYGvpJDsSaZ`), `CLAUDE_onboarding` (`FiA67LUzb5BF6csa`, still grants the 14-day trial),
+`CLAUDE_coach_reply` (`2ZLK31SPSSrplvlO`).
 
 - [x] Ran `test_workflow` on `CLAUDE_entitlements_get` (3 scenarios: active with balance, locked,
       trial-only/no-subscriptions-row — all correct) and inspected `CLAUDE_billing_checkout`'s real
@@ -193,30 +193,47 @@ when the app started the session. Once the website starts them, those redirects 
       `https://piggnify.com/account/?checkout=success`. `CLAUDE_billing_addon`'s Stripe node has no
       Code node computing its URL — confirmed directly on the saved node parameters instead.
 - [x] Published all three workflows.
-- [ ] ~~Confirm `CLAUDE_billing_sync`'s hourly cron has run at least once since the change~~ —
-      **could not check this box.** See finding below.
+- [x] Confirmed `CLAUDE_billing_sync`'s hourly cron runs successfully — **required fixing it first**,
+      see below.
 
-> **⚠️ Finding, not caused by this migration:** `CLAUDE_billing_sync`'s hourly cron
-> (`Hourly Sync Trigger` → `List Subscriptions To Sync`) has **never succeeded** —
-> `search_workflow_executions` shows 334/334 recorded runs at `status: "error"`, zero successes,
-> all failing identically: `400` from Appwrite, `"Invalid \`queries\` param..."`, because the node
-> sends two query-string parameters both named `queries[]` (one `equal` filter, one `limit`) via
-> n8n's HTTP node "keypair" query mode, which Appwrite's REST API rejects. The **webhook path**
-> (`POST /billing-sync {userId}`, single-user sync) is a separate node chain and is not affected.
-> This directly undermines this phase's own premise — the plan calls the hourly cron "the sole
-> backstop" once the app stops calling `/billing-sync` in Phase 2, but that backstop has been down
-> since it shipped. **Not fixed here** — it's a pre-existing, unrelated bug in a workflow this
-> migration doesn't otherwise touch, and deserves its own dedicated fix/test rather than a bolt-on.
-> Flagged as a follow-up task. **Before relying on the cron as a backstop (i.e. before finishing
-> Phase 2), this must be fixed and re-verified**, or the "sole backstop" framing in this document's
-> architecture diagram (§3) and Phase 2 no longer holds.
+> **⚠️ Finding, fixed 2026-09-06, not part of this migration's own scope:**
+> `CLAUDE_billing_sync`'s hourly cron (`Hourly Sync Trigger` → `List Subscriptions To Sync`) had
+> **never succeeded** — `search_workflow_executions` showed 334/334 recorded runs at
+> `status: "error"`, zero successes, all failing identically: `400` from Appwrite,
+> `"Invalid \`queries\` param..."`.
+>
+> **Root cause:** the node sent two query-string parameters both named `queries[]` (one `equal`
+> status filter, one `limit`) through n8n's HTTP node "keypair" query mode. n8n's underlying `qs`
+> serializer defaults to `arrayFormat: 'indices'` for a repeated key, producing
+> `queries[][0]=...&queries[][1]=...` — not the bare repeated-key form (`queries[]=...&queries[]=...`)
+> Appwrite's PHP-style query parser expects. Appwrite received keys it didn't recognize as `queries`
+> at all and rejected the whole param.
+>
+> **Fix:** rebuilt the request URL manually with the query string pre-encoded
+> (`queries%5B%5D=<encoded filter>&queries%5B%5D=<encoded limit>`), bypassing n8n's array
+> serialization entirely — the same manual-encoding pattern `CLAUDE_billing_checkout`'s `Pick Price`
+> node already uses for its Stripe body, for the same reason (precise control over encoding).
+>
+> **Verified against live Appwrite, not just logic-checked:** ran `execute_workflow` in `manual`
+> mode directly on the `Hourly Sync Trigger` node (execution `3116`) — the real trigger, the real
+> credential, a real HTTP call. Result: `{"total":0,"documents":[]}`, a clean 200 instead of a 400.
+> Cross-checked against the `subscriptions` table directly (`tables_db_list_rows`): it has **zero
+> rows** right now, so the empty result is the correct answer, not a masked second bug. The
+> **next real scheduled run (13:00 UTC, this was fixed at ~12:00 UTC) is the first hourly trigger
+> execution that will exercise this path end-to-end** — worth a `search_workflow_executions` spot
+> check after that time to see `status: "success"` from `mode: "trigger"`, not just `mode: "manual"`.
+> Published as workflow version `fd7115e7-2afb-40dc-b889-63e1cf775fba`.
+>
+> The webhook path (`POST /billing-sync {userId}`, single-user sync) was never affected — separate
+> node chain, no shared code with the broken one.
 
 **Phase complete when:** a Checkout Session created by each workflow returns a user to
 `piggnify.com/account/` rather than a `piggy://` deep link, verified on the real Stripe session
 object; `CLAUDE_entitlements_get` returns `addonBalance`; and the `quota_ai_messages` question above
-is answered in writing. **All met except the billing-sync cron health check, which surfaced a
-pre-existing outage instead — tracked separately, and a hard blocker for Phase 2's "sole backstop"
-assumption.**
+is answered in writing. **All met** (fully, as of 2026-09-06) — the billing-sync cron health check
+surfaced a pre-existing outage that blocked it, which was then fixed and verified against live
+Appwrite (see above), so Phase 2's "sole backstop" assumption now actually holds rather than resting
+on an unfixed dependency.
 
 ---
 
