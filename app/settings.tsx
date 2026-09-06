@@ -45,7 +45,6 @@ import { syncEntitlements } from '@/lib/entitlementsRefresh';
 import { AiConsentModal } from '@/components/AiConsentModal';
 import { hasConvertibleMonetaryData } from '@/lib/currencyConversion';
 import { fetchExchangeRate } from '@/lib/exchangeRates';
-import { timingPresets } from '@/lib/springPresets';
 import { ScreenTransition } from '@/components/ScreenTransition';
 import { FadeInStagger } from '@/components/animation/FadeInStagger';
 import { PickerModal } from '@/components/ui/picker-modal';
@@ -152,18 +151,13 @@ export default function Settings() {
   const [conversionRate, setConversionRate] = useState<number | null>(null);
   const [rateLoading, setRateLoading] = useState(false);
   const [rateUnavailable, setRateUnavailable] = useState(false);
-  const currencySelectionTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Set synchronously on tap; consumed once the currency PickerModal has actually finished closing (see handleCurrencyPickerClosed). */
+  const pendingCurrencySelection = useRef<string | null>(null);
   // Turning the toggle ON re-shows the same full-disclosure AiConsentModal
   // used at the Coach/Deep Analysis call sites, rather than granting
   // silently — the switch itself isn't the disclosure, the modal is (App
   // Review 5.1.2(i), Phase 4). Turning OFF revokes immediately, no modal.
   const [showAiConsent, setShowAiConsent] = useState(false);
-
-  useEffect(() => {
-    return () => {
-      if (currencySelectionTimeout.current) clearTimeout(currencySelectionTimeout.current);
-    };
-  }, []);
 
   // Re-read on every focus: covers both the initial mount and returning from
   // /enable-biometric after a successful PIN confirmation.
@@ -236,35 +230,34 @@ export default function Settings() {
   };
 
   const handleSelectCurrency = (item: { code: string }) => {
-    const code = item.code;
-    if (currencySelectionTimeout.current) clearTimeout(currencySelectionTimeout.current);
+    pendingCurrencySelection.current = item.code;
+  };
 
-    // Deferred past the currency PickerModal's own close animation
-    // (BottomSheet's timingPresets.sheet duration — the same 280ms it
-    // animates out over). Acting in the same tick as PickerModal's own
-    // onClose() stacks two native <Modal>s mid-animation (this one closing,
-    // CurrencyConvertModal opening), which made the confirm sheet easy to
-    // miss and looked like selecting a currency did nothing (#152).
-    currencySelectionTimeout.current = setTimeout(() => {
-      currencySelectionTimeout.current = null;
-      if (code === profile.currency) return;
+  // Runs once the currency PickerModal's BottomSheet has actually finished
+  // closing (its native <Modal> unmounted), not after a guessed delay —
+  // acting any earlier can stack this screen's own CurrencyConvertModal on
+  // top of the still-closing picker, which silently drops the confirm sheet
+  // and looked like selecting a currency did nothing (#152, #177).
+  const handleCurrencyPickerClosed = () => {
+    const code = pendingCurrencySelection.current;
+    pendingCurrencySelection.current = null;
+    if (code == null || code === profile.currency) return;
 
-      // Nothing to convert yet — relabel instantly, no modal.
-      if (!hasConvertibleMonetaryData(profile, goals)) {
-        updateProfile({ currency: code });
-        return;
-      }
+    // Nothing to convert yet — relabel instantly, no modal.
+    if (!hasConvertibleMonetaryData(profile, goals)) {
+      updateProfile({ currency: code });
+      return;
+    }
 
-      setPendingCurrency(code);
-      setConversionRate(null);
-      setRateUnavailable(false);
-      setRateLoading(true);
-      fetchExchangeRate(profile.currency, code).then((rate) => {
-        setRateLoading(false);
-        setConversionRate(rate);
-        setRateUnavailable(rate == null);
-      });
-    }, timingPresets.sheet.duration);
+    setPendingCurrency(code);
+    setConversionRate(null);
+    setRateUnavailable(false);
+    setRateLoading(true);
+    fetchExchangeRate(profile.currency, code).then((rate) => {
+      setRateLoading(false);
+      setConversionRate(rate);
+      setRateUnavailable(rate == null);
+    });
   };
 
   const handleConvertCurrency = () => {
@@ -558,6 +551,7 @@ export default function Settings() {
         <PickerModal
           isVisible={currencyPickerVisible}
           onClose={() => setCurrencyPickerVisible(false)}
+          onClosed={handleCurrencyPickerClosed}
           onSelect={handleSelectCurrency}
           items={CURRENCIES.map((c) => ({ code: c.code, name: t(`content:currencies.${c.code}`), symbol: c.symbol }))}
           selectedCode={profile.currency}
