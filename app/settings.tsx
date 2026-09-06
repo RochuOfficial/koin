@@ -32,7 +32,7 @@ import {
 import { useStore, CURRENCIES } from '@/lib/store';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/lib/i18n/detect';
 import { useAuthLock } from '@/lib/authLock';
-import { getPlanConfig, formatUSD } from '@/lib/entitlements';
+import { getPlanConfig } from '@/lib/entitlements';
 import {
   isBiometricAvailable,
   isBiometricEnabled,
@@ -40,7 +40,8 @@ import {
   disableBiometric,
   type BiometricKind,
 } from '@/lib/biometrics';
-import { safeOpenURL, SUPPORT_EMAIL, PRIVACY_URL, TERMS_URL } from '@/lib/linking';
+import { safeOpenURL, SUPPORT_EMAIL, PRIVACY_URL, TERMS_URL, ACCOUNT_URL } from '@/lib/linking';
+import { syncEntitlements } from '@/lib/entitlementsRefresh';
 import { AiConsentModal } from '@/components/AiConsentModal';
 import { hasConvertibleMonetaryData } from '@/lib/currencyConversion';
 import { fetchExchangeRate } from '@/lib/exchangeRates';
@@ -79,6 +80,8 @@ function Row({
   value,
   onPress,
   destructive,
+  accessibilityRole = 'button',
+  accessibilityLabel,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -86,10 +89,15 @@ function Row({
   value?: string;
   onPress: () => void;
   destructive?: boolean;
+  /** 'link' for rows that leave the app — the web billing row uses it. */
+  accessibilityRole?: 'button' | 'link';
+  accessibilityLabel?: string;
 }) {
   return (
     <TouchableOpacity
       onPress={onPress}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel ?? label}
       className="flex-row items-center justify-between py-4"
     >
       <View className="flex-row items-center gap-[14px]">
@@ -120,6 +128,19 @@ export default function Settings() {
 
   const planConfig = getPlanConfig(profile.plan);
   const pendingConfig = profile.pendingPlan ? getPlanConfig(profile.pendingPlan) : null;
+
+  /**
+   * Opens web billing and re-reads entitlements when the user comes back.
+   * `safeOpenURL` routes https through `expo-web-browser`, so this resolves on
+   * dismissal — which is the moment a plan change made over there becomes
+   * visible. Forced, since the hourly throttle would otherwise sit on exactly
+   * the read the user is waiting for and make a successful change look like it
+   * did nothing.
+   */
+  const openWebBilling = async () => {
+    await safeOpenURL(ACCOUNT_URL, t('manageOnWebError'), t('common:notAvailable'));
+    await syncEntitlements({ force: true });
+  };
 
   const [bioAvailable, setBioAvailable] = useState(false);
   const [bioKind, setBioKind] = useState<BiometricKind>('none');
@@ -280,8 +301,10 @@ export default function Settings() {
             <SectionLabel>{t('sections.subscription')}</SectionLabel>
             <TouchableOpacity
               onPress={() => router.push('/plans')}
-              className="mb-7 rounded-2xl bg-surface-container-low p-6"
+              className="rounded-2xl bg-surface-container-low p-6"
               style={CARD_SHADOW}
+              accessibilityRole="button"
+              accessibilityLabel={t('planLabel', { plan: planConfig.displayName })}
             >
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-[14px] flex-1">
@@ -290,6 +313,7 @@ export default function Settings() {
                   </View>
                   <View className="flex-1">
                     <Text className="text-[16px] font-bold text-on-surface">{t('planLabel', { plan: planConfig.displayName })}</Text>
+                    {/* No price (#173): the app shows none anywhere. */}
                     <Text className="text-[14px] font-medium text-on-surface-variant mt-[2px]">
                       {profile.planStatus === 'canceled'
                         ? t('planStatus.canceled')
@@ -301,16 +325,30 @@ export default function Settings() {
                               ? t('planStatus.pastDue')
                               : pendingConfig
                                 ? t('planStatus.switchingTo', { plan: pendingConfig.displayName })
-                                : t('planStatus.priceMonthly', { price: formatUSD(planConfig.priceUSD) })}
+                                : t('planStatus.active')}
                     </Text>
                   </View>
                 </View>
                 <View className="flex-row items-center gap-[5px]">
-                  <Text className="text-[14px] font-bold text-primary">{t('manage')}</Text>
+                  <Text className="text-[14px] font-bold text-primary">{t('viewDetails')}</Text>
                   <ChevronRight size={18} color="#1D4ED8" />
                 </View>
               </View>
             </TouchableOpacity>
+
+            {/* The one tappable route to web billing in the whole app (#173,
+                decision D3). Everything else — the plan detail screen, the
+                upgrade gates, the locked gate — states where billing lives
+                without linking to it. */}
+            <View className="mt-3 mb-7 rounded-2xl bg-surface-container-low px-6" style={CARD_SHADOW}>
+              <Row
+                icon={<Globe size={20} color="#1D4ED8" />}
+                label={t('manageOnWeb')}
+                onPress={openWebBilling}
+                accessibilityRole="link"
+                accessibilityLabel={t('common:a11y.manageSubscription')}
+              />
+            </View>
           </FadeInStagger>
 
           {/* Security */}

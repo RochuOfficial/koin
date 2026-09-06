@@ -11,17 +11,11 @@
   "hiGreetingNamed": "Cześć {{name}}! {{greeting}}",
   "hiGreetingAnonymous": "Cześć! {{greeting}}",
   "connectionError": "Przepraszam, mam teraz problem z połączeniem. Spróbuj ponownie za chwilę.",
-  "checkoutNotConfiguredTitle": "Płatność nieskonfigurowana",
-  "checkoutNotConfiguredBody": "Stripe Checkout nie jest skonfigurowany w tej wersji aplikacji. Zasymulować udany zakup 1 dodatkowej wiadomości?",
   "cancel": "Anuluj",
-  "simulatePurchase": "Zasymuluj zakup",
-  "checkoutFailedTitle": "Nie udało się otworzyć płatności",
-  "checkoutFailedBody": "Nie udało się otworzyć płatności. Sprawdź połączenie i spróbuj ponownie albo napisz do nas na {{email}}.",
   "title": "Trener AI",
   "onlineStatus": "Online • Gotowy do pomocy",
   "upgradeYourPlan": "Ulepsz swój plan",
   "unlimited": "Bez limitu",
   "pctUsedThisPeriod": "Wykorzystano {{pct}}% w tym okresie",
-  "inputPlaceholder": "Zapytaj swojego trenera...",
-  "buyMoreMessage": "Kup 1 dodatkową wiadomość · $2.99"
+  "inputPlaceholder": "Zapytaj swojego trenera..."
 }

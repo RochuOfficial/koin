@@ -535,7 +535,7 @@ export default function Goals() {
         isVisible={gate !== null}
         gate={gate}
         onClose={() => setGate(null)}
-        onUpgrade={(target: UserPlan) => {
+        onViewPlans={(target: UserPlan) => {
           setGate(null);
           router.push(`/plans?highlight=${target}`);
         }}

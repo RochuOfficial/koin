@@ -40,8 +40,8 @@
             { "name": "subscription_data[metadata][user_id]", "value": "={{ $json.userId }}" },
             { "name": "automatic_tax[enabled]", "value": "true" },
             { "name": "client_reference_id", "value": "={{ $json.userId }}" },
-            { "name": "success_url", "value": "={{ $env.CHECKOUT_SUCCESS_URL }}" },
-            { "name": "cancel_url", "value": "={{ $env.CHECKOUT_CANCEL_URL }}" }
+            { "name": "success_url", "value": "https://piggnify.com/account/?checkout=success" },
+            { "name": "cancel_url", "value": "https://piggnify.com/account/?checkout=canceled" }
           ]
         },
         "options": {}

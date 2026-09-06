@@ -1,8 +1,13 @@
 /**
  * Downgrade retention — "what to keep" (ONBOARDING_V2.md D13-D15, issue I).
- * Pushed as a modal from plans.tsx when the target plan holds fewer goals than
- * the user currently has active. Nothing is applied until the user confirms
- * here — backing out leaves the current plan and every goal untouched.
+ *
+ * Reactive since #173. It used to be pushed from plans.tsx *before* scheduling a
+ * downgrade, so nothing had happened yet and backing out cancelled the whole
+ * thing. Plan changes now happen on the web and reach the app through the
+ * entitlements sync, so by the time this screen opens the downgrade has already
+ * taken effect and the only open question is which goals stay active. Dismissing
+ * archives nothing and leaves `retentionRequiredFor` set, so the app asks again
+ * later rather than auto-archiving on the user's behalf (C4/C7).
  *
  * Only goals are selectable. `retention.ts` models incomes and devices too,
  * but the client has no multi-income or device-list feature to pick from
@@ -25,11 +30,16 @@ import { Icon } from '@/components/icons/Icon';
 export default function DowngradeSelection() {
   const { t } = useTranslation('plans');
   const router = useRouter();
-  const { target } = useLocalSearchParams<{ target: UserPlan }>();
+  const { target: targetParam } = useLocalSearchParams<{ target?: UserPlan }>();
 
   const goals = useStore((s) => s.goals);
   const monthlyIncome = useStore((s) => s.profile.monthlyIncome);
-  const applyDowngradeWithRetention = useStore((s) => s.applyDowngradeWithRetention);
+  const applyRetentionSelection = useStore((s) => s.applyRetentionSelection);
+  const retentionRequiredFor = useStore((s) => s.retentionRequiredFor);
+
+  // The sync sets the store flag; the param is kept so the route stays
+  // linkable/testable on its own.
+  const target = targetParam ?? retentionRequiredFor ?? undefined;
 
   const activeGoals = goals.filter((g) => !g.archived);
   const requirement = target
@@ -72,7 +82,7 @@ export default function DowngradeSelection() {
       return;
     }
     setBusy(true);
-    applyDowngradeWithRetention(target, keepIds);
+    applyRetentionSelection(keepIds);
     router.back();
   };
 

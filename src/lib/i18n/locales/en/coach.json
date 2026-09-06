@@ -11,17 +11,11 @@
   "hiGreetingNamed": "Hi {{name}}! {{greeting}}",
   "hiGreetingAnonymous": "Hi there! {{greeting}}",
   "connectionError": "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
-  "checkoutNotConfiguredTitle": "Checkout not configured",
-  "checkoutNotConfiguredBody": "Stripe Checkout isn't set up in this build. Simulate a successful purchase of 1 extra message?",
   "cancel": "Cancel",
-  "simulatePurchase": "Simulate purchase",
-  "checkoutFailedTitle": "Couldn't open checkout",
-  "checkoutFailedBody": "We couldn't open checkout. Check your connection and try again, or email us at {{email}}.",
   "title": "AI Coach",
   "onlineStatus": "Online • Ready to help",
   "upgradeYourPlan": "Upgrade your plan",
   "unlimited": "Unlimited",
   "pctUsedThisPeriod": "{{pct}}% used this period",
-  "inputPlaceholder": "Ask your coach...",
-  "buyMoreMessage": "Buy 1 more message · $2.99"
+  "inputPlaceholder": "Ask your coach..."
 }

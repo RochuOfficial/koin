@@ -116,8 +116,9 @@ real signup (`status: "trialing"`, `trial_ends_at: now + 14d`, confirmed via
 `planGateReason()` treats a `trialing` status whose `trial_ends_at` has passed
 as `locked` once the (live, not-in-this-repo) `CLAUDE_entitlements_get`
 workflow re-evaluates it — and `lockoutEnforced()` is structurally *on*
-whenever billing is configured, which it is
-(`EXPO_PUBLIC_N8N_BILLING_URL` is set in `eas.json`). App review can sit in
+whenever the user has a recovery path, which they always do since
+[#173](https://github.com/Koin-App-Official/pignify/issues/173) (it's now keyed
+on `ACCOUNT_URL`, a constant, not on an env var that could go missing). App review can sit in
 queue for weeks, and the same demo account is often reused across many future
 review cycles — a 14-day clock would silently lock reviewers out mid-review at
 some unpredictable future point. Fixed by updating both `entitlements` rows

@@ -5,7 +5,6 @@ import {
   trialDaysRemaining,
   lockoutEnforced,
   LOCKOUT_INTENDED,
-  canSubscribe,
 } from './planGate';
 import type { PlanGateInput } from './planGate';
 
@@ -103,41 +102,16 @@ describe('trialDaysRemaining', () => {
   });
 });
 
-describe('canSubscribe', () => {
-  it('allows checkout for a trialing user regardless of tier ranking', () => {
-    // The trial provisions Family (the top tier), so every other target
-    // would rank as a downgrade if ranking were consulted here — this is
-    // the exact bug (#4/#5 in ONBOARDING_FIXES.md) the helper exists to fix.
-    expect(canSubscribe('trialing', true)).toBe(true);
-    expect(canSubscribe('trialing', false)).toBe(true);
-  });
-
-  it('allows checkout for an expired trial regardless of tier ranking', () => {
-    expect(canSubscribe('expired', true)).toBe(true);
-    expect(canSubscribe('expired', false)).toBe(true);
-  });
-
-  it('defers to tier ranking for an active subscriber', () => {
-    expect(canSubscribe('active', true)).toBe(true);
-    expect(canSubscribe('active', false)).toBe(false);
-  });
-
-  it('defers to tier ranking for a canceled subscription', () => {
-    expect(canSubscribe('canceled', true)).toBe(true);
-    expect(canSubscribe('canceled', false)).toBe(false);
-  });
-});
-
 describe('lockoutEnforced', () => {
-  it('enforces when checkout is reachable', () => {
+  it('enforces when the user has a way back in', () => {
     expect(lockoutEnforced(true)).toBe(true);
   });
 
-  it('does NOT enforce when billing is unconfigured', () => {
+  it('does NOT enforce when there is no recovery path', () => {
     // The important one. A total lockout has no escape hatch, so enforcing it
-    // while every Subscribe tap returns `unavailable` would strand the user on
-    // a screen whose only action is broken. Letting them through costs revenue;
-    // trapping them costs the user. This picks the first.
+    // when the user has nowhere to go would strand them on a screen they can't
+    // act on. Letting them through costs revenue; trapping them costs the user.
+    // This picks the first.
     expect(lockoutEnforced(false)).toBe(false);
   });
 

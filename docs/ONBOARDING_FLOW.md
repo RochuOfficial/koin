@@ -1556,11 +1556,18 @@ naming, and the client accepts both.
 
 **Everything else** — Stripe checkout, subscription sync, the AI coach, account deletion —
 lives in separate `CLAUDE_*` workflows that onboarding never touches. Authoritative
-billing state flows **Stripe → n8n → Appwrite**, and the app only ever reads it.
+billing state flows **Stripe → n8n → Appwrite**, and the app only ever reads it. Since
+[#173](https://github.com/Koin-App-Official/pignify/issues/173) that last clause is literal: the
+app has no purchase path at all, `billing-checkout`/`billing-addon` are called by the website
+(`piggnify.com/account`), and the client's only remaining write-shaped call is account deletion.
 
 **Trust model, stated plainly:** these webhooks trust the client-supplied `userId` with no
 additional server-side session check. If you are porting this to the web, do not copy that
-part — a browser is a more exposed client than a signed app binary.
+part — a browser is a more exposed client than a signed app binary. That warning is now live
+rather than hypothetical: the checkout webhooks *are* driven from a browser, so whether
+`piggnify.com/account` can be made to mint a Checkout Session against someone else's `userId`
+is an open question flagged in
+[WEB_BILLING_MIGRATION.md](../implementations/WEB_BILLING_MIGRATION.md) Phase 0.
 
 Full backend documentation lives in [`n8n/README.md`](../n8n/README.md).
 

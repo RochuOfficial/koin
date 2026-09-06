@@ -12,7 +12,6 @@
     "aiMessagesUnlimited": "Unlimited AI messages/mo",
     "aiMessages_one": "{{count}} AI message/mo",
     "aiMessages_other": "{{count}} AI messages/mo",
-    "aiMessagesExtra": " (then {{price}}/msg)",
     "emailReportsUnlimited": "Unlimited email reports/mo",
     "emailReports_one": "{{count}} email report/mo",
     "emailReports_other": "{{count}} email reports/mo"
@@ -35,24 +34,10 @@
     "daysLeft_other": "{{count}} days left of your free trial",
     "activeBody": "You're on {{plan}} with everything unlocked, and we never asked for a card."
   },
-  "planUpdatedTitle": "Plan updated",
-  "planUpdatedBody": "You're now on the {{plan}} plan. Enjoy your new features! 🎉",
-  "downgradeCanceledTitle": "Downgrade canceled",
-  "downgradeCanceledBody": "You'll stay on the {{plan}} plan.",
-  "checkoutNotConfiguredTitle": "Checkout not configured",
-  "checkoutNotConfiguredBody": "Stripe Checkout isn't set up in this build. Simulate a successful payment for {{plan}}?",
   "cancel": "Cancel",
-  "simulatePayment": "Simulate payment",
-  "checkoutFailedTitle": "Couldn't open checkout",
-  "checkoutFailedBody": "We couldn't open checkout. Check your connection and try again, or email us at {{email}}.",
-  "switchToTitle": "Switch to {{plan}}?",
-  "switchToBody": "This takes effect on {{date}}. Nothing is ever deleted — if this plan holds fewer goals than you have, you'll choose which stay active first.",
-  "keepCurrentPlan": "Keep current plan",
   "continue": "Continue",
-  "header": "Choose your plan",
-  "confirmingPurchase": "Confirming your purchase…",
+  "header": "Your subscription",
   "pendingBanner": "Scheduled change: your plan switches to {{plan}} on {{date}}. Re-select your current plan below to cancel this.",
-  "perMonth": "/mo",
   "status": {
     "activeUntilCanceled": "Active until {{date}} (canceled)",
     "trialEndedPaused": "Trial ended — features paused",
@@ -60,13 +45,6 @@
     "pastDue": "Payment failed — update your card to avoid losing access",
     "current": "Current plan",
     "scheduledNextCycle": "Scheduled for next cycle"
-  },
-  "buttons": {
-    "yourCurrentPlan": "Your current plan",
-    "keepThisPlan": "Keep this plan",
-    "openingCheckout": "Opening checkout…",
-    "upgradeTo": "Upgrade to {{plan}}",
-    "switchTo": "Switch to {{plan}}"
   },
   "gates": {
     "aiCoach": {
@@ -110,17 +88,15 @@
     "defaultTitle": "Upgrade your plan",
     "defaultDescription": "This feature is available on a higher plan. Upgrade to unlock it.",
     "recommendedPlan": "Recommended plan",
-    "upgradeToPlan": "Upgrade to {{plan}}",
-    "upgradeToHigherPlan": "Upgrade to a higher plan",
     "onTopPlan": "You're on the top plan",
     "maybeLater": "Maybe later",
-    "perMonth": "/mo"
+    "seePlanDetails": "See plan details"
   },
   "downgradeSelection": {
     "nothingToChoose": "Nothing to choose here — go back and try again.",
     "chooseWhatToKeep": "Choose what to keep",
-    "keepBody_one": "{{plan}} keeps {{count}} active goal. You have {{total}}. Pick {{pickText}} to keep active — the rest come off your list, but nothing is ever deleted. They come straight back if you upgrade again.",
-    "keepBody_other": "{{plan}} keeps {{count}} active goals. You have {{total}}. Pick {{pickText}} to keep active — the rest come off your list, but nothing is ever deleted. They come straight back if you upgrade again.",
+    "keepBody_one": "Your plan is now {{plan}}, which keeps {{count}} active goal. You have {{total}}. Pick {{pickText}} to keep active — the rest come off your list, but nothing is ever deleted. They come straight back if you upgrade again.",
+    "keepBody_other": "Your plan is now {{plan}}, which keeps {{count}} active goals. You have {{total}}. Pick {{pickText}} to keep active — the rest come off your list, but nothing is ever deleted. They come straight back if you upgrade again.",
     "pickOne": "the one",
     "pickUpTo": "up to {{count}}",
     "keepingCountOfLimit": "Keeping {{count}} of {{limit}}",
@@ -141,22 +117,20 @@
       "featuresPaused": "{{plan}} features are paused for now.",
       "nothingDeletedBold": "Nothing has been deleted.",
       "nothingDeletedRest": " Your goals, deposits, streak and history are all exactly where you left them, and they come straight back when you subscribe.",
-      "checkoutNotConfigured": "Checkout isn't configured in this build, so subscribing won't work here. You can keep using Piggy for now.",
-      "pickPlan": "Pick a plan to carry on",
       "alreadySubscribed": "I've already subscribed",
       "continueWithoutSubscribing": "Continue without subscribing",
       "deletingAccount": "Deleting your account…",
       "logOut": "Log out",
       "contactSupport": "Contact support",
       "deleteAccount": "Delete account",
-      "checkoutFailed": "We couldn't open checkout. Check your connection and try again, or email us at {{email}}.",
       "noActiveSubscription": "We couldn't find an active subscription yet. If you've just paid, give it a moment and tap again.",
       "logoutBody": "You can log back in anytime with your email.",
       "deleteAccountTitle": "Delete account",
       "deleteAccountBody": "This permanently deletes your account and all data from our servers. This cannot be undone.",
       "deleteAction": "Delete",
       "somethingWrongTitle": "Something went wrong",
-      "somethingWrongBody": "We could not delete your account. Please try again."
+      "somethingWrongBody": "We could not delete your account. Please try again.",
+      "managedOnWeb": "Your subscription is managed on the web:"
     },
     "trialIntro": {
       "title": "{{days}} days of {{plan}},\non us",
@@ -169,10 +143,12 @@
   },
   "terms": {
     "billing": "Plans renew automatically each month, in your selected currency, until you cancel.",
-    "cancel": "Cancel anytime from Settings — you'll keep access until the end of your current billing period.",
+    "cancel": "Cancel anytime at piggnify.com/account — you'll keep access until the end of your current billing period.",
     "planMechanics": "Upgrades apply immediately. Downgrades take effect at the end of your current billing period, and your data is always kept safe.",
     "termsOfUse": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
     "linkError": "Could not open this link."
-  }
+  },
+  "currentPlanChip": "Current",
+  "managedOnWeb": "Your subscription is managed on the web at piggnify.com/account."
 }

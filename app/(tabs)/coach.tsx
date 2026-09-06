@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, TextInput, Alert, useWindowDimensions } from 'react-native';
+import { View, Text, KeyboardAvoidingView, Platform, TextInput, useWindowDimensions } from 'react-native';
 import { fetch as expoFetch } from 'expo/fetch';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Send, Sparkles } from 'lucide-react-native';
 import Animated, {
@@ -33,11 +33,8 @@ import { ScreenTransition } from '@/components/ScreenTransition';
 import { PressableScale } from '@/components/animation/PressableScale';
 import { SkiaConfetti } from '@/components/animation/SkiaConfetti';
 import { useCelebrate } from '@/components/animation/useCelebrate';
-import { startAddonCheckout, requestSubscriptionSync, isBillingConfigured } from '@/lib/billing';
 import { fetchEntitlementsSync } from '@/lib/entitlementsSync';
-import { tablesDB, DATABASE_ID } from '@/lib/appwrite';
 import { createLogger } from '@/lib/logger';
-import { SUPPORT_EMAIL } from '@/lib/linking';
 import { formatDate } from '@/lib/i18n/format';
 import type { SupportedLanguage } from '@/lib/i18n/detect';
 
@@ -121,23 +118,19 @@ export default function AICoach() {
   const coachRequestRef = useRef<AbortController | null>(null);
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const router = useRouter();
-  const { addon } = useLocalSearchParams<{ addon?: string }>();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const { confettiProgress, celebrate, active: confettiActive } = useCelebrate();
 
   const { plan, config, aiMessages, has } = useEntitlements();
   const incrementCoachMessages = useStore((s) => s.incrementCoachMessages);
   const setServerAiMessageUsage = useStore((s) => s.setServerAiMessageUsage);
-  const setAddonMessageBalance = useStore((s) => s.setAddonMessageBalance);
   const userID = useStore((s) => s.profile.userID);
   const language = useStore((s) => s.profile.language);
   const aiConsent = useStore((s) => s.profile.aiConsent);
   const grantAiConsent = useStore((s) => s.grantAiConsent);
   const messageLimit = typeof config.quotas.aiMessages === 'number' ? config.quotas.aiMessages : Infinity;
-  const canBuyMore = config.extraMessagePriceUSD != null;
 
   const [gate, setGate] = useState<GateInfo | null>(null);
-  const [gateKey, setGateKey] = useState<GateKey | null>(null);
   // Holds the message text a send() call was interrupted for while the AI
   // consent modal is open, so Allow can resume the exact same send without
   // the user retyping (Phase 3, App Review 5.1.2(i)).
@@ -145,14 +138,10 @@ export default function AICoach() {
   const pendingSendTextRef = useRef<string | null>(null);
 
   const openGate = (key: GateKey) => {
-    setGateKey(key);
     setGate(gateInfo(key, plan, tPlans));
   };
-  const closeGate = () => {
-    setGate(null);
-    setGateKey(null);
-  };
-  const goUpgrade = (target: UserPlan) => {
+  const closeGate = () => setGate(null);
+  const goViewPlans = (target: UserPlan) => {
     setGate(null);
     router.push(`/plans?highlight=${target}`);
   };
@@ -177,54 +166,6 @@ export default function AICoach() {
     };
   }, []);
 
-  const buyMore = async () => {
-    setGate(null);
-    const result = await startAddonCheckout(userID);
-    if (result.status === 'unavailable') {
-      // Same collapse-of-causes as plans.tsx's startCheckout: only offer the
-      // local-grant simulate path when billing is genuinely unconfigured in
-      // this (dev) build — never on a plain network failure in production
-      // (Guideline 2.3.1).
-      if (__DEV__ && !isBillingConfigured()) {
-        Alert.alert(
-          t('checkoutNotConfiguredTitle'),
-          t('checkoutNotConfiguredBody'),
-          [
-            { text: t('cancel'), style: 'cancel' },
-            {
-              text: t('simulatePurchase'),
-              onPress: () => setAddonMessageBalance(useStore.getState().addonMessageBalance + 1),
-            },
-          ]
-        );
-      } else {
-        Alert.alert(t('checkoutFailedTitle'), t('checkoutFailedBody', { email: SUPPORT_EMAIL }));
-      }
-    }
-  };
-
-  // Returning from the hosted Stripe Checkout for an add-on purchase: refresh
-  // the authoritative balance from Appwrite (we can't know the exact quantity
-  // purchased from the redirect alone since quantity is adjustable on Stripe's page).
-  useEffect(() => {
-    if (addon !== 'success' || !userID) return;
-    (async () => {
-      await requestSubscriptionSync(userID);
-      try {
-        const row = await tablesDB.getRow({
-          databaseId: DATABASE_ID,
-          tableId: 'subscriptions',
-          rowId: userID,
-        });
-        const balance = (row as any).addon_balance;
-        if (typeof balance === 'number') setAddonMessageBalance(balance);
-      } catch (err) {
-        log.error('Failed to refresh addon balance:', err);
-      }
-      router.setParams({ addon: undefined });
-    })();
-  }, [addon, userID]);
-
   // Quota/feature gate (C13): the coach stays visible; blocked sends open the
   // "Upgrade your plan" popup instead of silently failing.
   const send = async (text: string) => {
@@ -233,8 +174,8 @@ export default function AICoach() {
       return;
     }
     if (!aiMessages.allowed) {
-      // Quota exhausted (C6). Medium/family can buy more messages via a
-      // secondary CTA on the same gate; Beginner has no add-on option.
+      // Quota exhausted (C6). The gate explains the allowance is spent; buying
+      // more happens on the web (#173), so there's no purchase CTA here.
       openGate('aiMessages');
       return;
     }
@@ -534,16 +475,14 @@ export default function AICoach() {
         </View>
       </KeyboardAvoidingView>
 
+      {/* No "buy more messages" action (#173): extra messages are purchased on
+          the web now. An existing balance is still read from the server and
+          still spent here — the app just can't sell any. */}
       <UpgradeModal
         isVisible={gate !== null}
         gate={gate}
         onClose={closeGate}
-        onUpgrade={goUpgrade}
-        secondaryAction={
-          gateKey === 'aiMessages' && canBuyMore
-            ? { label: t('buyMoreMessage'), onPress: buyMore }
-            : undefined
-        }
+        onViewPlans={goViewPlans}
       />
 
       <AiConsentModal

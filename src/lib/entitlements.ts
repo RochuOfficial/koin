@@ -312,8 +312,8 @@ export function gateInfo(key: GateKey, currentPlan: UserPlan, t: TFunction<'plan
   }
 }
 
-/** Format a USD price for display, e.g. 5.99 -> "$5.99". */
-export function formatUSD(amount: number): string {
-  return `$${amount.toFixed(2)}`;
-}
+// `formatUSD` lived here until #173. It had exactly one job — rendering a plan
+// price — and the app deliberately shows no prices anywhere now, so it went dead
+// along with the last paywall. `priceUSD` below is kept as catalogue data (it
+// mirrors the `plans` table's `price_cents`), but nothing in the app renders it.
 

@@ -1,5 +1,15 @@
 # Buy More AI Coach Messages (Stripe hosted checkout)
 
+> **The in-app purchase path described here was removed on 2026-09-05
+> ([#173](https://github.com/Koin-App-Official/pignify/issues/173)).** The *rail* is untouched and
+> still live — `CLAUDE_billing_addon`, the `$2.99` adjustable-quantity Checkout Session, the webhook's
+> `addon` branch crediting `subscriptions.addon_balance` — but the **website** now starts that
+> checkout, not the app. What the app kept: it reads the balance (through
+> `CLAUDE_entitlements_get`'s new `addonBalance` field rather than querying the `subscriptions`
+> table directly) and spends it in the Coach exactly as described below. What it lost: `buyMore()`,
+> the "Buy 1 more message · $2.99" CTA on the quota gate, and `startAddonCheckout`. Everything below
+> is accurate history for the backend and stale for the client.
+
 ## Context
 
 The AI Coach screen already has a quota-exhausted branch that routes straight to the "Upgrade your plan" modal — the code even has a comment flagging this as a stopgap ("Add-on message purchase is a separate flow; for now we route to the upgrade path", [coach.tsx:96-100](app/(tabs)/coach.tsx:96)). We're now building that deferred add-on purchase flow.

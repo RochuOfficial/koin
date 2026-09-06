@@ -28,9 +28,8 @@
     "trialing": "Kostenlose Testphase",
     "pastDue": "Zahlung fehlgeschlagen — aktualisiere deine Karte",
     "switchingTo": "Wechselt im nächsten Zyklus zu {{plan}}",
-    "priceMonthly": "{{price}}/Monat"
+    "active": "Aktiv"
   },
-  "manage": "Verwalten",
   "changePin": "PIN ändern",
   "cancel": "Abbrechen",
   "biometric": {
@@ -76,5 +75,8 @@
   "versionLabel": "Piggy v{{version}}",
   "aiFeatures": {
     "toggleLabel": "KI-Funktionen"
-  }
+  },
+  "viewDetails": "Ansehen",
+  "manageOnWeb": "Abo im Web verwalten",
+  "manageOnWebError": "Die Kontoseite konnte nicht geöffnet werden. Besuche piggnify.com/account in deinem Browser."
 }

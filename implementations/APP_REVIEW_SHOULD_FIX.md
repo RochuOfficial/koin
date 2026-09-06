@@ -90,6 +90,12 @@ commit immediately.
 
 Guideline 2.3.1. Two call sites, not one, and a copy problem the audit did not see.
 
+> **Moot since 2026-09-05 ([#173](https://github.com/Koin-App-Official/pignify/issues/173)):**
+> `startCheckout`/`startAddonCheckout` and the "Simulate payment" path described below no longer
+> exist — `src/lib/billing.ts` was deleted with the app's whole purchase path. The fix recorded here
+> did ship and was correct at the time; it is kept as history. Nothing in the app can grant an
+> entitlement locally anymore, under `__DEV__` or otherwise.
+
 ### The problem restated precisely
 
 `startCheckout` / `startAddonCheckout` collapse five distinct failure modes into

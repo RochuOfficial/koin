@@ -28,9 +28,8 @@
     "trialing": "Bezpłatny okres próbny",
     "pastDue": "Płatność nieudana — zaktualizuj kartę",
     "switchingTo": "Zmiana na {{plan}} w następnym cyklu",
-    "priceMonthly": "{{price}}/mies."
+    "active": "Aktywna"
   },
-  "manage": "Zarządzaj",
   "changePin": "Zmień PIN",
   "cancel": "Anuluj",
   "biometric": {
@@ -76,5 +75,8 @@
   "versionLabel": "Piggy v{{version}}",
   "aiFeatures": {
     "toggleLabel": "Funkcje AI"
-  }
+  },
+  "viewDetails": "Zobacz",
+  "manageOnWeb": "Zarządzaj subskrypcją w przeglądarce",
+  "manageOnWebError": "Nie udało się otworzyć strony konta. Wejdź na piggnify.com/account w przeglądarce."
 }
