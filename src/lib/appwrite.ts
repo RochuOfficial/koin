@@ -11,6 +11,7 @@
  *   EXPO_PUBLIC_APPWRITE_PROJECT_ID
  *   EXPO_PUBLIC_APPWRITE_DATABASE_ID  defaults to piggnify_mobile_db
  */
+import * as Application from 'expo-application';
 import { Client, Account, TablesDB, ID } from 'react-native-appwrite';
 import { createLogger } from './logger';
 
@@ -37,9 +38,13 @@ if (!isConfigured) {
 // root layout — so that throw would crash module evaluation for the whole route tree,
 // not just auth. Fall back to obviously-invalid placeholders so construction always
 // succeeds; real network calls still fail loudly (as intended) when unconfigured.
+// `Application.applicationId` is null in Expo Go (no native module); falls back to
+// '' there rather than throwing, matching the isConfigured fallback above — native
+// dev/prod builds always have it.
 export const client = new Client()
   .setEndpoint(isConfigured ? endpoint : 'https://unconfigured.invalid/v1')
-  .setProject(isConfigured ? projectId : 'unconfigured');
+  .setProject(isConfigured ? projectId : 'unconfigured')
+  .setPlatform(Application.applicationId ?? '');
 
 export const account = new Account(client);
 export const tablesDB = new TablesDB(client);
