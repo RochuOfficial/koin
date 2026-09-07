@@ -22,6 +22,7 @@ import { AI_TRANSPARENCY_URL, PRIVACY_URL, TERMS_URL } from '@/lib/linking';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { useAuthLock } from '@/lib/authLock';
 import { requestEmailOtp, verifyEmailOtp, SessionSecretUnavailableError } from '@/lib/auth';
+import { createLogger } from '@/lib/logger';
 import { ArrowRight, ArrowLeft, ChevronDown, AlertTriangle, ShieldCheck } from 'lucide-react-native';
 import { PickerModal, PickerItem } from '@/components/ui/picker-modal';
 import { DobWheelPicker } from '@/components/ui/dob-picker';
@@ -41,6 +42,8 @@ import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/lib/i18n/detect';
 
 // GOAL_CHIPS moved to src/lib/catalogs.ts (#128) — was duplicated verbatim
 // here and in app/(tabs)/goals.tsx; now a single shared source of truth.
+
+const log = createLogger('onboarding');
 
 const LEGAL_LINK_STYLE = 'text-primary underline';
 
@@ -455,7 +458,8 @@ export default function Onboarding() {
       const { userId } = await requestEmailOtp(email.trim());
       setOtpUserId(userId);
       setOtpSent(true);
-    } catch {
+    } catch (err) {
+      log.error('requestEmailOtp failed:', err);
       setNetworkError(t('account.requestCodeError'));
     } finally {
       setIsLoading(false);

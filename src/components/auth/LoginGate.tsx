@@ -72,7 +72,8 @@ export function LoginGate() {
       const { userId } = await requestEmailOtp(email.trim());
       setOtpUserId(userId);
       setStage('code');
-    } catch {
+    } catch (err) {
+      log.error('requestEmailOtp failed:', err);
       setError(t('login.sendCodeError'));
     } finally {
       setBusy(false);
