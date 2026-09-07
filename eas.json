@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 10.0.0"
+    "version": ">= 10.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -25,6 +26,7 @@
       }
     },
     "production": {
+      "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_APPWRITE_ENDPOINT": "https://appwrite.piggnify.com/v1",
         "EXPO_PUBLIC_APPWRITE_PROJECT_ID": "6a15741300220ae26d13",
