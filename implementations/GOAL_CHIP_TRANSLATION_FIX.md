@@ -131,11 +131,12 @@ a separate screen — left untouched pending a decision on whether to fold it in
 
 **Files modified:** none
 
-- [ ] All checklist items in GitHub issue #183 ticked.
-- [ ] Completion comment posted on #183 summarizing the fix and verification performed.
-- [ ] Issue #183 closed.
-- [ ] PR opened from `fix/issue-183-goal-chip-translation` → `main`, body includes `Closes #183`.
+- [x] All checklist items in GitHub issue #183 ticked.
+- [x] Completion comment posted on #183 summarizing the fix and verification performed.
+- [x] Issue #183 closed.
+- [x] PR opened from `fix/issue-183-goal-chip-translation` → `main`, body includes `Closes #183`.
+      → https://github.com/Koin-App-Official/pignify/pull/184
 
 **Phase complete when:**
-- Issue #183 is closed with a completion comment.
-- PR is open and linked to #183.
+- [x] Issue #183 is closed with a completion comment.
+- [x] PR is open and linked to #183.
