@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { springPresets } from '@/lib/springPresets';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useStore, COUNTRIES, CURRENCIES, Goal, formatCurrency, getCurrencySymbol } from '@/lib/store';
-import { GOAL_CHIPS, getGoalIconKey } from '@/lib/catalogs';
+import { GOAL_CHIPS, getGoalIconKey, getGoalChipId } from '@/lib/catalogs';
 import { AI_TRANSPARENCY_URL, PRIVACY_URL, TERMS_URL } from '@/lib/linking';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { useAuthLock } from '@/lib/authLock';
@@ -201,6 +201,10 @@ export default function Onboarding() {
 
   const [goalName, setGoalName] = useState('');
   const [goalNameError, setGoalNameError] = useState('');
+  const goalDisplayName = useMemo(() => {
+    const chipId = getGoalChipId(goalName);
+    return chipId ? t(`goal.chips.${chipId}`) : goalName;
+  }, [goalName, t]);
 
   const [targetAmount, setTargetAmount] = useState('');
   const [targetAmountError, setTargetAmountError] = useState('');
@@ -1100,7 +1104,7 @@ export default function Onboarding() {
               </View>
 
               <Input
-                value={goalName}
+                value={goalDisplayName}
                 onChangeText={(v) => {
                   setGoalName(v);
                   if (v.trim().length >= 1) setGoalNameError('');
@@ -1118,7 +1122,7 @@ export default function Onboarding() {
           {step === OnboardingStep.TargetAmount && (
             <Animated.View entering={FadeInDown.springify()}>
               <Text className="mb-2 text-3xl font-black text-on-surface">
-                {t('targetAmount.headline', { goalName })}
+                {t('targetAmount.headline', { goalName: goalDisplayName })}
               </Text>
               <Text className="mb-8 text-sm font-medium text-on-surface-variant">
                 {t('targetAmount.sub')}
@@ -1200,7 +1204,7 @@ export default function Onboarding() {
 
               <View className="rounded-3xl bg-surface p-6 gap-4 mb-4" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 4 }}>
                 <Row label={t('blueprint.rowName')} value={firstName} />
-                <Row label={t('blueprint.rowGoal')} value={goalName} />
+                <Row label={t('blueprint.rowGoal')} value={goalDisplayName} />
                 <Row label={t('blueprint.rowTarget')} value={formatCurrency(Number(targetAmount), currency)} />
                 <Row
                   label={t('blueprint.rowMonthlyIncome')}
@@ -1271,7 +1275,7 @@ export default function Onboarding() {
                   title={t('pushPermission.milestoneTitle')}
                   body={
                     goalName
-                      ? t('pushPermission.milestoneBody', { goalName })
+                      ? t('pushPermission.milestoneBody', { goalName: goalDisplayName })
                       : t('pushPermission.milestoneBodyFallback')
                   }
                 />
@@ -1297,10 +1301,10 @@ export default function Onboarding() {
               </Text>
               <Text className="mb-8 text-sm font-medium text-on-surface-variant">
                 {verifiedSession
-                  ? t('account.subEmailConfirmed', { goalName })
+                  ? t('account.subEmailConfirmed', { goalName: goalDisplayName })
                   : otpSent
                     ? t('account.subOtpSent', { email })
-                    : t('account.subInitial', { goalName, date: formatMonthYear(targetDate, language) })}
+                    : t('account.subInitial', { goalName: goalDisplayName, date: formatMonthYear(targetDate, language) })}
               </Text>
 
               <Input
