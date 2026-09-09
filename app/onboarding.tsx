@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   TextInput,
   Linking,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -191,6 +192,9 @@ export default function Onboarding() {
   const { t: tContent } = useTranslation('content');
   const [step, setStep] = useState<OnboardingStep>(OnboardingStep.Name);
   const emailInputRef = useRef<TextInput>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const signInLinkRef = useRef<View>(null);
+  const resendCodeLinkRef = useRef<View>(null);
 
   const [firstName, setFirstName] = useState('');
   const [firstNameError, setFirstNameError] = useState('');
@@ -356,6 +360,31 @@ export default function Onboarding() {
     const t = setTimeout(() => setResumed(false), 6000);
     return () => clearTimeout(t);
   }, [resumed]);
+
+  // The Name and OTP steps render a text link right below an autoFocus input.
+  // KeyboardAvoidingView only resizes the screen for the keyboard, it doesn't
+  // scroll that link into view, so it can end up hidden behind the keyboard —
+  // scroll it into view ourselves once the keyboard has actually appeared.
+  useEffect(() => {
+    const linkRef =
+      step === OnboardingStep.Name
+        ? signInLinkRef
+        : step === OnboardingStep.AccountFinalization
+        ? resendCodeLinkRef
+        : null;
+    if (!linkRef) return;
+
+    const sub = Keyboard.addListener('keyboardDidShow', () => {
+      linkRef.current?.measureLayout(
+        scrollViewRef.current as any,
+        (_x, y, _width, height) => {
+          scrollViewRef.current?.scrollTo({ y: y + height - 80, animated: true });
+        },
+        () => {}
+      );
+    });
+    return () => sub.remove();
+  }, [step]);
 
   const currencySymbol = getCurrencySymbol(currency);
   const countryName = country ? tContent(`countries.${country}`) : '';
@@ -938,7 +967,7 @@ export default function Onboarding() {
           </Animated.View>
         )}
 
-        <ScrollView className="flex-1 px-5 py-6" keyboardShouldPersistTaps="handled">
+        <ScrollView ref={scrollViewRef} className="flex-1 px-5 py-6" keyboardShouldPersistTaps="handled">
           {/* Screen 0: Name */}
           {step === OnboardingStep.Name && (
             <Animated.View entering={FadeInDown.springify()}>
@@ -967,11 +996,13 @@ export default function Onboarding() {
                 <Text className="mt-2 text-xs text-destructive">{firstNameError}</Text>
               ) : null}
 
-              <TouchableOpacity onPress={requestLogin} className="mt-6 items-center py-2">
-                <Text className="text-sm font-semibold text-on-surface-variant">
-                  {t('welcome.haveAccount')} <Text className="text-primary underline">{t('welcome.signIn')}</Text>
-                </Text>
-              </TouchableOpacity>
+              <View ref={signInLinkRef}>
+                <TouchableOpacity onPress={requestLogin} className="mt-6 items-center py-2">
+                  <Text className="text-sm font-semibold text-on-surface-variant">
+                    {t('welcome.haveAccount')} <Text className="text-primary underline">{t('welcome.signIn')}</Text>
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </Animated.View>
           )}
 
@@ -1354,9 +1385,11 @@ export default function Onboarding() {
                     maxLength={6}
                     autoFocus
                   />
-                  <TouchableOpacity onPress={handleRequestCode} disabled={isLoading} className="mt-3 items-center py-1">
-                    <Text className="text-sm font-semibold text-primary underline">{t('account.resendCode')}</Text>
-                  </TouchableOpacity>
+                  <View ref={resendCodeLinkRef}>
+                    <TouchableOpacity onPress={handleRequestCode} disabled={isLoading} className="mt-3 items-center py-1">
+                      <Text className="text-sm font-semibold text-primary underline">{t('account.resendCode')}</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
 
