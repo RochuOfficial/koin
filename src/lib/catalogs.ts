@@ -115,6 +115,16 @@ export function getGoalIconKey(goalName: string): IconName {
   return GOAL_CHIPS.find((c) => c.label === goalName)?.icon ?? 'target';
 }
 
+/**
+ * Reverse lookup from a canonical goal name back to its chip `id`, so callers
+ * can re-translate a chip-derived `goalName` for display (#183) without this
+ * file taking on an i18next dependency. Returns `undefined` for a free-typed
+ * goal name that doesn't match any chip.
+ */
+export function getGoalChipId(goalName: string): string | undefined {
+  return GOAL_CHIPS.find((c) => c.label === goalName)?.id;
+}
+
 // `name` dropped for the same reason — see `content.json`'s `countries.<code>`.
 export const COUNTRIES = [
   { code: 'US', currency: 'USD' },
